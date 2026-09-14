@@ -1,13 +1,12 @@
 #include <chrono>
-#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <sstream>
 #include <string>
 #include <vector>
 
 #include "DateFunctions.h"
+#include "DatabaseFunctions.h"
 #include "HabitFunctions.h"
 #include "ProgressionFunctions.h"
 #include "Todo.h"
@@ -36,82 +35,11 @@ int getNumber(string prompt) {
 }
 
 void saveTodos() {
-    ofstream file("todoData.txt");
-
-    if (!file) {
-        cout << "Could not open todoData.txt" << endl;
-        return;
-    }
-
-    for (size_t i = 0; i < todos.size(); i++) {
-        file << todos[i].id << "|" << todos[i].completed << "|"
-             << todos[i].dueDate << "|" << todos[i].totalSeconds << "|"
-             << todos[i].task << endl;
-    }
-
-    file.close();
+    saveTodosToDatabase(todos);
 }
 
 void loadTodos() {
-    ifstream file("todoData.txt");
-
-    if (!file) {
-        return;
-    }
-
-    string line;
-
-    while (getline(file, line)) {
-        string idString;
-        string completedString;
-        string savedDueDate;
-        string savedTotalSeconds;
-        string savedTask;
-        Todo todo;
-        stringstream ss(line);
-        int separatorCount = 0;
-
-        for (size_t i = 0; i < line.length(); i++) {
-            if (line[i] == '|') {
-                separatorCount++;
-            }
-        }
-
-        getline(ss, idString, '|');
-        getline(ss, completedString, '|');
-        getline(ss, savedDueDate, '|');
-        getline(ss, savedTotalSeconds, '|');
-        getline(ss, savedTask);
-
-        // Older saved tasks did not have a due date or tracked time.
-        if (separatorCount == 2) {
-            todo.dueDate = "";
-            todo.task = savedDueDate;
-            todo.totalSeconds = 0;
-        } else if (separatorCount == 3) {
-            todo.dueDate = savedDueDate;
-            todo.task = savedTotalSeconds;
-            todo.totalSeconds = 0;
-        } else {
-            todo.dueDate = savedDueDate;
-            todo.task = savedTask;
-            todo.totalSeconds = stoll(savedTotalSeconds);
-        }
-
-        if (idString.empty() || completedString.empty() || todo.task.empty()) {
-            continue;
-        }
-
-        todo.id = stoi(idString);
-        todo.completed = stoi(completedString);
-        todos.push_back(todo);
-
-        if (todo.id >= nextID) {
-            nextID = todo.id + 1;
-        }
-    }
-
-    file.close();
+    loadTodosFromDatabase(todos, nextID);
 }
 
 int findTodoByID(int id) {
@@ -450,6 +378,8 @@ void removeTodo() {
 }
 
 int main() {
+    setupDatabase();
+
     loadTodos();
     loadHabits();
 

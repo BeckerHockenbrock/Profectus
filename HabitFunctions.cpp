@@ -1,14 +1,13 @@
 #include "HabitFunctions.h"
 
-#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <sstream>
 #include <string>
 #include <vector>
 
 #include "DateFunctions.h"
+#include "DatabaseFunctions.h"
 #include "Habit.h"
 #include "UIFunctions.h"
 
@@ -32,66 +31,11 @@ int getHabitNumber(string prompt) {
 }
 
 void saveHabits() {
-    ofstream file("habitData.txt");
-
-    if (!file) {
-        cout << "Could not open habitData.txt" << endl;
-        return;
-    }
-
-    for (size_t i = 0; i < habits.size(); i++) {
-        file << habits[i].id << "|" << habits[i].xpReward << "|"
-             << habits[i].lastCheckedIn << "|" << habits[i].currentStreak << "|"
-             << habits[i].bestStreak << "|" << habits[i].totalCheckIns << "|"
-             << habits[i].name << endl;
-    }
-
-    file.close();
+    saveHabitsToDatabase(habits);
 }
 
 void loadHabits() {
-    ifstream file("habitData.txt");
-
-    if (!file) {
-        return;
-    }
-
-    string line;
-
-    while (getline(file, line)) {
-        Habit habit;
-        string idString;
-        string xpString;
-        string streakString;
-        string bestStreakString;
-        string checkInsString;
-        stringstream ss(line);
-
-        getline(ss, idString, '|');
-        getline(ss, xpString, '|');
-        getline(ss, habit.lastCheckedIn, '|');
-        getline(ss, streakString, '|');
-        getline(ss, bestStreakString, '|');
-        getline(ss, checkInsString, '|');
-        getline(ss, habit.name);
-
-        if (idString.empty() || xpString.empty() || habit.name.empty()) {
-            continue;
-        }
-
-        habit.id = stoi(idString);
-        habit.xpReward = stoi(xpString);
-        habit.currentStreak = stoi(streakString);
-        habit.bestStreak = stoi(bestStreakString);
-        habit.totalCheckIns = stoi(checkInsString);
-        habits.push_back(habit);
-
-        if (habit.id >= nextHabitID) {
-            nextHabitID = habit.id + 1;
-        }
-    }
-
-    file.close();
+    loadHabitsFromDatabase(habits, nextHabitID);
 }
 
 int findHabitByID(int id) {

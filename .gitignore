@@ -26,6 +26,8 @@ CMakeFiles/
 *.exe
 *.out
 
-# Local todo app data
-todoData.txt
-habitData.txt
+# Local Todo Quest database
+todoQuest.db
+todoQuest.db-journal
+todoQuest.db-wal
+todoQuest.db-shm
