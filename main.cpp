@@ -1,4 +1,5 @@
 #include <chrono>
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -109,13 +110,7 @@ long long getTrackedSeconds(Todo todo) {
     return trackedSeconds;
 }
 
-void showTodos() {
-    if (todos.size() == 0) {
-        cout << "Your todo list is empty." << endl;
-        return;
-    }
-
-    printSection("QUEST LOG");
+void printTodoTableHeader() {
     cout << left << setw(6) << "ID"
          << setw(13) << "STATUS"
          << setw(34) << "QUEST"
@@ -124,39 +119,114 @@ void showTodos() {
          << setw(16) << "FOCUS TIME"
          << "XP" << endl;
     cout << string(111, '-') << endl;
+}
+
+void printTodoRow(Todo todo) {
+    string status;
+
+    if (todo.completed) {
+        status = "COMPLETE";
+    } else {
+        status = "OPEN";
+    }
+
+    string dueDate = formatDueDateForDisplay(todo.dueDate);
+    long long trackedSeconds = getTrackedSeconds(todo);
+
+    cout << left << setw(6) << todo.id
+         << setw(13) << status
+         << setw(34) << shortenText(todo.task, 31)
+         << setw(18) << shortenText(todo.category, 15)
+         << setw(16) << dueDate
+         << setw(16) << formatTime(trackedSeconds)
+         << getXPForTime(trackedSeconds) << endl;
+
+    if (timerIsRunning && todo.id == runningTodoID) {
+        cout << "      >>> TIMER RUNNING FOR THIS QUEST <<<" << endl;
+    }
+
+    if (!todo.description.empty()) {
+        cout << "      Details: " << todo.description << endl;
+    }
+}
+
+void showTodos() {
+    if (todos.size() == 0) {
+        cout << "Your todo list is empty." << endl;
+        return;
+    }
+
+    printSection("QUEST LOG");
+    printTodoTableHeader();
 
     for (size_t i = 0; i < todos.size(); i++) {
-        string status;
-        if (todos[i].completed) {
-            status = "COMPLETE";
-        } else {
-            status = "OPEN";
-        }
-
-        string dueDate = formatDueDateForDisplay(todos[i].dueDate);
-
-        long long trackedSeconds = getTrackedSeconds(todos[i]);
-        cout << left << setw(6) << todos[i].id
-             << setw(13) << status
-             << setw(34) << shortenText(todos[i].task, 31)
-             << setw(18) << shortenText(todos[i].category, 15)
-             << setw(16) << dueDate
-             << setw(16) << formatTime(trackedSeconds)
-             << getXPForTime(trackedSeconds) << endl;
-
-        if (timerIsRunning && todos[i].id == runningTodoID) {
-            cout << "      >>> TIMER RUNNING FOR THIS QUEST <<<" << endl;
-        }
-
-        if (!todos[i].description.empty()) {
-            cout << "      Details: " << todos[i].description << endl;
-        }
+        printTodoRow(todos[i]);
     }
 
     cout << string(111, '-') << endl;
     cout << "  Task XP: " << getTotalXP(todos)
          << "    |    Ritual XP: " << getTotalHabitXP()
          << "    |    Total XP: " << getTotalXP(todos) + getTotalHabitXP() << endl;
+}
+
+void showTodosByCategory() {
+    vector<string> categories;
+
+    for (size_t i = 0; i < todos.size(); i++) {
+        bool categoryAlreadyListed = false;
+
+        for (size_t j = 0; j < categories.size(); j++) {
+            if (categories[j] == todos[i].category) {
+                categoryAlreadyListed = true;
+            }
+        }
+
+        if (!categoryAlreadyListed) {
+            categories.push_back(todos[i].category);
+        }
+    }
+
+    sort(categories.begin(), categories.end());
+
+    printSection("QUESTS BY CATEGORY");
+
+    for (size_t i = 0; i < categories.size(); i++) {
+        cout << "  " << categories[i] << endl;
+        printTodoTableHeader();
+
+        for (size_t j = 0; j < todos.size(); j++) {
+            if (todos[j].category == categories[i]) {
+                printTodoRow(todos[j]);
+            }
+        }
+
+        cout << string(111, '-') << endl;
+        cout << endl;
+    }
+}
+
+void viewQuests() {
+    if (todos.size() == 0) {
+        cout << "Your todo list is empty." << endl;
+        return;
+    }
+
+    showTodos();
+    cout << endl;
+
+    printSection("QUEST LOG OPTIONS");
+    printMenuItem(1, "View all quests by category");
+    printMenuItem(2, "Return to the command console");
+    cout << endl;
+
+    int choice = getNumber("Choose an option (1-2): ");
+
+    if (choice != 1) {
+        return;
+    }
+
+    showTodosByCategory();
+    waitForEnter();
 }
 
 void showXPSummary() {
@@ -437,8 +507,7 @@ int main() {
         if (choice == 1) {
             addTodo();
         } else if (choice == 2) {
-            showTodos();
-            waitForEnter();
+            viewQuests();
         } else if (choice == 3) {
             completeTodo();
         } else if (choice == 4) {
