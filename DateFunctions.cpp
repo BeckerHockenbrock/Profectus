@@ -70,6 +70,33 @@ string getTodayDate() {
     return getDateFromToday(0);
 }
 
+string formatDueDateForDisplay(string dueDate) {
+    if (dueDate.empty()) {
+        return "--";
+    }
+
+    if (!isValidDate(dueDate)) {
+        return dueDate;
+    }
+
+    if (dueDate == getTodayDate()) {
+        return "Today";
+    }
+
+    if (dueDate == getDateFromToday(1)) {
+        return "Tmrw";
+    }
+
+    string monthAndDay = dueDate.substr(5, 2) + "/" + dueDate.substr(8, 2);
+    string currentYear = getTodayDate().substr(0, 4);
+
+    if (dueDate.substr(0, 4) == currentYear) {
+        return monthAndDay;
+    }
+
+    return monthAndDay + "/" + dueDate.substr(0, 4);
+}
+
 void makeLowerCase(string& text) {
     for (size_t i = 0; i < text.length(); i++) {
         if (text[i] >= 'A' && text[i] <= 'Z') {

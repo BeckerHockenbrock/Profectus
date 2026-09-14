@@ -133,10 +133,7 @@ void showTodos() {
             status = "OPEN";
         }
 
-        string dueDate = todos[i].dueDate;
-        if (todos[i].dueDate.empty()) {
-            dueDate = "--";
-        }
+        string dueDate = formatDueDateForDisplay(todos[i].dueDate);
 
         long long trackedSeconds = getTrackedSeconds(todos[i]);
         cout << left << setw(6) << todos[i].id
@@ -247,7 +244,7 @@ void startTimer() {
     printSection("FOCUS SESSION ACTIVE");
     cout << "  Current quest: " << todos[index].task << endl;
     cout << "  Category: " << todos[index].category << endl;
-    cout << "  Due date: " << (todos[index].dueDate.empty() ? "--" : todos[index].dueDate) << endl;
+    cout << "  Due date: " << formatDueDateForDisplay(todos[index].dueDate) << endl;
     cout << endl;
     cout << "  Your timer is running. Stay with the quest." << endl;
     cout << "  Press Enter when you are ready to finish this focus session." << endl;
