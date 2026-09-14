@@ -66,6 +66,10 @@ string getDateFromToday(int daysToAdd) {
     return formatDate(date.tm_year + 1900, date.tm_mon + 1, date.tm_mday);
 }
 
+string getTodayDate() {
+    return getDateFromToday(0);
+}
+
 void makeLowerCase(string& text) {
     for (size_t i = 0; i < text.length(); i++) {
         if (text[i] >= 'A' && text[i] <= 'Z') {

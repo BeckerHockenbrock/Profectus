@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "DateFunctions.h"
+#include "HabitFunctions.h"
 #include "ProgressionFunctions.h"
 #include "Todo.h"
 #include "UIFunctions.h"
@@ -147,7 +148,7 @@ void showDashboard() {
     printSection("DAILY STATUS");
     cout << "  Open quests: " << getOpenTodoCount()
          << "    |    Completed: " << todos.size() - getOpenTodoCount()
-         << "    |    Total XP: " << getTotalXP(todos) << endl;
+         << "    |    Total XP: " << getTotalXP(todos) + getTotalHabitXP() << endl;
     cout << "  Every focused minute becomes 1 XP. Build your streak one quest at a time." << endl;
     cout << endl;
 }
@@ -222,7 +223,9 @@ void showTodos() {
     }
 
     cout << string(93, '-') << endl;
-    cout << "  Total XP: " << getTotalXP(todos) << endl;
+    cout << "  Task XP: " << getTotalXP(todos)
+         << "    |    Ritual XP: " << getTotalHabitXP()
+         << "    |    Total XP: " << getTotalXP(todos) + getTotalHabitXP() << endl;
 }
 
 void showXPSummary() {
@@ -232,7 +235,9 @@ void showXPSummary() {
     }
 
     printSection("XP SUMMARY");
-    cout << "Total XP: " << getTotalXP(todos) << endl;
+    cout << "Task XP: " << getTotalXP(todos) << endl;
+    cout << "Ritual XP: " << getTotalHabitXP() << endl;
+    cout << "Total XP: " << getTotalXP(todos) + getTotalHabitXP() << endl;
     cout << "Earn 1 XP for every full minute tracked." << endl;
     cout << endl;
 
@@ -446,6 +451,7 @@ void removeTodo() {
 
 int main() {
     loadTodos();
+    loadHabits();
 
     int choice;
 
@@ -463,9 +469,10 @@ int main() {
         printMenuItem(7, "Remove a quest");
         printMenuItem(8, "Save your progress");
         printMenuItem(9, "View XP summary");
-        printMenuItem(10, "Exit Todo Quest");
+        printMenuItem(10, "Open daily rituals");
+        printMenuItem(11, "Exit Todo Quest");
         cout << endl;
-        choice = getNumber("Choose a command (1-10): ");
+        choice = getNumber("Choose a command (1-11): ");
 
         if (choice == 1) {
             addTodo();
@@ -489,6 +496,8 @@ int main() {
             showXPSummary();
             waitForEnter();
         } else if (choice == 10) {
+            habitMenu();
+        } else if (choice == 11) {
             if (timerIsRunning) {
                 stopTimer();
             }
@@ -500,7 +509,7 @@ int main() {
         }
 
         cout << endl;
-    } while (choice != 10);
+    } while (choice != 11);
 
     return 0;
 }

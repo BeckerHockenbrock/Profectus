@@ -4,6 +4,8 @@
 #include <string>
 
 bool isValidDate(std::string dueDate);
+std::string getTodayDate();
+std::string getDateFromToday(int daysToAdd);
 std::string getDueDate(std::string prompt);
 
 #endif
