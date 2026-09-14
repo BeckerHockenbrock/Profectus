@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "DateFunctions.h"
+#include "ProgressionFunctions.h"
 #include "Todo.h"
 
 using namespace std;
@@ -149,6 +150,8 @@ void showTodos() {
 
     cout << "Todo List" << endl;
     cout << "---------" << endl;
+    cout << "Total XP: " << getTotalXP(todos) << endl;
+    cout << "Earn 1 XP for every full minute tracked." << endl;
 
     for (size_t i = 0; i < todos.size(); i++) {
         cout << todos[i].id << ". ";
@@ -167,13 +170,32 @@ void showTodos() {
             cout << " - Due: " << todos[i].dueDate;
         }
 
-        cout << " - Time: " << formatTime(getTrackedSeconds(todos[i]));
+        long long trackedSeconds = getTrackedSeconds(todos[i]);
+        cout << " - Time: " << formatTime(trackedSeconds);
+        cout << " - XP: " << getXPForTime(trackedSeconds);
 
         if (timerIsRunning && todos[i].id == runningTodoID) {
             cout << " [Timer running]";
         }
 
         cout << endl;
+    }
+}
+
+void showXPSummary() {
+    if (todos.size() == 0) {
+        cout << "Your todo list is empty." << endl;
+        return;
+    }
+
+    cout << "XP Summary" << endl;
+    cout << "----------" << endl;
+    cout << "Total XP: " << getTotalXP(todos) << endl;
+    cout << "Earn 1 XP for every full minute tracked." << endl;
+
+    for (size_t i = 0; i < todos.size(); i++) {
+        cout << todos[i].task << ": "
+             << getXPForTime(getTrackedSeconds(todos[i])) << " XP" << endl;
     }
 }
 
@@ -391,8 +413,9 @@ int main() {
         cout << "6. Start a timer" << endl;
         cout << "7. Remove a task" << endl;
         cout << "8. Save tasks" << endl;
-        cout << "9. Exit" << endl;
-        choice = getNumber("Enter your choice (1-9): ");
+        cout << "9. View XP summary" << endl;
+        cout << "10. Exit" << endl;
+        choice = getNumber("Enter your choice (1-10): ");
 
         if (choice == 1) {
             addTodo();
@@ -412,6 +435,8 @@ int main() {
             saveTodos();
             cout << "Tasks saved." << endl;
         } else if (choice == 9) {
+            showXPSummary();
+        } else if (choice == 10) {
             if (timerIsRunning) {
                 stopTimer();
             }
@@ -423,7 +448,7 @@ int main() {
         }
 
         cout << endl;
-    } while (choice != 9);
+    } while (choice != 10);
 
     return 0;
 }
