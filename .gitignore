@@ -1,0 +1,30 @@
+# Editor and IDE files
+.vscode/
+.vs/
+.idea/
+*.code-workspace
+*.suo
+*.user
+
+# clangd files
+.clangd
+.clangd/
+
+# C++ build files
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+*.o
+*.obj
+*.d
+*.pdb
+*.idb
+*.ilk
+
+# Program files
+*.exe
+*.out
+
+# Local todo app data
+todoData.txt
