@@ -6,38 +6,39 @@
 using namespace std;
 
 const string RESET = "\033[0m";
-const string PURPLE = "\033[38;5;141m";
-const string CYAN = "\033[38;5;51m";
-const string GOLD = "\033[38;5;220m";
-const string GREEN = "\033[38;5;82m";
-const string DIM = "\033[38;5;245m";
+const string WHITE = "\033[38;5;255m";
+const string ICE_BLUE = "\033[38;5;117m";
+const string SILVER = "\033[38;5;251m";
+const string MUTED = "\033[38;5;245m";
 
 void clearScreen() {
     cout << "\033[2J\033[H";
 }
 
 void printHeader() {
-    cout << PURPLE;
+    cout << MUTED;
     cout << "====================================================================================================" << endl;
-    cout << "  _______ ____  _____   ____        ____  _    _ ______  _____ _______ " << endl;
-    cout << " |__   __/ __ \\|  __ \\ / __ \\      / __ \\| |  | |  ____|/ ____|__   __|" << endl;
-    cout << "    | | | |  | | |  | | |  | |    | |  | | |  | | |__  | (___    | |   " << endl;
-    cout << "    | | | |  | | |  | | |  | |    | |  | | |  | |  __|  \\___ \\   | |   " << endl;
-    cout << "    | | | |__| | |__| | |__| |    | |__| | |__| | |____ ____) |  | |   " << endl;
-    cout << "    |_|  \\____/|_____/ \\____/      \\___\\_\\____/|______|_____/   |_|   " << endl;
+    cout << WHITE;
+    cout << "     _______ ____  _____   ____        ____  _    _ ______  _____ _______" << endl;
+    cout << "    |__   __/ __ \\|  __ \\ / __ \\      / __ \\| |  | |  ____|/ ____|__   __|" << endl;
+    cout << "       | | | |  | | |  | | |  | |    | |  | | |  | | |__  | (___    | |" << endl;
+    cout << "       | | | |  | | |  | | |  | |    | |  | | |  | |  __|  \\___ \\   | |" << endl;
+    cout << "       | | | |__| | |__| | |__| |    | |__| | |__| | |____ ____) |  | |" << endl;
+    cout << "       |_|  \\____/|_____/ \\____/      \\___\\_\\____/|______|_____/   |_|" << endl;
+    cout << MUTED;
     cout << "====================================================================================================" << endl;
-    cout << CYAN << "       QUEST TRACKER  //  FOCUS ENGINE  //  TURN YOUR TIME INTO EXPERIENCE" << RESET << endl;
+    cout << ICE_BLUE << "                    Focus clearly. Progress quietly. Level up deliberately." << RESET << endl;
     cout << endl;
 }
 
 void printSection(string title) {
-    cout << GOLD << "--[ " << title << " ]" << string(78 - title.length(), '-') << RESET << endl;
+    cout << ICE_BLUE << "  " << title << " " << string(84 - title.length(), '-') << RESET << endl;
 }
 
 void printMenuItem(int number, string label) {
-    cout << "  " << PURPLE << "[" << number << "]" << RESET << "  " << label << endl;
+    cout << "  " << ICE_BLUE << number << "." << RESET << "  " << SILVER << label << RESET << endl;
 }
 
 void printMessage(string message) {
-    cout << GREEN << message << RESET << endl;
+    cout << SILVER << message << RESET << endl;
 }
