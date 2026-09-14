@@ -119,10 +119,11 @@ void showTodos() {
     cout << left << setw(6) << "ID"
          << setw(13) << "STATUS"
          << setw(34) << "QUEST"
+         << setw(18) << "CATEGORY"
          << setw(16) << "DUE DATE"
          << setw(16) << "FOCUS TIME"
          << "XP" << endl;
-    cout << string(93, '-') << endl;
+    cout << string(111, '-') << endl;
 
     for (size_t i = 0; i < todos.size(); i++) {
         string status;
@@ -141,6 +142,7 @@ void showTodos() {
         cout << left << setw(6) << todos[i].id
              << setw(13) << status
              << setw(34) << shortenText(todos[i].task, 31)
+             << setw(18) << shortenText(todos[i].category, 15)
              << setw(16) << dueDate
              << setw(16) << formatTime(trackedSeconds)
              << getXPForTime(trackedSeconds) << endl;
@@ -148,9 +150,13 @@ void showTodos() {
         if (timerIsRunning && todos[i].id == runningTodoID) {
             cout << "      >>> TIMER RUNNING FOR THIS QUEST <<<" << endl;
         }
+
+        if (!todos[i].description.empty()) {
+            cout << "      Details: " << todos[i].description << endl;
+        }
     }
 
-    cout << string(93, '-') << endl;
+    cout << string(111, '-') << endl;
     cout << "  Task XP: " << getTotalXP(todos)
          << "    |    Ritual XP: " << getTotalHabitXP()
          << "    |    Total XP: " << getTotalXP(todos) + getTotalHabitXP() << endl;
@@ -240,6 +246,7 @@ void startTimer() {
     printHeader();
     printSection("FOCUS SESSION ACTIVE");
     cout << "  Current quest: " << todos[index].task << endl;
+    cout << "  Category: " << todos[index].category << endl;
     cout << "  Due date: " << (todos[index].dueDate.empty() ? "--" : todos[index].dueDate) << endl;
     cout << endl;
     cout << "  Your timer is running. Stay with the quest." << endl;
@@ -263,6 +270,17 @@ void addTodo() {
         cout << "Task cannot be blank." << endl;
         return;
     }
+
+    cout << "Enter a category (class name, Work, College, etc.): ";
+    getline(cin, todo.category);
+
+    if (todo.category.empty()) {
+        cout << "Category cannot be blank." << endl;
+        return;
+    }
+
+    cout << "Enter a description (optional): ";
+    getline(cin, todo.description);
 
     todo.dueDate = getDueDate("Enter due date (YYYY-MM-DD, day number, today, tomorrow, or tmrw): ");
 
@@ -317,9 +335,11 @@ void editTodo() {
     }
 
     string newTask;
+    string newCategory;
+    string newDescription;
 
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    cout << "Enter the new task description: ";
+    cout << "Enter the new quest title: ";
     getline(cin, newTask);
 
     if (newTask.empty()) {
@@ -327,7 +347,20 @@ void editTodo() {
         return;
     }
 
+    cout << "Enter the new category: ";
+    getline(cin, newCategory);
+
+    if (newCategory.empty()) {
+        cout << "Category cannot be blank." << endl;
+        return;
+    }
+
+    cout << "Enter the new description (press Enter to clear it): ";
+    getline(cin, newDescription);
+
     todos[index].task = newTask;
+    todos[index].category = newCategory;
+    todos[index].description = newDescription;
     saveTodos();
     cout << "Task updated." << endl;
 }
@@ -393,7 +426,7 @@ int main() {
         printMenuItem(1, "Create a new quest");
         printMenuItem(2, "Open the quest log");
         printMenuItem(3, "Mark a quest complete");
-        printMenuItem(4, "Edit a quest title");
+        printMenuItem(4, "Edit a quest");
         printMenuItem(5, "Change a due date");
         printMenuItem(6, "Begin a focus session");
         printMenuItem(7, "Remove a quest");

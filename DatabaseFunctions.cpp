@@ -33,6 +33,25 @@ bool runSQL(sqlite3* database, const string& sql) {
     return true;
 }
 
+bool todoColumnExists(sqlite3* database, const string& columnName) {
+    sqlite3_stmt* statement = nullptr;
+    bool foundColumn = false;
+
+    if (sqlite3_prepare_v2(database, "PRAGMA table_info(todos);", -1, &statement, nullptr) == SQLITE_OK) {
+        while (sqlite3_step(statement) == SQLITE_ROW) {
+            string currentColumn = reinterpret_cast<const char*>(sqlite3_column_text(statement, 1));
+
+            if (currentColumn == columnName) {
+                foundColumn = true;
+                break;
+            }
+        }
+    }
+
+    sqlite3_finalize(statement);
+    return foundColumn;
+}
+
 void setupDatabase() {
     sqlite3* database = openDatabase();
 
@@ -44,9 +63,19 @@ void setupDatabase() {
         "CREATE TABLE IF NOT EXISTS todos ("
         "id INTEGER PRIMARY KEY, "
         "task TEXT NOT NULL, "
+        "description TEXT NOT NULL, "
+        "category TEXT NOT NULL, "
         "completed INTEGER NOT NULL, "
         "due_date TEXT, "
         "total_seconds INTEGER NOT NULL);");
+
+    if (!todoColumnExists(database, "description")) {
+        runSQL(database, "ALTER TABLE todos ADD COLUMN description TEXT NOT NULL DEFAULT '';");
+    }
+
+    if (!todoColumnExists(database, "category")) {
+        runSQL(database, "ALTER TABLE todos ADD COLUMN category TEXT NOT NULL DEFAULT 'General';");
+    }
 
     runSQL(database,
         "CREATE TABLE IF NOT EXISTS habits ("
@@ -72,15 +101,17 @@ void saveTodosToDatabase(const vector<Todo>& todos) {
     runSQL(database, "DELETE FROM todos;");
 
     sqlite3_stmt* statement = nullptr;
-    string sql = "INSERT INTO todos (id, task, completed, due_date, total_seconds) VALUES (?, ?, ?, ?, ?);";
+    string sql = "INSERT INTO todos (id, task, description, category, completed, due_date, total_seconds) VALUES (?, ?, ?, ?, ?, ?, ?);";
 
     if (sqlite3_prepare_v2(database, sql.c_str(), -1, &statement, nullptr) == SQLITE_OK) {
         for (size_t i = 0; i < todos.size(); i++) {
             sqlite3_bind_int(statement, 1, todos[i].id);
             sqlite3_bind_text(statement, 2, todos[i].task.c_str(), -1, SQLITE_TRANSIENT);
-            sqlite3_bind_int(statement, 3, todos[i].completed);
-            sqlite3_bind_text(statement, 4, todos[i].dueDate.c_str(), -1, SQLITE_TRANSIENT);
-            sqlite3_bind_int64(statement, 5, todos[i].totalSeconds);
+            sqlite3_bind_text(statement, 3, todos[i].description.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 4, todos[i].category.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int(statement, 5, todos[i].completed);
+            sqlite3_bind_text(statement, 6, todos[i].dueDate.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int64(statement, 7, todos[i].totalSeconds);
 
             if (sqlite3_step(statement) != SQLITE_DONE) {
                 cout << "Could not save a quest." << endl;
@@ -106,16 +137,18 @@ void loadTodosFromDatabase(vector<Todo>& todos, int& nextID) {
     }
 
     sqlite3_stmt* statement = nullptr;
-    string sql = "SELECT id, task, completed, due_date, total_seconds FROM todos ORDER BY id;";
+    string sql = "SELECT id, task, description, category, completed, due_date, total_seconds FROM todos ORDER BY id;";
 
     if (sqlite3_prepare_v2(database, sql.c_str(), -1, &statement, nullptr) == SQLITE_OK) {
         while (sqlite3_step(statement) == SQLITE_ROW) {
             Todo todo;
             todo.id = sqlite3_column_int(statement, 0);
             todo.task = reinterpret_cast<const char*>(sqlite3_column_text(statement, 1));
-            todo.completed = sqlite3_column_int(statement, 2);
-            todo.dueDate = reinterpret_cast<const char*>(sqlite3_column_text(statement, 3));
-            todo.totalSeconds = sqlite3_column_int64(statement, 4);
+            todo.description = reinterpret_cast<const char*>(sqlite3_column_text(statement, 2));
+            todo.category = reinterpret_cast<const char*>(sqlite3_column_text(statement, 3));
+            todo.completed = sqlite3_column_int(statement, 4);
+            todo.dueDate = reinterpret_cast<const char*>(sqlite3_column_text(statement, 5));
+            todo.totalSeconds = sqlite3_column_int64(statement, 6);
             todos.push_back(todo);
 
             if (todo.id >= nextID) {
