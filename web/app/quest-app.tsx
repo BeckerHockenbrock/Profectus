@@ -3,16 +3,7 @@
 import Image from "next/image";
 import type { CSSProperties, FormEvent } from "react";
 import { useMemo, useState } from "react";
-
-export type Quest = {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  dueDate: string;
-  completed: boolean;
-  focusMinutes: number;
-};
+import type { Quest } from "@/lib/quest-types";
 
 type QuestAppProps = {
   initialQuests: Quest[];
@@ -65,10 +56,12 @@ function QuestCard({
   quest,
   today,
   onToggle,
+  isUpdating,
 }: {
   quest: Quest;
   today: string;
   onToggle: (id: number) => void;
+  isUpdating: boolean;
 }) {
   return (
     <article className={`questCard${quest.completed ? " isComplete" : ""}`}>
@@ -78,6 +71,7 @@ function QuestCard({
         aria-label={quest.completed ? `Reopen ${quest.title}` : `Complete ${quest.title}`}
         aria-pressed={quest.completed}
         onClick={() => onToggle(quest.id)}
+        disabled={isUpdating}
       >
         <span aria-hidden="true">{quest.completed ? "✓" : ""}</span>
       </button>
@@ -106,6 +100,9 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
   const [view, setView] = useState<"all" | "categories">("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<QuestForm>(emptyForm);
+  const [savingQuestId, setSavingQuestId] = useState<number | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const openCount = quests.filter((quest) => !quest.completed).length;
   const completedCount = quests.length - openCount;
@@ -125,40 +122,79 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
     [quests],
   );
 
-  function toggleQuest(id: number) {
-    setQuests((current) =>
-      current.map((quest) =>
-        quest.id === id ? { ...quest, completed: !quest.completed } : quest,
-      ),
-    );
+  async function toggleQuest(id: number) {
+    const quest = quests.find((current) => current.id === id);
+
+    if (!quest || savingQuestId !== null) {
+      return;
+    }
+
+    const completed = !quest.completed;
+    setSaveError("");
+    setSavingQuestId(id);
+    setQuests((current) => current.map((item) => (item.id === id ? { ...item, completed } : item)));
+
+    try {
+      const response = await fetch(`/api/quests/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Quest update failed");
+      }
+
+      const savedQuest = (await response.json()) as Quest;
+      setQuests((current) => current.map((item) => (item.id === id ? savedQuest : item)));
+    } catch {
+      setQuests((current) => current.map((item) => (item.id === id ? quest : item)));
+      setSaveError("That change did not save. Try again.");
+    } finally {
+      setSavingQuestId(null);
+    }
   }
 
   function closeSheet() {
     setSheetOpen(false);
   }
 
-  function submitQuest(event: FormEvent<HTMLFormElement>) {
+  async function submitQuest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const title = form.title.trim();
     const category = form.category.trim();
 
-    if (!title || !category) return;
+    if (!title || !category || isCreating) return;
 
-    setQuests((current) => [
-      {
-        id: Date.now(),
-        title,
-        description: form.description.trim(),
-        category,
-        dueDate: form.dueDate,
-        completed: false,
-        focusMinutes: 0,
-      },
-      ...current,
-    ]);
-    setForm(emptyForm);
-    closeSheet();
+    setSaveError("");
+    setIsCreating(true);
+
+    try {
+      const response = await fetch("/api/quests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description: form.description.trim(),
+          category,
+          dueDate: form.dueDate,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Quest creation failed");
+      }
+
+      const savedQuest = (await response.json()) as Quest;
+      setQuests((current) => [savedQuest, ...current]);
+      setForm(emptyForm);
+      closeSheet();
+    } catch {
+      setSaveError("That quest did not save. Try again.");
+    } finally {
+      setIsCreating(false);
+    }
   }
 
   return (
@@ -242,11 +278,23 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
             </div>
           </div>
 
+          {saveError ? <p className="formError" role="alert">{saveError}</p> : null}
+
           {view === "all" ? (
             <div className="questList">
-              {quests.map((quest) => (
-                <QuestCard key={quest.id} quest={quest} today={today} onToggle={toggleQuest} />
-              ))}
+              {quests.length === 0 ? (
+                <p className="emptyState">Your path is clear. Add the first quest when you are ready.</p>
+              ) : (
+                quests.map((quest) => (
+                  <QuestCard
+                    key={quest.id}
+                    quest={quest}
+                    today={today}
+                    onToggle={toggleQuest}
+                    isUpdating={savingQuestId === quest.id}
+                  />
+                ))
+              )}
             </div>
           ) : (
             <div className="categoryList">
@@ -258,7 +306,13 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
                   </div>
                   <div className="questList">
                     {group.quests.map((quest) => (
-                      <QuestCard key={quest.id} quest={quest} today={today} onToggle={toggleQuest} />
+                      <QuestCard
+                        key={quest.id}
+                        quest={quest}
+                        today={today}
+                        onToggle={toggleQuest}
+                        isUpdating={savingQuestId === quest.id}
+                      />
                     ))}
                   </div>
                 </section>
@@ -341,8 +395,8 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
               />
             </label>
 
-            <button className="saveButton" type="submit">
-              Create quest
+            <button className="saveButton" type="submit" disabled={isCreating}>
+              {isCreating ? "Saving…" : "Create quest"}
             </button>
           </form>
         </section>

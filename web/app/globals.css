@@ -347,6 +347,12 @@ h2 {
   background: var(--accent);
 }
 
+.completeButton:disabled,
+.saveButton:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
 .questContent {
   min-width: 0;
 }
@@ -417,6 +423,25 @@ h2 {
 .questReward strong {
   color: var(--accent);
   font-weight: 650;
+}
+
+.emptyState,
+.formError {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface-soft);
+  color: var(--secondary);
+}
+
+.emptyState {
+  padding: 1rem;
+}
+
+.formError {
+  padding: 0.75rem 0.85rem;
+  color: var(--text);
+  font-size: 0.85rem;
 }
 
 .categoryList {

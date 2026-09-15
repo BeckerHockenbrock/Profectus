@@ -37,3 +37,4 @@ yarn-error.log*
 
 # Data
 *.db
+web/data/
