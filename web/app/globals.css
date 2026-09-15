@@ -21,11 +21,13 @@
 
 html {
   background: var(--background);
+  min-height: 100%;
   scroll-behavior: smooth;
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   background: radial-gradient(circle at 50% -18rem, rgba(255, 255, 255, 0.08), transparent 38rem), var(--background);
   color: var(--text);
@@ -111,8 +113,8 @@ textarea:focus-visible {
 
 .profileButton {
   display: grid;
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 2.75rem;
+  height: 2.75rem;
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 50%;
@@ -154,6 +156,12 @@ textarea:focus-visible {
   color: var(--secondary);
 }
 
+.authCard .homeScreenHint {
+  width: 100%;
+  margin: 0;
+  text-align: left;
+}
+
 .signInButton {
   width: 100%;
   min-height: 3rem;
@@ -169,6 +177,44 @@ textarea:focus-visible {
   width: min(100%, 48rem);
   margin: 0 auto;
   padding: 1.5rem 1.15rem 2rem;
+}
+
+.homeScreenHint {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+}
+
+.homeScreenHint strong {
+  display: block;
+  font-size: 0.85rem;
+}
+
+.homeScreenHint p {
+  margin: 0.18rem 0 0;
+  color: var(--secondary);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.hintDismissButton {
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 650;
 }
 
 .hero {
@@ -653,12 +699,21 @@ textarea:focus {
 }
 
 @media (max-width: 28rem) {
+  .content {
+    padding-right: max(0.9rem, env(safe-area-inset-right));
+    padding-left: max(0.9rem, env(safe-area-inset-left));
+  }
+
   .sectionHeading {
     align-items: flex-end;
   }
 
   .viewSwitch button {
     padding-inline: 0.55rem;
+  }
+
+  .homeScreenHint {
+    align-items: flex-start;
   }
 }
 

@@ -4,9 +4,22 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Todo Quest",
   description: "Focus clearly. Progress quietly.",
+  applicationName: "Todo Quest",
+  manifest: "/manifest.webmanifest",
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
-    icon: "/sisyphus.png",
-    apple: "/sisyphus.png",
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Todo Quest",
+    statusBarStyle: "black-translucent",
   },
 };
 
@@ -14,6 +27,8 @@ export const viewport: Viewport = {
   themeColor: "#080b10",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -32,6 +32,20 @@ const emptyForm: QuestForm = {
   dueDate: "",
 };
 
+function HomeScreenHint({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <aside className="homeScreenHint" aria-label="Add Todo Quest to your home screen">
+      <div>
+        <strong>Use Todo Quest like an app</strong>
+        <p>Open your browser menu, then choose <b>Share</b> and <b>Add to Home Screen</b>.</p>
+      </div>
+      <button className="hintDismissButton" type="button" onClick={onDismiss} aria-label="Dismiss home screen hint">
+        Not now
+      </button>
+    </aside>
+  );
+}
+
 function addDays(isoDate: string, daysToAdd: number) {
   const [year, month, day] = isoDate.split("-").map(Number);
   const date = new Date(year, month - 1, day + daysToAdd);
@@ -104,6 +118,7 @@ export default function QuestApp({ today }: QuestAppProps) {
   const [savingQuestId, setSavingQuestId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [saveError, setSaveError] = useState(firebaseConfigured ? "" : "Firebase is not configured yet.");
+  const [showHomeScreenHint, setShowHomeScreenHint] = useState(false);
 
   const openCount = quests.filter((quest) => !quest.completed).length;
   const completedCount = quests.length - openCount;
@@ -171,6 +186,23 @@ export default function QuestApp({ today }: QuestAppProps) {
       stopAuthListener();
     };
   }, [firebaseConfigured]);
+
+  useEffect(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigatorWithStandalone.standalone === true;
+
+    if (isIOS && !isStandalone && localStorage.getItem("todo-quest-home-screen-hint-dismissed") !== "true") {
+      const animationFrame = requestAnimationFrame(() => setShowHomeScreenHint(true));
+      return () => cancelAnimationFrame(animationFrame);
+    }
+  }, []);
+
+  function dismissHomeScreenHint() {
+    localStorage.setItem("todo-quest-home-screen-hint-dismissed", "true");
+    setShowHomeScreenHint(false);
+  }
 
   async function toggleQuest(id: string) {
     const quest = quests.find((current) => current.id === id);
@@ -262,6 +294,7 @@ export default function QuestApp({ today }: QuestAppProps) {
           <button className="signInButton" type="button" onClick={startSignIn}>
             Continue with Google
           </button>
+          {showHomeScreenHint ? <HomeScreenHint onDismiss={dismissHomeScreenHint} /> : null}
         </section>
       </main>
     );
@@ -286,6 +319,7 @@ export default function QuestApp({ today }: QuestAppProps) {
       </header>
 
       <div className="content" id="top">
+        {showHomeScreenHint ? <HomeScreenHint onDismiss={dismissHomeScreenHint} /> : null}
         <section className="hero" aria-label="Todo Quest">
           <Image
             className="heroLogo"
