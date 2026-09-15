@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { CSSProperties, FormEvent } from "react";
+import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 import type { Quest } from "@/lib/quest-types";
 
@@ -41,15 +41,6 @@ function formatDueDate(dueDate: string, today: string) {
   const [year, month, day] = dueDate.split("-");
   const currentYear = today.slice(0, 4);
   return year === currentYear ? `${month}/${day}` : `${month}/${day}/${year}`;
-}
-
-function formatWeekday(isoDate: string) {
-  const [year, month, day] = isoDate.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    timeZone: "UTC",
-  }).format(date);
 }
 
 function QuestCard({
@@ -107,8 +98,6 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
   const openCount = quests.filter((quest) => !quest.completed).length;
   const completedCount = quests.length - openCount;
   const totalXP = quests.reduce((total, quest) => total + quest.focusMinutes, 0);
-  const completionPercent = quests.length === 0 ? 0 : (completedCount / quests.length) * 100;
-
   const groupedQuests = useMemo(() => {
     const categories = Array.from(new Set(quests.map((quest) => quest.category))).sort();
     return categories.map((category) => ({
@@ -209,7 +198,6 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
             height={40}
             preload
           />
-          Todo Quest
         </a>
         <div className="profileButton" aria-label="Local profile">
           B
@@ -217,23 +205,17 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
       </header>
 
       <div className="content" id="top">
-        <section className="hero" aria-labelledby="page-title">
-          <div>
-            <p className="eyebrow">{formatWeekday(today)} · Your quest log</p>
-            <h1 id="page-title">Make today count.</h1>
-            <p className="heroCopy">Choose what deserves your focus, then move one quest forward.</p>
-          </div>
-
-          <div
-            className="progressOrb"
-            aria-label={`${completedCount} of ${quests.length} quests complete`}
-            style={{ "--quest-progress": `${completionPercent}%` } as CSSProperties}
-          >
-            <div className="progressOrbInner">
-              <strong>{openCount}</strong>
-              <span>open</span>
-            </div>
-          </div>
+        <section className="hero" aria-label="Todo Quest">
+          <Image
+            className="heroLogo"
+            src="/sisyphus.png"
+            alt="Sisyphus carrying a boulder"
+            width={1152}
+            height={1366}
+            sizes="(max-width: 48rem) 70vw, 18rem"
+            preload
+          />
+          <p className="heroTitle">Todo Quest</p>
         </section>
 
         <section className="statStrip" aria-label="Daily progress">
@@ -253,10 +235,7 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
 
         <section className="questSection" aria-labelledby="quest-heading">
           <div className="sectionHeading">
-            <div>
-              <p className="eyebrow">In progress</p>
-              <h2 id="quest-heading">Quests</h2>
-            </div>
+            <h2 id="quest-heading">Quests</h2>
 
             <div className="viewSwitch" aria-label="Quest view">
               <button
@@ -341,7 +320,6 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
           <div className="sheetHandle" aria-hidden="true" />
           <div className="sheetHeading">
             <div>
-              <p className="eyebrow">Add to your path</p>
               <h2 id="sheet-title">New quest</h2>
             </div>
             <button className="closeButton" type="button" onClick={closeSheet} aria-label="Close">

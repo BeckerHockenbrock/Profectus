@@ -129,84 +129,32 @@ textarea:focus-visible {
 }
 
 .hero {
-  display: flex;
-  gap: 1.5rem;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 2rem 0 1.5rem;
+  display: grid;
+  justify-items: center;
+  padding: 1.15rem 0 1.4rem;
+  text-align: center;
 }
 
-.eyebrow {
-  margin: 0 0 0.45rem;
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.115em;
+.heroLogo {
+  width: min(70vw, 18rem);
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+.heroTitle {
+  margin: -0.15rem 0 0;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 720;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
-h1,
 h2,
 h3,
 p {
   margin-top: 0;
-}
-
-h1 {
-  max-width: 11ch;
-  margin-bottom: 0.65rem;
-  font-size: clamp(2.55rem, 11vw, 4.8rem);
-  font-weight: 680;
-  letter-spacing: -0.045em;
-  line-height: 0.98;
-}
-
-.heroCopy {
-  max-width: 34rem;
-  margin-bottom: 0;
-  color: var(--secondary);
-  font-size: 0.98rem;
-  line-height: 1.55;
-}
-
-.progressOrb {
-  display: grid;
-  flex: 0 0 5.35rem;
-  width: 5.35rem;
-  height: 5.35rem;
-  padding: 0.32rem;
-  place-items: center;
-  border-radius: 50%;
-  background: conic-gradient(
-    var(--accent) 0 var(--quest-progress),
-    rgba(255, 255, 255, 0.07) var(--quest-progress) 100%
-  );
-  box-shadow: 0 0 42px rgba(255, 255, 255, 0.06);
-}
-
-.progressOrbInner {
-  display: grid;
-  width: 100%;
-  height: 100%;
-  place-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 50%;
-  background: #080808;
-  text-align: center;
-}
-
-.progressOrb strong {
-  font-size: 1.45rem;
-  font-weight: 650;
-  line-height: 1;
-}
-
-.progressOrb span {
-  margin-top: 0.15rem;
-  color: var(--muted);
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .statStrip {
@@ -662,16 +610,6 @@ textarea:focus {
 }
 
 @media (max-width: 28rem) {
-  .hero {
-    align-items: center;
-  }
-
-  .progressOrb {
-    flex-basis: 4.6rem;
-    width: 4.6rem;
-    height: 4.6rem;
-  }
-
   .sectionHeading {
     align-items: flex-end;
   }
