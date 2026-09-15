@@ -120,7 +120,7 @@ function getDatabase() {
 
 function toQuest(row: TodoRow): Quest {
   return {
-    id: Number(row.id),
+    id: String(row.id),
     title: row.task,
     description: row.description,
     category: row.category,

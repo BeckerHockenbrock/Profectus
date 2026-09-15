@@ -1,0 +1,50 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Each quest is stored at users/{accountId}/quests/{questId}.
+    // All fields are required. Only `completed` may change after creation.
+    function ownsAccount(accountId) {
+      return request.auth != null && request.auth.uid == accountId;
+    }
+
+    function isValidQuest(data) {
+      return data.keys().hasOnly([
+          'title', 'description', 'category', 'dueDate', 'completed', 'focusMinutes', 'createdAt'
+        ])
+        && data.keys().hasAll([
+          'title', 'description', 'category', 'dueDate', 'completed', 'focusMinutes', 'createdAt'
+        ])
+        && data.title is string
+        && data.title.size() > 0
+        && data.title.size() <= 160
+        && data.description is string
+        && data.description.size() <= 1000
+        && data.category is string
+        && data.category.size() > 0
+        && data.category.size() <= 80
+        && data.dueDate is string
+        && data.dueDate.matches('^$|^\\d{4}-\\d{2}-\\d{2}$')
+        && data.completed is bool
+        && data.focusMinutes is number
+        && data.focusMinutes >= 0
+        && data.createdAt is number;
+    }
+
+    function onlyChangesCompletion() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['completed'])
+        && request.resource.data.completed is bool;
+    }
+
+    match /users/{accountId}/quests/{questId} {
+      allow read, delete: if ownsAccount(accountId);
+      allow create: if ownsAccount(accountId)
+        && isValidQuest(request.resource.data)
+        && request.resource.data.completed == false
+        && request.resource.data.focusMinutes == 0;
+      allow update: if ownsAccount(accountId)
+        && isValidQuest(request.resource.data)
+        && onlyChangesCompletion();
+    }
+  }
+}

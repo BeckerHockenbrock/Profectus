@@ -2,11 +2,19 @@
 
 import Image from "next/image";
 import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  type User,
+} from "firebase/auth";
+import { addDoc, collection, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
+import { getFirebaseAuth, getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase";
 import type { Quest } from "@/lib/quest-types";
 
 type QuestAppProps = {
-  initialQuests: Quest[];
   today: string;
 };
 
@@ -51,7 +59,7 @@ function QuestCard({
 }: {
   quest: Quest;
   today: string;
-  onToggle: (id: number) => void;
+  onToggle: (id: string) => void;
   isUpdating: boolean;
 }) {
   return (
@@ -86,14 +94,16 @@ function QuestCard({
   );
 }
 
-export default function QuestApp({ initialQuests, today }: QuestAppProps) {
-  const [quests, setQuests] = useState(initialQuests);
+export default function QuestApp({ today }: QuestAppProps) {
+  const firebaseConfigured = isFirebaseConfigured();
+  const [quests, setQuests] = useState<Quest[]>([]);
+  const [user, setUser] = useState<User | null | undefined>(firebaseConfigured ? undefined : null);
   const [view, setView] = useState<"all" | "categories">("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<QuestForm>(emptyForm);
-  const [savingQuestId, setSavingQuestId] = useState<number | null>(null);
+  const [savingQuestId, setSavingQuestId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [saveError, setSaveError] = useState("");
+  const [saveError, setSaveError] = useState(firebaseConfigured ? "" : "Firebase is not configured yet.");
 
   const openCount = quests.filter((quest) => !quest.completed).length;
   const completedCount = quests.length - openCount;
@@ -111,10 +121,61 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
     [quests],
   );
 
-  async function toggleQuest(id: number) {
+  useEffect(() => {
+    if (!firebaseConfigured) {
+      return;
+    }
+
+    let stopQuestSync: (() => void) | undefined;
+
+    const auth = getFirebaseAuth();
+    const database = getFirebaseDb();
+    const stopAuthListener = onAuthStateChanged(auth, (nextUser) => {
+      stopQuestSync?.();
+      setUser(nextUser);
+
+      if (!nextUser) {
+        setQuests([]);
+        return;
+      }
+
+      const questQuery = query(
+        collection(database, "users", nextUser.uid, "quests"),
+        orderBy("createdAt", "desc"),
+      );
+
+      stopQuestSync = onSnapshot(
+        questQuery,
+        (snapshot) => {
+          setQuests(
+            snapshot.docs.map((quest) => {
+              const data = quest.data();
+              return {
+                id: quest.id,
+                title: String(data.title ?? ""),
+                description: String(data.description ?? ""),
+                category: String(data.category ?? "General"),
+                dueDate: String(data.dueDate ?? ""),
+                completed: Boolean(data.completed),
+                focusMinutes: Number(data.focusMinutes ?? 0),
+              };
+            }),
+          );
+        },
+        () => setSaveError("Your quests could not be loaded. Try refreshing."),
+      );
+    });
+
+    return () => {
+      stopQuestSync?.();
+      stopAuthListener();
+    };
+  }, [firebaseConfigured]);
+
+  async function toggleQuest(id: string) {
     const quest = quests.find((current) => current.id === id);
 
-    if (!quest || savingQuestId !== null) {
+    if (!quest || !user || savingQuestId !== null) {
       return;
     }
 
@@ -124,18 +185,7 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
     setQuests((current) => current.map((item) => (item.id === id ? { ...item, completed } : item)));
 
     try {
-      const response = await fetch(`/api/quests/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Quest update failed");
-      }
-
-      const savedQuest = (await response.json()) as Quest;
-      setQuests((current) => current.map((item) => (item.id === id ? savedQuest : item)));
+      await updateDoc(doc(getFirebaseDb(), "users", user.uid, "quests", id), { completed });
     } catch {
       setQuests((current) => current.map((item) => (item.id === id ? quest : item)));
       setSaveError("That change did not save. Try again.");
@@ -154,29 +204,21 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
     const title = form.title.trim();
     const category = form.category.trim();
 
-    if (!title || !category || isCreating) return;
+    if (!title || !category || !user || isCreating) return;
 
     setSaveError("");
     setIsCreating(true);
 
     try {
-      const response = await fetch("/api/quests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          description: form.description.trim(),
-          category,
-          dueDate: form.dueDate,
-        }),
+      await addDoc(collection(getFirebaseDb(), "users", user.uid, "quests"), {
+        title,
+        description: form.description.trim(),
+        category,
+        dueDate: form.dueDate,
+        completed: false,
+        focusMinutes: 0,
+        createdAt: Date.now(),
       });
-
-      if (!response.ok) {
-        throw new Error("Quest creation failed");
-      }
-
-      const savedQuest = (await response.json()) as Quest;
-      setQuests((current) => [savedQuest, ...current]);
       setForm(emptyForm);
       closeSheet();
     } catch {
@@ -184,6 +226,45 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
     } finally {
       setIsCreating(false);
     }
+  }
+
+  async function startSignIn() {
+    setSaveError("");
+
+    try {
+      await signInWithPopup(getFirebaseAuth(), new GoogleAuthProvider());
+    } catch {
+      setSaveError("Google sign-in did not start. Try again.");
+    }
+  }
+
+  async function signOutUser() {
+    try {
+      await signOut(getFirebaseAuth());
+    } catch {
+      setSaveError("Could not sign out. Try again.");
+    }
+  }
+
+  if (user === undefined) {
+    return <main className="authShell">Loading your quests…</main>;
+  }
+
+  if (!user) {
+    return (
+      <main className="authShell">
+        <section className="authCard" aria-labelledby="sign-in-heading">
+          <Image src="/sisyphus.png" alt="Sisyphus carrying a boulder" width={120} height={142} priority />
+          <p className="heroTitle">Todo Quest</p>
+          <h1 id="sign-in-heading">Your quests, wherever you are.</h1>
+          <p>Sign in with Google to keep this account&apos;s quests synced across your devices.</p>
+          {saveError ? <p className="formError" role="alert">{saveError}</p> : null}
+          <button className="signInButton" type="button" onClick={startSignIn}>
+            Continue with Google
+          </button>
+        </section>
+      </main>
+    );
   }
 
   return (
@@ -199,9 +280,9 @@ export default function QuestApp({ initialQuests, today }: QuestAppProps) {
             preload
           />
         </a>
-        <div className="profileButton" aria-label="Local profile">
-          B
-        </div>
+        <button className="profileButton" type="button" onClick={signOutUser} title="Sign out" aria-label="Sign out">
+          {(user.displayName ?? user.email ?? "U").slice(0, 1).toUpperCase()}
+        </button>
       </header>
 
       <div className="content" id="top">

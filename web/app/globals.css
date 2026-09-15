@@ -120,6 +120,49 @@ textarea:focus-visible {
   color: var(--accent-strong);
   font-size: 0.84rem;
   font-weight: 700;
+  cursor: pointer;
+}
+
+.authShell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.authCard {
+  display: grid;
+  width: min(100%, 26rem);
+  justify-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+  text-align: center;
+}
+
+.authCard h1 {
+  margin: 0;
+  font-size: 1.65rem;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.authCard > p:not(.heroTitle):not(.formError) {
+  margin: 0;
+  color: var(--secondary);
+}
+
+.signInButton {
+  width: 100%;
+  min-height: 3rem;
+  border: 0;
+  border-radius: 0.9rem;
+  background: var(--accent);
+  color: #111;
+  cursor: pointer;
+  font-weight: 720;
 }
 
 .content {

@@ -1,4 +1,3 @@
-import { getQuests } from "@/lib/database";
 import QuestApp from "./quest-app";
 
 export const runtime = "nodejs";
@@ -13,7 +12,6 @@ function toISODate(date: Date) {
 
 export default function Home() {
   const today = toISODate(new Date());
-  const initialQuests = getQuests();
 
-  return <QuestApp initialQuests={initialQuests} today={today} />;
+  return <QuestApp today={today} />;
 }
