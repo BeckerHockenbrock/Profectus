@@ -745,9 +745,6 @@ export default function QuestApp({ today }: QuestAppProps) {
     setSelectedQuestId(null);
   }
 
-  const openCount = openQuests.length;
-  const completedCount = completedQuests.length;
-  const totalXP = quests.reduce((total, quest) => total + quest.focusMinutes, 0);
   const groupedQuests = useMemo(() => {
     const categories = Array.from(new Set(quests.map((quest) => quest.category))).sort();
     return categories.map((category) => ({
@@ -1297,21 +1294,6 @@ export default function QuestApp({ today }: QuestAppProps) {
             unoptimized
           />
           <p className="heroTitle">Todo Quest</p>
-        </section>
-
-        <section className="statStrip" aria-label="Daily progress">
-          <div>
-            <span>Completed</span>
-            <strong>{completedCount}</strong>
-          </div>
-          <div>
-            <span>Focus XP</span>
-            <strong>{totalXP}</strong>
-          </div>
-          <div>
-            <span>Categories</span>
-            <strong>{groupedQuests.length}</strong>
-          </div>
         </section>
 
         <section className="questSection" aria-labelledby="quest-heading">
