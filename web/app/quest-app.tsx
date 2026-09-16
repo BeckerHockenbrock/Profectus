@@ -884,9 +884,34 @@ export default function QuestApp({ today }: QuestAppProps) {
             unoptimized
           />
         </a>
-        <button className="profileButton" type="button" onClick={signOutUser} title="Sign out" aria-label="Sign out">
-          {(user.displayName ?? user.email ?? "U").slice(0, 1).toUpperCase()}
-        </button>
+        <div className="topBarActions">
+          <button
+            className="topAddButton"
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            aria-label="Create new quest"
+            title="New quest"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>New quest</span>
+          </button>
+          <button className="profileButton" type="button" onClick={signOutUser} title="Sign out" aria-label="Sign out">
+            {(user.displayName ?? user.email ?? "U").slice(0, 1).toUpperCase()}
+          </button>
+        </div>
       </header>
 
       <div className="content" id="top">
@@ -922,7 +947,19 @@ export default function QuestApp({ today }: QuestAppProps) {
 
         <section className="questSection" aria-labelledby="quest-heading">
           <div className="sectionHeading">
-            <h2 id="quest-heading">Quests</h2>
+            <div className="sectionTitleGroup">
+              <h2 id="quest-heading">Quests</h2>
+              <button
+                type="button"
+                className="sectionAddButton"
+                onClick={() => setSheetOpen(true)}
+                aria-label="Create new quest"
+                title="New quest"
+              >
+                <span aria-hidden="true">+</span>
+                <span>New</span>
+              </button>
+            </div>
 
             <div className="viewSwitch" aria-label="Quest view">
               <button
@@ -990,10 +1027,6 @@ export default function QuestApp({ today }: QuestAppProps) {
         </section>
       </div>
 
-      <button className="addButton" type="button" onClick={() => setSheetOpen(true)}>
-        <span aria-hidden="true">+</span>
-        <span>New quest</span>
-      </button>
 
       <div
         className="sheetLayer"

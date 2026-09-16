@@ -21,10 +21,14 @@ export const metadata: Metadata = {
     title: "Todo Quest",
     statusBarStyle: "black-translucent",
   },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "apple-touch-fullscreen": "yes",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#080b10",
+  themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

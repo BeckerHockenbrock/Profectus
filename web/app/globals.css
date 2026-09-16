@@ -61,7 +61,7 @@ textarea:focus-visible {
 
 .appShell {
   min-height: 100vh;
-  padding-bottom: calc(9.5rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
 }
 
 .topBar {
@@ -73,7 +73,7 @@ textarea:focus-visible {
   justify-content: space-between;
   min-height: calc(4.4rem + env(safe-area-inset-top));
   padding: calc(0.7rem + env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right)) 0.7rem max(1.25rem, env(safe-area-inset-left));
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.96), rgba(0, 0, 0, 0.72));
+  background: linear-gradient(to bottom, #000000 0%, rgba(0, 0, 0, 0.94) 55%, rgba(0, 0, 0, 0.72) 100%);
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
 }
@@ -108,6 +108,44 @@ textarea:focus-visible {
   border-radius: 0.75rem;
   object-fit: contain;
   object-position: center;
+}
+
+.topBarActions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.topAddButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding: 0.42rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: var(--accent-strong);
+  color: #050505;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: transform 100ms ease-out, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.topAddButton:hover {
+  background: #f0f0eb;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+}
+
+.topAddButton:active {
+  transform: scale(0.95);
+}
+
+.topAddButton svg {
+  flex-shrink: 0;
 }
 
 .profileButton {
@@ -296,6 +334,44 @@ p {
 .sectionHeading {
   gap: 1rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.sectionTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.sectionAddButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.68rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--secondary);
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 650;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, transform 100ms ease-out;
+}
+
+.sectionAddButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--accent-strong);
+}
+
+.sectionAddButton:active {
+  transform: scale(0.96);
+}
+
+.sectionAddButton span:first-child {
+  font-size: 0.95rem;
+  line-height: 1;
 }
 
 h2 {
@@ -333,7 +409,6 @@ h2 {
 }
 
 .viewSwitch button:active,
-.addButton:active,
 .completeButton:active,
 .closeButton:active,
 .saveButton:active {
@@ -549,39 +624,6 @@ h2 {
   font-size: 0.72rem;
 }
 
-.addButton {
-  position: fixed;
-  z-index: 25;
-  right: max(1.15rem, env(safe-area-inset-right));
-  bottom: calc(5.2rem + env(safe-area-inset-bottom));
-  display: flex;
-  gap: 0.55rem;
-  min-height: 3.3rem;
-  align-items: center;
-  padding: 0.72rem 1.05rem 0.72rem 0.78rem;
-  border: 1px solid rgba(255, 255, 255, 0.42);
-  border-radius: 999px;
-  background: var(--accent-strong);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
-  color: #050505;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 750;
-  transition: transform 100ms ease-out, box-shadow 180ms ease;
-}
-
-.addButton span:first-child {
-  display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  place-items: center;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.09);
-  font-size: 1.3rem;
-  font-weight: 450;
-  line-height: 1;
-}
-
 .sheetLayer {
   position: fixed;
   z-index: 50;
@@ -730,19 +772,20 @@ textarea:focus {
   .questCard {
     padding: 1.15rem;
   }
-
-  .addButton {
-    right: max(calc((100vw - 48rem) / 2 + 1.5rem), 1.5rem);
-  }
-}
-
-@media (min-width: 52rem) {
-  .addButton {
-    bottom: calc(1.5rem + env(safe-area-inset-bottom));
-  }
 }
 
 @media (max-width: 28rem) {
+  .topAddButton span {
+    display: none;
+  }
+
+  .topAddButton {
+    width: 2.65rem;
+    height: 2.65rem;
+    padding: 0;
+    justify-content: center;
+  }
+
   .content {
     padding-right: max(0.9rem, env(safe-area-inset-right));
     padding-left: max(0.9rem, env(safe-area-inset-left));
