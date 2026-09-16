@@ -435,13 +435,6 @@ export function SchoolView({ userId }: SchoolViewProps) {
     return { currentPeriod: current, nextPeriod: next };
   }, [periods, currentTime]);
 
-  const periodsActiveToday = useMemo(() => {
-    return periods.filter((p) => {
-      const days = p.days && p.days.length > 0 ? p.days : WEEKDAYS;
-      return days.includes(todayDay);
-    });
-  }, [periods, todayDay]);
-
   const handleOpenAdd = () => {
     const nextPeriodNum = periods.length + 1;
     setEditingPeriodId(null);
@@ -744,22 +737,6 @@ export function SchoolView({ userId }: SchoolViewProps) {
             </div>
           </div>
         ) : null}
-
-        {/* Summary metric strip */}
-        <div className="schoolMetricsStrip" aria-label="Schedule summary">
-          <div className="metricItem">
-            <span>Today</span>
-            <strong>{todayDay}</strong>
-          </div>
-          <div className="metricItem">
-            <span>Today&apos;s classes</span>
-            <strong>{periodsActiveToday.length}</strong>
-          </div>
-          <div className="metricItem">
-            <span>Total periods</span>
-            <strong>{periods.length}</strong>
-          </div>
-        </div>
       </section>
 
       {/* Main Period Schedule List */}
