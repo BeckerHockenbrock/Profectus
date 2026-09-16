@@ -1175,7 +1175,7 @@ export default function QuestApp({ today }: QuestAppProps) {
     return (
       <main className="authShell">
         <section className="authCard" aria-labelledby="sign-in-heading">
-          <Image src="/sisyphus.png" alt="Todo Quest zen stone logo" width={120} height={120} priority unoptimized />
+          <Image src="/sisyphus.png" alt="Sisyphus carrying a boulder" width={120} height={142} priority unoptimized />
           <p className="heroTitle">Todo Quest</p>
           <h1 id="sign-in-heading">Your quests, wherever you are.</h1>
           <p>Sign in with Google to keep this account&apos;s quests synced across your devices.</p>
@@ -1276,9 +1276,9 @@ export default function QuestApp({ today }: QuestAppProps) {
           <Image
             className="heroLogo"
             src="/sisyphus.png"
-            alt="Todo Quest zen stone logo"
-            width={512}
-            height={512}
+            alt="Sisyphus carrying a boulder"
+            width={1152}
+            height={1366}
             sizes="(max-width: 48rem) 70vw, 18rem"
             preload
             unoptimized
