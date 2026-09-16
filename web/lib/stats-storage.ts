@@ -12,7 +12,7 @@ import {
   RANK_TIERS,
 } from "./stats-types";
 
-const STATS_STORAGE_KEY_PREFIX = "todo-quest-stats";
+const STATS_STORAGE_KEY_PREFIX = "todo-quest-stats-v2";
 
 export function getCurrentSeasonId(date: Date = new Date()): string {
   const year = date.getFullYear();
@@ -138,17 +138,17 @@ export function calculateAttributeScores(
   quests: Quest[] = [],
   overrides?: Partial<Record<LifeAttribute, number>>,
 ): Record<LifeAttribute, number> {
-  // Balanced default baseline scores mirroring high achiever progress
+  // Baseline scores strictly start at 0 and track actual activity
   const baseScores: Record<LifeAttribute, number> = {
-    physical: 88,
-    social: 82,
-    discipline: 92,
-    mental: 86,
-    intellect: 80,
-    ambition: 90,
+    physical: 0,
+    social: 0,
+    discipline: 0,
+    mental: 0,
+    intellect: 0,
+    ambition: 0,
   };
 
-  // Add contributions from user quests and focus minutes
+  // Tally completed quests and focus minutes per attribute
   const attributeActivity: Record<LifeAttribute, { completed: number; focusMins: number }> = {
     physical: { completed: 0, focusMins: 0 },
     social: { completed: 0, focusMins: 0 },
@@ -172,14 +172,14 @@ export function calculateAttributeScores(
 
   for (const attr of ATTRIBUTE_ORDER) {
     const act = attributeActivity[attr];
-    // Each completed quest gives +1.5 points, every 25 min focus gives +1 point
-    const earnedBonus = Math.round(act.completed * 1.5 + act.focusMins / 25);
-    const score = Math.min(99, Math.max(50, baseScores[attr] + earnedBonus));
+    // Each completed quest gives +5 points, every 10 min focus gives +1 point
+    const earnedBonus = act.completed * 5 + Math.floor(act.focusMins / 10);
+    const score = Math.min(99, Math.max(0, earnedBonus));
     finalScores[attr] = score;
 
-    // Apply manual override if set
+    // Apply manual override if explicitly provided
     if (overrides && typeof overrides[attr] === "number") {
-      finalScores[attr] = Math.min(99, Math.max(10, overrides[attr]!));
+      finalScores[attr] = Math.min(99, Math.max(0, overrides[attr]!));
     }
   }
 
@@ -200,41 +200,22 @@ export function getInitialStatsProfile(quests: Quest[] = []): UserStatsProfile {
   const totalFocus = quests.reduce((sum, q) => sum + (q.focusMinutes || 0), 0);
   const completedCount = quests.filter((q) => q.completed).length;
 
-  // Initial cumulative RR: 1 focus minute = 1 RR, 1 completed quest = 25 RR
-  // Default to a solid starter rank (e.g. Gold / Platinum or computed from user quests)
-  const initialCalculatedRR = Math.max(950, totalFocus + completedCount * 25);
+  // Real tracked baseline: 1 focus minute = 1 XP/RR, 1 completed quest = 25 XP/RR
+  const calculatedRR = totalFocus + completedCount * 25;
+  const calculatedXP = totalFocus + completedCount * 25;
 
   return {
     currentSeasonId,
-    seasonCumulativeRR: initialCalculatedRR,
-    lifetimeXP: Math.max(1850, totalFocus + completedCount * 50),
+    seasonCumulativeRR: calculatedRR,
+    lifetimeXP: calculatedXP,
     monthFocusMinutes: totalFocus,
     monthQuestsCompleted: completedCount,
     lifetimeFocusMinutes: totalFocus,
     lifetimeQuestsCompleted: completedCount,
-    seasonPeakCumulativeRR: initialCalculatedRR,
-    lifetimePeakCumulativeRR: initialCalculatedRR,
-    seasonHistory: [
-      {
-        seasonId: "2026-08",
-        seasonName: "August 2026 Act",
-        finalTier: "diamond",
-        finalDivision: 2,
-        finalRR: 45,
-        peakTier: "diamond",
-        peakDivision: 3,
-        totalSeasonXP: 1680,
-        closedAt: "2026-08-31T23:59:59.000Z",
-      },
-    ],
-    attributeOverrides: {
-      physical: 93,
-      social: 87,
-      discipline: 98,
-      mental: 91,
-      intellect: 84,
-      ambition: 95,
-    },
+    seasonPeakCumulativeRR: calculatedRR,
+    lifetimePeakCumulativeRR: calculatedXP,
+    seasonHistory: [],
+    attributeOverrides: {},
   };
 }
 
@@ -244,6 +225,11 @@ export function loadUserStats(userId?: string | null, quests: Quest[] = []): Use
   }
 
   try {
+    // Purge legacy v1 mock profile if present
+    try {
+      localStorage.removeItem(`todo-quest-stats-${userId || "default"}`);
+    } catch {}
+
     const raw = localStorage.getItem(getStatsStorageKey(userId));
     if (!raw) {
       const initial = getInitialStatsProfile(quests);
@@ -253,7 +239,25 @@ export function loadUserStats(userId?: string | null, quests: Quest[] = []): Use
 
     const parsed: UserStatsProfile = JSON.parse(raw);
     const checked = checkAndApplyMonthlyReset(parsed);
-    return checked;
+
+    // Sync loaded profile with real live quest progression
+    const totalFocus = quests.reduce((sum, q) => sum + (q.focusMinutes || 0), 0);
+    const completedCount = quests.filter((q) => q.completed).length;
+    const questEarnedXP = totalFocus + completedCount * 25;
+
+    const synced: UserStatsProfile = {
+      ...checked,
+      seasonCumulativeRR: Math.max(checked.seasonCumulativeRR, questEarnedXP),
+      lifetimeXP: Math.max(checked.lifetimeXP, questEarnedXP),
+      monthFocusMinutes: Math.max(checked.monthFocusMinutes, totalFocus),
+      lifetimeFocusMinutes: Math.max(checked.lifetimeFocusMinutes, totalFocus),
+      monthQuestsCompleted: Math.max(checked.monthQuestsCompleted, completedCount),
+      lifetimeQuestsCompleted: Math.max(checked.lifetimeQuestsCompleted, completedCount),
+      seasonPeakCumulativeRR: Math.max(checked.seasonPeakCumulativeRR, checked.seasonCumulativeRR, questEarnedXP),
+      lifetimePeakCumulativeRR: Math.max(checked.lifetimePeakCumulativeRR, checked.lifetimeXP, questEarnedXP),
+    };
+
+    return synced;
   } catch (err) {
     console.error("Failed to load user stats profile:", err);
     return getInitialStatsProfile(quests);

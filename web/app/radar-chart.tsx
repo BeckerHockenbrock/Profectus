@@ -52,16 +52,26 @@ export function RadarChart({
   // Data polygon points
   const dataPoints = useMemo(() => {
     return ATTRIBUTE_ORDER.map((attr, i) => {
-      const score = Math.max(10, Math.min(100, scores[attr] ?? 50));
+      const score = Math.max(0, Math.min(100, scores[attr] ?? 0));
       const radius = (score / 100) * RADAR_MAX_RADIUS;
+      const dotRadius = score > 0 ? radius : 8; // Small offset so vertex dot is distinct even at 0
       const a = RADAR_ANGLES[i];
+      const p = getRadarPoint(a, radius);
+      const dotP = getRadarPoint(a, dotRadius);
       return {
         attr,
         score,
-        ...getRadarPoint(a, radius),
+        x: p.x,
+        y: p.y,
+        dotX: dotP.x,
+        dotY: dotP.y,
       };
     });
   }, [scores]);
+
+  const hasAnyScore = useMemo(() => {
+    return dataPoints.some((p) => p.score > 0);
+  }, [dataPoints]);
 
   const dataPolygonString = useMemo(() => {
     return dataPoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
@@ -183,23 +193,27 @@ export function RadarChart({
 
         {/* Data Polygon Fill & Glow Border */}
         <g className="radarDataGroup">
-          {/* Subtle outer glow on the polygon */}
-          <polygon
-            points={dataPolygonString}
-            fill="none"
-            stroke="rgba(255, 255, 255, 0.45)"
-            strokeWidth="3.5"
-            strokeLinejoin="round"
-            filter="url(#neonGlow)"
-          />
-          {/* Main filled polygon */}
-          <polygon
-            points={dataPolygonString}
-            fill="url(#polyFillGrad)"
-            stroke="rgba(255, 255, 255, 0.9)"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
+          {hasAnyScore ? (
+            <>
+              {/* Subtle outer glow on the polygon */}
+              <polygon
+                points={dataPolygonString}
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.45)"
+                strokeWidth="3.5"
+                strokeLinejoin="round"
+                filter="url(#neonGlow)"
+              />
+              {/* Main filled polygon */}
+              <polygon
+                points={dataPolygonString}
+                fill="url(#polyFillGrad)"
+                stroke="rgba(255, 255, 255, 0.9)"
+                strokeWidth="2"
+                strokeLinejoin="round"
+              />
+            </>
+          ) : null}
 
           {/* Vertex Points */}
           {dataPoints.map((pt) => {
@@ -217,8 +231,8 @@ export function RadarChart({
               >
                 {isSelected && (
                   <circle
-                    cx={pt.x}
-                    cy={pt.y}
+                    cx={pt.dotX}
+                    cy={pt.dotY}
                     r="8"
                     fill="none"
                     stroke={meta.color}
@@ -227,8 +241,8 @@ export function RadarChart({
                   />
                 )}
                 <circle
-                  cx={pt.x}
-                  cy={pt.y}
+                  cx={pt.dotX}
+                  cy={pt.dotY}
                   r={isSelected ? "4.5" : "3.5"}
                   fill={meta.color}
                   stroke="#ffffff"

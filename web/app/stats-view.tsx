@@ -58,7 +58,20 @@ export function StatsView({ userId, quests }: StatsViewProps) {
     });
   };
 
-  // Compute live attribute scores
+  // Live quest progression computation
+  const liveQuestStats = useMemo(() => {
+    const focusMins = quests.reduce((sum, q) => sum + (q.focusMinutes || 0), 0);
+    const completedCount = quests.filter((q) => q.completed).length;
+    const earnedXP = focusMins + completedCount * 25;
+    return { focusMins, completedCount, earnedXP };
+  }, [quests]);
+
+  const effectiveLifetimeXP = Math.max(profile.lifetimeXP, liveQuestStats.earnedXP);
+  const effectiveSeasonRR = Math.max(profile.seasonCumulativeRR, liveQuestStats.earnedXP);
+  const effectiveFocusMins = Math.max(profile.lifetimeFocusMinutes, liveQuestStats.focusMins);
+  const effectiveQuestsCompleted = Math.max(profile.lifetimeQuestsCompleted, liveQuestStats.completedCount);
+
+  // Compute live attribute scores strictly from activity
   const attributeScores = useMemo(() => {
     return calculateAttributeScores(quests, profile.attributeOverrides);
   }, [quests, profile.attributeOverrides]);
@@ -69,8 +82,8 @@ export function StatsView({ userId, quests }: StatsViewProps) {
 
   // Compute live rank
   const rank: RankPosition = useMemo(() => {
-    return calculateRankFromRR(profile.seasonCumulativeRR);
-  }, [profile.seasonCumulativeRR]);
+    return calculateRankFromRR(effectiveSeasonRR);
+  }, [effectiveSeasonRR]);
 
   const daysRemaining = useMemo(() => {
     return getDaysRemainingInSeason();
@@ -93,8 +106,10 @@ export function StatsView({ userId, quests }: StatsViewProps) {
   // Manual RR Boost for demonstration / testing grind
   const handleAddFocusBonus = (rrAmount: number) => {
     updateProfile((prev) => {
-      const newSeasonRR = prev.seasonCumulativeRR + rrAmount;
-      const newLifetimeXP = prev.lifetimeXP + rrAmount;
+      const baseSeasonRR = Math.max(prev.seasonCumulativeRR, liveQuestStats.earnedXP);
+      const baseLifetimeXP = Math.max(prev.lifetimeXP, liveQuestStats.earnedXP);
+      const newSeasonRR = baseSeasonRR + rrAmount;
+      const newLifetimeXP = baseLifetimeXP + rrAmount;
       const newPeak = Math.max(prev.seasonPeakCumulativeRR, newSeasonRR);
       const newLifetimePeak = Math.max(prev.lifetimePeakCumulativeRR, newSeasonRR);
       return {
@@ -156,7 +171,7 @@ export function StatsView({ userId, quests }: StatsViewProps) {
         <RadarChart
           scores={attributeScores}
           overallRating={overallRating}
-          totalXP={profile.lifetimeXP}
+          totalXP={effectiveLifetimeXP}
           selectedAttribute={selectedAttr}
           onSelectAttribute={(attr) => setSelectedAttr(attr === selectedAttr ? null : attr)}
         />
@@ -333,18 +348,18 @@ export function StatsView({ userId, quests }: StatsViewProps) {
             <div>
               <span className="rankMetaLabel">Act Peak</span>
               <strong className="rankMetaValue">
-                {calculateRankFromRR(profile.seasonPeakCumulativeRR).label}
+                {calculateRankFromRR(Math.max(profile.seasonPeakCumulativeRR, effectiveSeasonRR)).label}
               </strong>
             </div>
             <div>
               <span className="rankMetaLabel">Lifetime Peak</span>
               <strong className="rankMetaValue">
-                {calculateRankFromRR(profile.lifetimePeakCumulativeRR).label}
+                {calculateRankFromRR(Math.max(profile.lifetimePeakCumulativeRR, effectiveLifetimeXP)).label}
               </strong>
             </div>
             <div>
               <span className="rankMetaLabel">Monthly Focus</span>
-              <strong className="rankMetaValue">{profile.monthFocusMinutes}m</strong>
+              <strong className="rankMetaValue">{effectiveFocusMins}m</strong>
             </div>
           </div>
 
@@ -387,7 +402,7 @@ export function StatsView({ userId, quests }: StatsViewProps) {
           <div className="xpCardHeader">
             <div>
               <span className="xpCardSubtitle">LIFETIME REPUTATION</span>
-              <h3 className="xpCardTitle">{profile.lifetimeXP.toLocaleString()} XP</h3>
+              <h3 className="xpCardTitle">{effectiveLifetimeXP.toLocaleString()} XP</h3>
             </div>
             <button
               type="button"
@@ -402,15 +417,15 @@ export function StatsView({ userId, quests }: StatsViewProps) {
           <div className="xpBreakdownGrid">
             <div className="xpStatBox">
               <span className="xpStatLabel">Act XP</span>
-              <strong className="xpStatNum">{profile.seasonCumulativeRR.toLocaleString()}</strong>
+              <strong className="xpStatNum">{effectiveSeasonRR.toLocaleString()}</strong>
             </div>
             <div className="xpStatBox">
               <span className="xpStatLabel">Focus Time</span>
-              <strong className="xpStatNum">{Math.floor(profile.lifetimeFocusMinutes / 60)}h {profile.lifetimeFocusMinutes % 60}m</strong>
+              <strong className="xpStatNum">{Math.floor(effectiveFocusMins / 60)}h {effectiveFocusMins % 60}m</strong>
             </div>
             <div className="xpStatBox">
               <span className="xpStatLabel">Quests Done</span>
-              <strong className="xpStatNum">{quests.filter((q) => q.completed).length}</strong>
+              <strong className="xpStatNum">{effectiveQuestsCompleted}</strong>
             </div>
           </div>
         </div>
