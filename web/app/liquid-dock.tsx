@@ -59,8 +59,8 @@ export function LiquidDock({
       >
         <svg
           className="dockIcon"
-          width="20"
-          height="20"
+          width="23"
+          height="23"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -92,8 +92,8 @@ export function LiquidDock({
       >
         <svg
           className="dockIcon dockHomeIcon"
-          width="22"
-          height="22"
+          width="25"
+          height="25"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -120,8 +120,8 @@ export function LiquidDock({
       >
         <svg
           className="dockIcon"
-          width="20"
-          height="20"
+          width="23"
+          height="23"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -146,8 +146,8 @@ export function LiquidDock({
       >
         <svg
           className="dockIcon"
-          width="20"
-          height="20"
+          width="23"
+          height="23"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
