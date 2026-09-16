@@ -1,6 +1,16 @@
 "use client";
 
 import { type FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  setDoc,
+  updateDoc,
+  writeBatch,
+} from "firebase/firestore";
+import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase";
 import type { DayOfWeek, Period, PeriodIconId } from "@/lib/school-types";
 import {
   ALL_DAYS,
@@ -13,7 +23,12 @@ import {
   getTodayDayOfWeek,
   timeToMinutes,
 } from "@/lib/school-types";
-import { SAMPLE_PERIODS, loadPeriods, savePeriods } from "@/lib/school-storage";
+import {
+  SAMPLE_PERIODS,
+  loadPeriods,
+  savePeriods,
+  sortPeriodsChronologically,
+} from "@/lib/school-storage";
 import { useSheetSwipe } from "./use-sheet-swipe";
 
 type SchoolViewProps = {
@@ -285,13 +300,88 @@ export function SchoolView({ userId }: SchoolViewProps) {
   const [formError, setFormError] = useState("");
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
-  // Load periods on mount and when userId changes
+  // Load cached periods immediately and subscribe to Firestore when configured
   useEffect(() => {
+    // 1. Immediate local cache load for instant zero-latency UI
     const frame = requestAnimationFrame(() => {
-      setPeriods(loadPeriods(userId));
+      const local = loadPeriods(userId);
+      const initialLocal = local.length > 0 ? local : loadPeriods(null);
+      if (initialLocal.length > 0) {
+        setPeriods(initialLocal);
+      }
       setIsLoaded(true);
     });
-    return () => cancelAnimationFrame(frame);
+
+    // 2. If Firebase is not configured or user is not signed in, keep using local storage
+    if (!isFirebaseConfigured() || !userId) {
+      return () => cancelAnimationFrame(frame);
+    }
+
+    // 3. Listen to Firestore collection users/{userId}/periods
+    let isFirstSnapshot = true;
+    const db = getFirebaseDb();
+    const periodsCol = collection(db, "users", userId, "periods");
+
+    const unsubscribe = onSnapshot(
+      periodsCol,
+      (snapshot) => {
+        // Automatic migration: If Firestore is empty on initial check, upload local periods
+        if (snapshot.empty && isFirstSnapshot) {
+          isFirstSnapshot = false;
+          const cached = loadPeriods(userId);
+          const toMigrate = cached.length > 0 ? cached : loadPeriods(null);
+          if (toMigrate.length > 0) {
+            const batch = writeBatch(db);
+            toMigrate.forEach((p, idx) => {
+              const newRef = doc(periodsCol);
+              batch.set(newRef, {
+                name: p.name,
+                startTime: p.startTime,
+                endTime: p.endTime,
+                room: p.room || "",
+                days: p.days || WEEKDAYS,
+                icon: p.icon || "book",
+                createdAt: Date.now() + idx,
+              });
+            });
+            batch.commit().catch((err) => {
+              console.error("Failed to migrate local periods to Firestore:", err);
+            });
+            return;
+          }
+        }
+        isFirstSnapshot = false;
+
+        const fetched: Period[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            name: String(data.name ?? ""),
+            startTime: String(data.startTime ?? ""),
+            endTime: String(data.endTime ?? ""),
+            room: data.room ? String(data.room) : undefined,
+            days: Array.isArray(data.days) ? (data.days as DayOfWeek[]) : WEEKDAYS,
+            color: data.color ? String(data.color) : undefined,
+            icon: data.icon ? (data.icon as PeriodIconId) : "book",
+          };
+        });
+
+        const sorted = sortPeriodsChronologically(fetched);
+        setPeriods(sorted);
+        savePeriods(sorted, userId);
+        setIsLoaded(true);
+      },
+      (error) => {
+        console.error("Firestore periods subscription error:", error);
+        setPeriods(sortPeriodsChronologically(loadPeriods(userId)));
+        setIsLoaded(true);
+      },
+    );
+
+    return () => {
+      cancelAnimationFrame(frame);
+      unsubscribe();
+    };
   }, [userId]);
 
   // Update live clock every 30 seconds for dynamic period status
@@ -420,35 +510,99 @@ export function SchoolView({ userId }: SchoolViewProps) {
       return;
     }
 
-    if (editingPeriodId) {
-      const updated = periods.map((p) =>
-        p.id === editingPeriodId
-          ? {
-              ...p,
-              name,
-              startTime: form.startTime,
-              endTime: form.endTime,
-              room: form.room.trim() || undefined,
-              days: form.days,
-              icon: form.icon,
-            }
-          : p,
-      );
-      setPeriods(updated);
-      savePeriods(updated, userId);
+    if (isFirebaseConfigured() && userId) {
+      const db = getFirebaseDb();
+      if (editingPeriodId) {
+        const periodRef = doc(db, "users", userId, "periods", editingPeriodId);
+        updateDoc(periodRef, {
+          name,
+          startTime: form.startTime,
+          endTime: form.endTime,
+          room: form.room.trim() || "",
+          days: form.days,
+          icon: form.icon,
+          updatedAt: Date.now(),
+        }).catch((err) => {
+          console.error("Failed to update period in Firestore:", err);
+        });
+
+        const updated = periods.map((p) =>
+          p.id === editingPeriodId
+            ? {
+                ...p,
+                name,
+                startTime: form.startTime,
+                endTime: form.endTime,
+                room: form.room.trim() || undefined,
+                days: form.days,
+                icon: form.icon,
+              }
+            : p,
+        );
+        const sorted = sortPeriodsChronologically(updated);
+        setPeriods(sorted);
+        savePeriods(sorted, userId);
+      } else {
+        const periodsCol = collection(db, "users", userId, "periods");
+        const newRef = doc(periodsCol);
+        const newPeriod: Period = {
+          id: newRef.id,
+          name,
+          startTime: form.startTime,
+          endTime: form.endTime,
+          room: form.room.trim() || undefined,
+          days: form.days,
+          icon: form.icon,
+        };
+
+        setDoc(newRef, {
+          name,
+          startTime: form.startTime,
+          endTime: form.endTime,
+          room: form.room.trim() || "",
+          days: form.days,
+          icon: form.icon,
+          createdAt: Date.now(),
+        }).catch((err) => {
+          console.error("Failed to create period in Firestore:", err);
+        });
+
+        const sorted = sortPeriodsChronologically([...periods, newPeriod]);
+        setPeriods(sorted);
+        savePeriods(sorted, userId);
+      }
     } else {
-      const newPeriod: Period = {
-        id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-        name,
-        startTime: form.startTime,
-        endTime: form.endTime,
-        room: form.room.trim() || undefined,
-        days: form.days,
-        icon: form.icon,
-      };
-      const updated = [...periods, newPeriod];
-      setPeriods(updated);
-      savePeriods(updated, userId);
+      if (editingPeriodId) {
+        const updated = periods.map((p) =>
+          p.id === editingPeriodId
+            ? {
+                ...p,
+                name,
+                startTime: form.startTime,
+                endTime: form.endTime,
+                room: form.room.trim() || undefined,
+                days: form.days,
+                icon: form.icon,
+              }
+            : p,
+        );
+        const sorted = sortPeriodsChronologically(updated);
+        setPeriods(sorted);
+        savePeriods(sorted, userId);
+      } else {
+        const newPeriod: Period = {
+          id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+          name,
+          startTime: form.startTime,
+          endTime: form.endTime,
+          room: form.room.trim() || undefined,
+          days: form.days,
+          icon: form.icon,
+        };
+        const sorted = sortPeriodsChronologically([...periods, newPeriod]);
+        setPeriods(sorted);
+        savePeriods(sorted, userId);
+      }
     }
 
     closeFormSheet();
@@ -462,15 +616,57 @@ export function SchoolView({ userId }: SchoolViewProps) {
     if (selectedPeriodId === id) {
       setSelectedPeriodId(null);
     }
+
+    if (isFirebaseConfigured() && userId) {
+      const db = getFirebaseDb();
+      deleteDoc(doc(db, "users", userId, "periods", id)).catch((err) => {
+        console.error("Failed to delete period from Firestore:", err);
+      });
+    }
   };
 
-  const handleLoadSample = () => {
-    const sampleWithIds: Period[] = SAMPLE_PERIODS.map((sample, idx) => ({
-      ...sample,
-      id: `sample-${Date.now()}-${idx}`,
-    }));
-    setPeriods(sampleWithIds);
-    savePeriods(sampleWithIds, userId);
+  const handleLoadSample = async () => {
+    if (isFirebaseConfigured() && userId) {
+      const db = getFirebaseDb();
+      const batch = writeBatch(db);
+      const periodsCol = collection(db, "users", userId, "periods");
+      const sampleWithIds: Period[] = [];
+
+      SAMPLE_PERIODS.forEach((sample, idx) => {
+        const newRef = doc(periodsCol);
+        batch.set(newRef, {
+          name: sample.name,
+          startTime: sample.startTime,
+          endTime: sample.endTime,
+          room: sample.room || "",
+          days: sample.days || WEEKDAYS,
+          icon: sample.icon || "book",
+          createdAt: Date.now() + idx,
+        });
+        sampleWithIds.push({
+          ...sample,
+          id: newRef.id,
+        });
+      });
+
+      const sorted = sortPeriodsChronologically(sampleWithIds);
+      setPeriods(sorted);
+      savePeriods(sorted, userId);
+
+      try {
+        await batch.commit();
+      } catch (err) {
+        console.error("Failed to load sample periods to Firestore:", err);
+      }
+    } else {
+      const sampleWithIds: Period[] = SAMPLE_PERIODS.map((sample, idx) => ({
+        ...sample,
+        id: `sample-${Date.now()}-${idx}`,
+      }));
+      const sorted = sortPeriodsChronologically(sampleWithIds);
+      setPeriods(sorted);
+      savePeriods(sorted, userId);
+    }
   };
 
   return (

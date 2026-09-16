@@ -54,5 +54,9 @@ service cloud.firestore {
         && isValidQuest(request.resource.data)
         && isValidQuestUpdate();
     }
+
+    match /users/{accountId}/periods/{periodId} {
+      allow read, write: if ownsAccount(accountId);
+    }
   }
 }
