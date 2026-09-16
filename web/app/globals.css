@@ -944,9 +944,10 @@ select {
   border-radius: 0.9rem;
   background: rgba(0, 0, 0, 0.58);
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: 16px;
   letter-spacing: 0;
   box-sizing: border-box;
+  touch-action: manipulation;
   transition: border-color 160ms ease, background-color 160ms ease;
 }
 
@@ -2425,7 +2426,9 @@ select:focus {
   box-sizing: border-box !important;
   padding: 0.72rem 0.4rem !important;
   text-align: center;
+  font-size: 16px !important;
   font-variant-numeric: tabular-nums;
+  touch-action: manipulation;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
