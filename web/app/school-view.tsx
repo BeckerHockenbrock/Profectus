@@ -760,11 +760,12 @@ export function SchoolView({ userId }: SchoolViewProps) {
             </div>
 
             <div className="formTimeGrid">
-              <label>
-                Start time
+              <label className="formTimeField">
+                <span>Start time</span>
                 <input
                   type="time"
                   required
+                  className="formTimeInput"
                   value={form.startTime}
                   onChange={(event) =>
                     setForm({ ...form, startTime: event.target.value })
@@ -772,11 +773,12 @@ export function SchoolView({ userId }: SchoolViewProps) {
                 />
               </label>
 
-              <label>
-                End time
+              <label className="formTimeField">
+                <span>End time</span>
                 <input
                   type="time"
                   required
+                  className="formTimeInput"
                   value={form.endTime}
                   onChange={(event) =>
                     setForm({ ...form, endTime: event.target.value })
