@@ -1,14 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import type { Quest, QuestForm } from "../types/quest";
+import type { Quest, QuestForm, Subtask } from "../types/quest";
 import {
   completeQuestFocusSession,
   createQuestInFirestore,
   deleteQuestInFirestore,
   toggleQuestInFirestore,
   updateQuestInFirestore,
+  updateSubtasksInFirestore,
 } from "../data/quest-firestore";
+
+function createSubtaskId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `st_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
 
 type UseQuestMutationsProps = {
   userId: string | null | undefined;
@@ -81,6 +89,7 @@ export function useQuestMutations({
       description: form.description.trim(),
       category,
       dueDate: form.dueDate,
+      subtasks: form.subtasks ?? quest.subtasks ?? [],
     };
 
     setMutationError("");
@@ -126,6 +135,87 @@ export function useQuestMutations({
     }
   };
 
+  const toggleSubtask = async (questId: string, subtaskId: string) => {
+    const quest = quests.find((current) => current.id === questId);
+    if (!quest || !userId) return;
+
+    const currentSubtasks = quest.subtasks ?? [];
+    const updatedSubtasks = currentSubtasks.map((st) =>
+      st.id === subtaskId ? { ...st, completed: !st.completed } : st
+    );
+
+    setMutationError("");
+    setQuests((current) =>
+      current.map((item) => (item.id === questId ? { ...item, subtasks: updatedSubtasks } : item))
+    );
+
+    try {
+      await updateSubtasksInFirestore(userId, questId, updatedSubtasks);
+    } catch {
+      setQuests((current) =>
+        current.map((item) => (item.id === questId ? quest : item))
+      );
+      setMutationError("That subtask could not be updated. Try again.");
+    }
+  };
+
+  const addSubtask = async (questId: string, title: string) => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || !userId) return false;
+
+    const quest = quests.find((current) => current.id === questId);
+    if (!quest) return false;
+
+    const newSubtask: Subtask = {
+      id: createSubtaskId(),
+      title: trimmedTitle,
+      completed: false,
+    };
+
+    const currentSubtasks = quest.subtasks ?? [];
+    const updatedSubtasks = [...currentSubtasks, newSubtask];
+
+    setMutationError("");
+    setQuests((current) =>
+      current.map((item) => (item.id === questId ? { ...item, subtasks: updatedSubtasks } : item))
+    );
+
+    try {
+      await updateSubtasksInFirestore(userId, questId, updatedSubtasks);
+      return true;
+    } catch {
+      setQuests((current) =>
+        current.map((item) => (item.id === questId ? quest : item))
+      );
+      setMutationError("That subtask could not be added. Try again.");
+      return false;
+    }
+  };
+
+  const deleteSubtask = async (questId: string, subtaskId: string) => {
+    const quest = quests.find((current) => current.id === questId);
+    if (!quest || !userId) return false;
+
+    const currentSubtasks = quest.subtasks ?? [];
+    const updatedSubtasks = currentSubtasks.filter((st) => st.id !== subtaskId);
+
+    setMutationError("");
+    setQuests((current) =>
+      current.map((item) => (item.id === questId ? { ...item, subtasks: updatedSubtasks } : item))
+    );
+
+    try {
+      await updateSubtasksInFirestore(userId, questId, updatedSubtasks);
+      return true;
+    } catch {
+      setQuests((current) =>
+        current.map((item) => (item.id === questId ? quest : item))
+      );
+      setMutationError("That subtask could not be deleted. Try again.");
+      return false;
+    }
+  };
+
   const finishFocusSession = async (questId: string, addedMinutes: number) => {
     if (!userId) {
       throw new Error("Could not save focus session. Please check your connection and retry.");
@@ -154,6 +244,9 @@ export function useQuestMutations({
     createQuest,
     updateQuest,
     deleteQuest,
+    toggleSubtask,
+    addSubtask,
+    deleteSubtask,
     finishFocusSession,
   };
 }

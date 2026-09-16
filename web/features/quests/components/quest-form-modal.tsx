@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { QuestForm } from "../types/quest";
+import type { QuestForm, Subtask } from "../types/quest";
 import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
 import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
 
@@ -29,11 +29,41 @@ export function QuestFormModal({
   onSubmit,
 }: QuestFormModalProps) {
   const [isCreatingNewCategory, setIsCreatingNewCategory] = useState(false);
+  const [newSubtaskInput, setNewSubtaskInput] = useState("");
   useBodyScrollLock(sheetOpen);
 
   const handleClose = () => {
     setIsCreatingNewCategory(false);
+    setNewSubtaskInput("");
     onClose();
+  };
+
+  const handleAddSubtaskToForm = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const title = newSubtaskInput.trim();
+    if (!title) return;
+
+    const newSubtask: Subtask = {
+      id:
+        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `st_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      title,
+      completed: false,
+    };
+
+    setForm((prev) => ({
+      ...prev,
+      subtasks: [...(prev.subtasks ?? []), newSubtask],
+    }));
+    setNewSubtaskInput("");
+  };
+
+  const handleRemoveSubtaskFromForm = (subtaskId: string) => {
+    setForm((prev) => ({
+      ...prev,
+      subtasks: (prev.subtasks ?? []).filter((st) => st.id !== subtaskId),
+    }));
   };
 
   const {
@@ -153,6 +183,57 @@ export function QuestFormModal({
               </select>
             )}
           </label>
+
+          <div className="formSubtasksGroup">
+            <div className="formSubtasksHeader">
+              <span className="formSubtasksLabel">Subtasks</span>
+              <span className="formOptionalBadge">Optional</span>
+            </div>
+
+            {form.subtasks && form.subtasks.length > 0 ? (
+              <ul className="formSubtaskList" role="list">
+                {form.subtasks.map((subtask) => (
+                  <li key={subtask.id} className="formSubtaskItem">
+                    <span className="formSubtaskBullet" aria-hidden="true">•</span>
+                    <span className="formSubtaskTitle">{subtask.title}</span>
+                    <button
+                      type="button"
+                      className="formSubtaskRemoveButton"
+                      onClick={() => handleRemoveSubtaskFromForm(subtask.id)}
+                      aria-label={`Remove subtask "${subtask.title}"`}
+                      title="Remove subtask"
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            <div className="formAddSubtaskRow">
+              <input
+                type="text"
+                value={newSubtaskInput}
+                onChange={(e) => setNewSubtaskInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddSubtaskToForm();
+                  }
+                }}
+                placeholder="Add a subtask…"
+                maxLength={160}
+              />
+              <button
+                type="button"
+                className="formAddSubtaskButton"
+                onClick={() => handleAddSubtaskToForm()}
+                disabled={!newSubtaskInput.trim()}
+              >
+                Add
+              </button>
+            </div>
+          </div>
 
           <label>
             Description <span>Optional</span>

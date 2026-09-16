@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Quest } from "../types/quest";
 import { formatDueDateDetail } from "../domain/date-utils";
 import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
@@ -13,6 +13,9 @@ type TaskDetailModalProps = {
   onEdit: () => void;
   onDelete: () => void | Promise<void>;
   onToggleComplete: (id: string) => void;
+  onToggleSubtask: (subtaskId: string) => void;
+  onAddSubtask: (title: string) => void | Promise<boolean>;
+  onDeleteSubtask: (subtaskId: string) => void | Promise<boolean>;
   onStartFocus: (quest: Quest) => void;
   isUpdating: boolean;
 };
@@ -24,9 +27,14 @@ export function TaskDetailModal({
   onEdit,
   onDelete,
   onToggleComplete,
+  onToggleSubtask,
+  onAddSubtask,
+  onDeleteSubtask,
   onStartFocus,
   isUpdating,
 }: TaskDetailModalProps) {
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+  const [isSubmittingSubtask, setIsSubmittingSubtask] = useState(false);
   const { sheetRef, scrimRef, dragHandleProps } = useSheetSwipe({ onClose });
   useBodyScrollLock(true);
 
@@ -43,7 +51,28 @@ export function TaskDetailModal({
     };
   }, [onClose]);
 
+  const handleAddSubtask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const title = newSubtaskTitle.trim();
+    if (!title || isSubmittingSubtask) return;
+
+    setIsSubmittingSubtask(true);
+    try {
+      await onAddSubtask(title);
+      setNewSubtaskTitle("");
+    } finally {
+      setIsSubmittingSubtask(false);
+    }
+  };
+
   const isDueToday = quest.dueDate === today;
+  const subtasks = quest.subtasks ?? [];
+  const completedSubtasksCount = subtasks.filter((s) => s.completed).length;
+  const totalSubtasksCount = subtasks.length;
+  const progressPercent =
+    totalSubtasksCount > 0
+      ? Math.round((completedSubtasksCount / totalSubtasksCount) * 100)
+      : 0;
 
   return (
     <div
@@ -145,6 +174,91 @@ export function TaskDetailModal({
             ) : (
               <p className="detailDescription isEmpty">No additional notes added for this quest.</p>
             )}
+          </div>
+
+          <div className="detailSection detailSubtasksSection">
+            <div className="detailSubtasksHeader">
+              <h3 className="detailSectionLabel">Subtasks</h3>
+              {totalSubtasksCount > 0 ? (
+                <span className="subtasksProgressText">
+                  {completedSubtasksCount} of {totalSubtasksCount} completed ({progressPercent}%)
+                </span>
+              ) : null}
+            </div>
+
+            {totalSubtasksCount > 0 ? (
+              <div
+                className="subtaskProgressBar"
+                role="progressbar"
+                aria-valuenow={progressPercent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Subtasks completion progress"
+              >
+                <div
+                  className="subtaskProgressFill"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            ) : null}
+
+            {totalSubtasksCount > 0 ? (
+              <ul className="detailSubtaskList" role="list">
+                {subtasks.map((subtask) => (
+                  <li key={subtask.id} className={`detailSubtaskItem${subtask.completed ? " isComplete" : ""}`}>
+                    <button
+                      type="button"
+                      className={`subtaskCheckbox${subtask.completed ? " isChecked" : ""}`}
+                      onClick={() => onToggleSubtask(subtask.id)}
+                      aria-label={subtask.completed ? `Mark "${subtask.title}" as incomplete` : `Mark "${subtask.title}" as complete`}
+                      aria-pressed={subtask.completed}
+                    >
+                      <span className="subtaskCheckIcon" aria-hidden="true">
+                        {subtask.completed ? "✓" : ""}
+                      </span>
+                    </button>
+
+                    <span
+                      className="subtaskTitle"
+                      onClick={() => onToggleSubtask(subtask.id)}
+                    >
+                      {subtask.title}
+                    </span>
+
+                    <button
+                      type="button"
+                      className="subtaskDeleteButton"
+                      onClick={() => onDeleteSubtask(subtask.id)}
+                      aria-label={`Delete subtask "${subtask.title}"`}
+                      title="Delete subtask"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            <form className="detailAddSubtaskForm" onSubmit={handleAddSubtask}>
+              <input
+                type="text"
+                className="detailAddSubtaskInput"
+                placeholder="Add a subtask…"
+                value={newSubtaskTitle}
+                onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                maxLength={160}
+              />
+              <button
+                type="submit"
+                className="detailAddSubtaskButton"
+                disabled={!newSubtaskTitle.trim() || isSubmittingSubtask}
+              >
+                Add
+              </button>
+            </form>
           </div>
 
           <div className="detailFocusCard">

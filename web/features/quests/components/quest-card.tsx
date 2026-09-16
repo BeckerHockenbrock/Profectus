@@ -91,6 +91,32 @@ export function QuestCard({
             <span>{formatDueDate(quest.dueDate, today)}</span>
           </span>
           <span className="categoryPill">{quest.category}</span>
+          {quest.subtasks && quest.subtasks.length > 0 ? (
+            <span
+              className={`subtaskBadge${
+                quest.subtasks.every((s) => s.completed) ? " isAllCompleted" : ""
+              }`}
+              title={`${quest.subtasks.filter((s) => s.completed).length} of ${quest.subtasks.length} subtasks completed`}
+            >
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M9 11l3 3L22 4" />
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+              </svg>
+              <span>
+                {quest.subtasks.filter((s) => s.completed).length}/{quest.subtasks.length}
+              </span>
+            </span>
+          ) : null}
           {quest.focusMinutes > 0 ? (
             <span className="questXPBadge">{quest.focusMinutes}m</span>
           ) : null}

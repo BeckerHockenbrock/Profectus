@@ -29,6 +29,7 @@ const emptyForm: QuestForm = {
   description: "",
   category: "",
   dueDate: "",
+  subtasks: [],
 };
 
 export function AppShell({ today }: AppShellProps) {
@@ -52,6 +53,9 @@ export function AppShell({ today }: AppShellProps) {
     createQuest,
     updateQuest,
     deleteQuest,
+    toggleSubtask,
+    addSubtask,
+    deleteSubtask,
     finishFocusSession,
   } = useQuestMutations({
     userId: user?.uid,
@@ -141,6 +145,7 @@ export function AppShell({ today }: AppShellProps) {
       description: quest.description,
       category: quest.category,
       dueDate: quest.dueDate,
+      subtasks: quest.subtasks ? [...quest.subtasks] : [],
     });
     setSheetOpen(true);
   };
@@ -258,6 +263,9 @@ export function AppShell({ today }: AppShellProps) {
               onEdit={() => openQuestEditor(selectedQuest)}
               onDelete={() => handleDeleteQuest(selectedQuest.id)}
               onToggleComplete={toggleQuest}
+              onToggleSubtask={(subtaskId) => toggleSubtask(selectedQuest.id, subtaskId)}
+              onAddSubtask={(title) => addSubtask(selectedQuest.id, title)}
+              onDeleteSubtask={(subtaskId) => deleteSubtask(selectedQuest.id, subtaskId)}
               onStartFocus={(targetQuest) => {
                 setSelectedQuestId(null);
                 setFocusQuest(targetQuest);

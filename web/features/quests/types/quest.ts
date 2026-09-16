@@ -1,3 +1,9 @@
+export type Subtask = {
+  id: string;
+  title: string;
+  completed: boolean;
+};
+
 export type Quest = {
   id: string;
   title: string;
@@ -7,6 +13,7 @@ export type Quest = {
   completed: boolean;
   focusMinutes: number;
   order?: number;
+  subtasks?: Subtask[];
 };
 
 export type QuestView = "all" | "categories" | "dates";
@@ -17,6 +24,7 @@ export type NewQuestInput = {
   category: string;
   dueDate: string;
   order?: number;
+  subtasks?: Subtask[];
 };
 
 export type QuestForm = {
@@ -24,4 +32,5 @@ export type QuestForm = {
   description: string;
   category: string;
   dueDate: string;
+  subtasks?: Subtask[];
 };

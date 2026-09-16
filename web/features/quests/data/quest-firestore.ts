@@ -11,7 +11,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { getFirebaseDb } from "@/lib/firebase";
-import type { Quest, QuestForm } from "../types/quest";
+import type { Quest, QuestForm, Subtask } from "../types/quest";
 import { saveQuestOrder, sortQuestsByStoredOrder } from "./quest-storage";
 
 export function subscribeQuests(
@@ -39,6 +39,13 @@ export function subscribeQuests(
           completed: Boolean(data.completed),
           focusMinutes: Number(data.focusMinutes ?? 0),
           order: typeof data.order === "number" ? data.order : undefined,
+          subtasks: Array.isArray(data.subtasks)
+            ? data.subtasks.map((s: Record<string, unknown>) => ({
+                id: String(s.id ?? ""),
+                title: String(s.title ?? ""),
+                completed: Boolean(s.completed),
+              }))
+            : [],
         };
       });
 
@@ -72,6 +79,7 @@ export async function createQuestInFirestore(
     focusMinutes: 0,
     order: minOrder - 1,
     createdAt: Date.now(),
+    subtasks: form.subtasks ?? [],
   });
   return docRef.id;
 }
@@ -87,6 +95,18 @@ export async function updateQuestInFirestore(
     description: form.description.trim(),
     category: form.category.trim(),
     dueDate: form.dueDate,
+    subtasks: form.subtasks ?? [],
+  });
+}
+
+export async function updateSubtasksInFirestore(
+  userId: string,
+  questId: string,
+  subtasks: Subtask[],
+): Promise<void> {
+  const database = getFirebaseDb();
+  await updateDoc(doc(database, "users", userId, "quests", questId), {
+    subtasks,
   });
 }
 

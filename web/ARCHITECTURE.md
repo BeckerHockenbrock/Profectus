@@ -108,7 +108,7 @@ The transaction reads and updates `users/{uid}/quests/{questId}`, sets `complete
 ### Quest boundaries
 
 - `use-quest-subscription.ts` owns listener lifecycle and returns the unsubscribe cleanup.
-- `use-quest-mutations.ts` owns optimistic completion, rollback errors, creation, and focus completion.
+- `use-quest-mutations.ts` owns optimistic completion, rollback errors, creation, subtask mutations, and focus completion.
 - `use-quest-reorder.ts` owns the original 200 ms hold threshold, 16 px cancellation threshold, haptics, auto-scroll, transforms, and 180 ms click suppression.
 - `quest-firestore.ts` owns Firestore reads and writes.
 - `quest-storage.ts` exclusively owns the `todo-quest-order-<uid>` localStorage key and ordering fallback.
