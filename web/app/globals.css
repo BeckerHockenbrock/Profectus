@@ -1062,6 +1062,7 @@ select:focus {
   align-items: flex-end;
   justify-content: center;
   animation: fadeInScrim 200ms ease-out;
+  overscroll-behavior: contain;
 }
 
 @keyframes fadeInScrim {
@@ -1084,6 +1085,7 @@ select:focus {
   -webkit-backdrop-filter: blur(32px) saturate(180%);
   box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.6);
   animation: slideUpModal 240ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  overscroll-behavior: contain;
 }
 
 @keyframes slideUpModal {
@@ -1092,15 +1094,62 @@ select:focus {
 }
 
 .detailModalHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 0.85rem;
   touch-action: none !important;
   -webkit-touch-callout: none;
   user-select: none;
   -webkit-user-select: none;
   cursor: grab;
+}
+
+.detailHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.detailModalHeader > .categoryPill {
+  justify-self: center;
+}
+
+.detailIconButton {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--secondary);
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 100ms ease-out;
+}
+
+.detailIconButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: var(--text);
+}
+
+.detailIconButton.isDestructive {
+  color: #ff9d9d;
+}
+
+.detailIconButton.isDestructive:hover {
+  border-color: rgba(255, 110, 110, 0.45);
+  background: rgba(255, 90, 90, 0.12);
+}
+
+.detailIconButton:active {
+  transform: scale(0.92);
+}
+
+.detailIconButton:disabled {
+  cursor: wait;
+  opacity: 0.55;
 }
 
 .detailCloseButton {
@@ -1269,50 +1318,6 @@ select:focus {
   display: grid;
   gap: 0.6rem;
   margin-top: 1.25rem;
-}
-
-.detailEditButton,
-.questDeleteButton {
-  width: 100%;
-  min-height: 3rem;
-  border-radius: 0.95rem;
-  cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 680;
-  transition: background-color 150ms ease, border-color 150ms ease, transform 100ms ease-out;
-}
-
-.detailEditButton {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-}
-
-.detailEditButton:hover {
-  background: rgba(255, 255, 255, 0.13);
-  border-color: rgba(255, 255, 255, 0.34);
-}
-
-.questDeleteButton {
-  border: 1px solid rgba(255, 110, 110, 0.28);
-  background: rgba(255, 90, 90, 0.07);
-  color: #ff9d9d;
-}
-
-.questDeleteButton:hover {
-  border-color: rgba(255, 110, 110, 0.48);
-  background: rgba(255, 90, 90, 0.13);
-}
-
-.detailEditButton:active,
-.questDeleteButton:active {
-  transform: scale(0.97);
-}
-
-.detailEditButton:disabled,
-.questDeleteButton:disabled {
-  cursor: wait;
-  opacity: 0.55;
 }
 
 .detailCompleteToggle {

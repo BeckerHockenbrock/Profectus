@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { QuestForm } from "../types/quest";
+import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
 import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
 
 type QuestFormModalProps = {
@@ -28,6 +29,7 @@ export function QuestFormModal({
   onSubmit,
 }: QuestFormModalProps) {
   const [isCreatingNewCategory, setIsCreatingNewCategory] = useState(false);
+  useBodyScrollLock(sheetOpen);
 
   const handleClose = () => {
     setIsCreatingNewCategory(false);

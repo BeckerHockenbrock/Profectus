@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import type { Quest } from "../types/quest";
 import { formatDueDateDetail } from "../domain/date-utils";
+import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
 import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
 
 type TaskDetailModalProps = {
@@ -27,11 +28,9 @@ export function TaskDetailModal({
   isUpdating,
 }: TaskDetailModalProps) {
   const { sheetRef, scrimRef, dragHandleProps } = useSheetSwipe({ onClose });
+  useBodyScrollLock(true);
 
   useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
@@ -40,7 +39,6 @@ export function TaskDetailModal({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClose]);
@@ -67,6 +65,35 @@ export function TaskDetailModal({
         </div>
 
         <header className="detailModalHeader" {...dragHandleProps}>
+          <div className="detailHeaderLeft">
+            <button
+              type="button"
+              className="detailIconButton"
+              onClick={onEdit}
+              aria-label={`Edit ${quest.title}`}
+              title="Edit quest"
+              disabled={isUpdating}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="detailIconButton isDestructive"
+              onClick={onDelete}
+              aria-label={`Delete ${quest.title}`}
+              title="Delete quest"
+              disabled={isUpdating}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              </svg>
+            </button>
+          </div>
           <span className="categoryPill">{quest.category}</span>
           <button
             type="button"
@@ -148,27 +175,11 @@ export function TaskDetailModal({
         <footer className="detailModalFooter">
           <button
             type="button"
-            className="detailEditButton"
-            onClick={onEdit}
-            disabled={isUpdating}
-          >
-            Edit quest
-          </button>
-          <button
-            type="button"
             className={`detailCompleteToggle${quest.completed ? " isReopen" : ""}`}
             onClick={() => onToggleComplete(quest.id)}
             disabled={isUpdating}
           >
             {quest.completed ? "Reopen Quest" : "Mark Completed"}
-          </button>
-          <button
-            type="button"
-            className="questDeleteButton"
-            onClick={onDelete}
-            disabled={isUpdating}
-          >
-            Delete quest
           </button>
         </footer>
       </section>
