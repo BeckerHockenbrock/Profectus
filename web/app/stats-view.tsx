@@ -66,10 +66,10 @@ export function StatsView({ userId, quests }: StatsViewProps) {
     return { focusMins, completedCount, earnedXP };
   }, [quests]);
 
-  const effectiveLifetimeXP = Math.max(profile.lifetimeXP, liveQuestStats.earnedXP);
-  const effectiveSeasonRR = Math.max(profile.seasonCumulativeRR, liveQuestStats.earnedXP);
-  const effectiveFocusMins = Math.max(profile.lifetimeFocusMinutes, liveQuestStats.focusMins);
-  const effectiveQuestsCompleted = Math.max(profile.lifetimeQuestsCompleted, liveQuestStats.completedCount);
+  const effectiveLifetimeXP = liveQuestStats.earnedXP + (profile.bonusXP || 0);
+  const effectiveSeasonRR = liveQuestStats.earnedXP + (profile.bonusRR || 0);
+  const effectiveFocusMins = liveQuestStats.focusMins + (profile.bonusFocusMins || 0);
+  const effectiveQuestsCompleted = liveQuestStats.completedCount;
 
   // Compute live attribute scores strictly from activity
   const attributeScores = useMemo(() => {
@@ -106,16 +106,18 @@ export function StatsView({ userId, quests }: StatsViewProps) {
   // Manual RR Boost for demonstration / testing grind
   const handleAddFocusBonus = (rrAmount: number) => {
     updateProfile((prev) => {
-      const baseSeasonRR = Math.max(prev.seasonCumulativeRR, liveQuestStats.earnedXP);
-      const baseLifetimeXP = Math.max(prev.lifetimeXP, liveQuestStats.earnedXP);
-      const newSeasonRR = baseSeasonRR + rrAmount;
-      const newLifetimeXP = baseLifetimeXP + rrAmount;
-      const newPeak = Math.max(prev.seasonPeakCumulativeRR, newSeasonRR);
-      const newLifetimePeak = Math.max(prev.lifetimePeakCumulativeRR, newSeasonRR);
+      const newBonusXP = (prev.bonusXP || 0) + rrAmount;
+      const newBonusRR = (prev.bonusRR || 0) + rrAmount;
+      const newTotalXP = liveQuestStats.earnedXP + newBonusXP;
+      const newTotalRR = liveQuestStats.earnedXP + newBonusRR;
+      const newPeak = Math.max(prev.seasonPeakCumulativeRR || 0, newTotalRR);
+      const newLifetimePeak = Math.max(prev.lifetimePeakCumulativeRR || 0, newTotalXP);
       return {
         ...prev,
-        seasonCumulativeRR: newSeasonRR,
-        lifetimeXP: newLifetimeXP,
+        bonusXP: newBonusXP,
+        bonusRR: newBonusRR,
+        seasonCumulativeRR: newTotalRR,
+        lifetimeXP: newTotalXP,
         monthFocusMinutes: prev.monthFocusMinutes + rrAmount,
         lifetimeFocusMinutes: prev.lifetimeFocusMinutes + rrAmount,
         seasonPeakCumulativeRR: newPeak,

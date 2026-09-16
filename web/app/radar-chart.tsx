@@ -54,17 +54,13 @@ export function RadarChart({
     return ATTRIBUTE_ORDER.map((attr, i) => {
       const score = Math.max(0, Math.min(100, scores[attr] ?? 0));
       const radius = (score / 100) * RADAR_MAX_RADIUS;
-      const dotRadius = score > 0 ? radius : 8; // Small offset so vertex dot is distinct even at 0
       const a = RADAR_ANGLES[i];
       const p = getRadarPoint(a, radius);
-      const dotP = getRadarPoint(a, dotRadius);
       return {
         attr,
         score,
         x: p.x,
         y: p.y,
-        dotX: dotP.x,
-        dotY: dotP.y,
       };
     });
   }, [scores]);
@@ -215,8 +211,9 @@ export function RadarChart({
             </>
           ) : null}
 
-          {/* Vertex Points */}
+          {/* Vertex Points (only rendered when an attribute has earned points) */}
           {dataPoints.map((pt) => {
+            if (pt.score <= 0) return null;
             const meta = LIFE_ATTRIBUTES[pt.attr];
             const isSelected = activeAttr === pt.attr;
 
@@ -231,8 +228,8 @@ export function RadarChart({
               >
                 {isSelected && (
                   <circle
-                    cx={pt.dotX}
-                    cy={pt.dotY}
+                    cx={pt.x}
+                    cy={pt.y}
                     r="8"
                     fill="none"
                     stroke={meta.color}
@@ -241,8 +238,8 @@ export function RadarChart({
                   />
                 )}
                 <circle
-                  cx={pt.dotX}
-                  cy={pt.dotY}
+                  cx={pt.x}
+                  cy={pt.y}
                   r={isSelected ? "4.5" : "3.5"}
                   fill={meta.color}
                   stroke="#ffffff"
@@ -273,19 +270,19 @@ export function RadarChart({
           </text>
           <text
             x={RADAR_CENTER}
-            y={RADAR_CENTER + 26}
+            y={RADAR_CENTER + 24}
             textAnchor="middle"
             dominantBaseline="central"
             className="radarCenterOvrLabel"
             fill="#9ca3af"
             style={{
-              fontSize: "10.5px",
+              fontSize: "10px",
               fontWeight: "700",
-              letterSpacing: "0.12em",
+              letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
           >
-            {totalXP > 0 ? `OVR ${totalXP.toLocaleString()}` : "OVR"}
+            OVERALL
           </text>
         </g>
 

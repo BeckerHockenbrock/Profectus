@@ -686,7 +686,7 @@ export default function QuestApp({ today }: QuestAppProps) {
   const firebaseConfigured = isFirebaseConfigured();
   const [quests, setQuests] = useState<Quest[]>([]);
   const [user, setUser] = useState<User | null | undefined>(firebaseConfigured ? undefined : null);
-  const [activeTab, setActiveTab] = useState<"tasks" | "school" | "stats">("tasks");
+  const [activeTab, setActiveTab] = useState<"tasks" | "school" | "stats" | "journal">("tasks");
   const [view, setView] = useState<"all" | "categories">("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<QuestForm>(emptyForm);
@@ -710,9 +710,17 @@ export default function QuestApp({ today }: QuestAppProps) {
   const suppressClickRef = useRef<boolean>(false);
   const questsRef = useRef(quests);
 
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+
+  const openQuests = useMemo(() => quests.filter((quest) => !quest.completed), [quests]);
+  const completedQuests = useMemo(() => quests.filter((quest) => quest.completed), [quests]);
+  const openQuestsRef = useRef(openQuests);
+
   useEffect(() => {
     questsRef.current = quests;
-  }, [quests]);
+    openQuestsRef.current = openQuests;
+  }, [quests, openQuests]);
 
   const {
     sheetRef: newSheetRef,
@@ -736,8 +744,8 @@ export default function QuestApp({ today }: QuestAppProps) {
     setSelectedQuestId(null);
   }
 
-  const openCount = quests.filter((quest) => !quest.completed).length;
-  const completedCount = quests.length - openCount;
+  const openCount = openQuests.length;
+  const completedCount = completedQuests.length;
   const totalXP = quests.reduce((total, quest) => total + quest.focusMinutes, 0);
   const groupedQuests = useMemo(() => {
     const categories = Array.from(new Set(quests.map((quest) => quest.category))).sort();
@@ -876,7 +884,7 @@ export default function QuestApp({ today }: QuestAppProps) {
   );
 
   const startDrag = useCallback((questId: string, clientY: number) => {
-    const index = questsRef.current.findIndex((q) => q.id === questId);
+    const index = openQuestsRef.current.findIndex((q) => q.id === questId);
     if (index === -1) return;
 
     const cardEl = document.querySelector(`[data-quest-id="${questId}"]`) as HTMLElement;
@@ -966,7 +974,7 @@ export default function QuestApp({ today }: QuestAppProps) {
 
       const h = dragItemHeight || 62;
       const slotsMoved = Math.round(deltaY / h);
-      const newTarget = Math.max(0, Math.min(questsRef.current.length - 1, dragStartIndex + slotsMoved));
+      const newTarget = Math.max(0, Math.min(openQuestsRef.current.length - 1, dragStartIndex + slotsMoved));
 
       setTargetDropIndex((prev) => {
         if (prev !== newTarget && typeof navigator !== "undefined" && navigator.vibrate) {
@@ -982,9 +990,11 @@ export default function QuestApp({ today }: QuestAppProps) {
         const to = targetDropIndex;
 
         if (from !== -1 && to !== -1 && from !== to) {
-          const next = [...questsRef.current];
-          const [moved] = next.splice(from, 1);
-          next.splice(to, 0, moved);
+          const nextOpen = [...openQuestsRef.current];
+          const [moved] = nextOpen.splice(from, 1);
+          nextOpen.splice(to, 0, moved);
+          const completedPart = questsRef.current.filter((q) => q.completed);
+          const next = [...nextOpen, ...completedPart];
           setQuests(next);
           saveQuestOrder(next);
         }
@@ -1018,7 +1028,7 @@ export default function QuestApp({ today }: QuestAppProps) {
     if (!draggedId) return 0;
     if (draggedId === questId) return dragDeltaY;
 
-    const index = quests.findIndex((q) => q.id === questId);
+    const index = openQuests.findIndex((q) => q.id === questId);
     if (index === -1) return 0;
 
     const h = dragItemHeight || 62;
@@ -1108,6 +1118,20 @@ export default function QuestApp({ today }: QuestAppProps) {
       setSheetOpen(false);
     }
     setActiveTab("stats");
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  }, [sheetOpen]);
+
+  const handleJournalNavigation = useCallback(() => {
+    if (sheetOpen) {
+      setSheetOpen(false);
+    }
+    setActiveTab("journal");
     const prefersReducedMotion =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1270,6 +1294,10 @@ export default function QuestApp({ today }: QuestAppProps) {
         <div className="content" id="top">
           <StatsView key={user?.uid ?? "anon"} userId={user?.uid} quests={quests} />
         </div>
+      ) : activeTab === "journal" ? (
+        <div className="content" id="top">
+          {/* Journal - intentionally left empty for now */}
+        </div>
       ) : (
         <div className="content" id="top">
           {showHomeScreenHint ? <HomeScreenHint onDismiss={dismissHomeScreenHint} /> : null}
@@ -1341,55 +1369,171 @@ export default function QuestApp({ today }: QuestAppProps) {
           {saveError ? <p className="formError" role="alert">{saveError}</p> : null}
 
           {view === "all" ? (
-            <div className="questList">
-              {quests.length === 0 ? (
-                <p className="emptyState">Your path is clear. Add the first quest when you are ready.</p>
-              ) : (
-                quests.map((quest) => (
-                  <QuestCard
-                    key={quest.id}
-                    quest={quest}
-                    today={today}
-                    onToggle={toggleQuest}
-                    onSelect={(targetQuest) => {
-                      if (suppressClickRef.current) return;
-                      setSelectedQuestId(targetQuest.id);
-                    }}
-                    isUpdating={savingQuestId === quest.id}
-                    isDragging={draggedId === quest.id}
-                    transformY={getCardTransformY(quest.id)}
-                    onPointerDown={handleCardPointerDown}
-                  />
-                ))
-              )}
+            <div className="questListContainer">
+              <div className="questList">
+                {openQuests.length === 0 && completedQuests.length === 0 ? (
+                  <p className="emptyState">Your path is clear. Add the first quest when you are ready.</p>
+                ) : openQuests.length === 0 ? (
+                  <p className="emptyState">All active quests completed! Great work.</p>
+                ) : (
+                  openQuests.map((quest) => (
+                    <QuestCard
+                      key={quest.id}
+                      quest={quest}
+                      today={today}
+                      onToggle={toggleQuest}
+                      onSelect={(targetQuest) => {
+                        if (suppressClickRef.current) return;
+                        setSelectedQuestId(targetQuest.id);
+                      }}
+                      isUpdating={savingQuestId === quest.id}
+                      isDragging={draggedId === quest.id}
+                      transformY={getCardTransformY(quest.id)}
+                      onPointerDown={handleCardPointerDown}
+                    />
+                  ))
+                )}
+              </div>
+
+              {completedQuests.length > 0 ? (
+                <div className="completedSection">
+                  <button
+                    type="button"
+                    className="completedToggle"
+                    onClick={() => setShowCompleted((prev) => !prev)}
+                    aria-expanded={showCompleted}
+                  >
+                    <span>Completed ({completedQuests.length})</span>
+                    <svg
+                      className={`completedChevron ${showCompleted ? "isOpen" : ""}`}
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+
+                  {showCompleted ? (
+                    <div className="questList completedQuestList">
+                      {completedQuests.map((quest) => (
+                        <QuestCard
+                          key={quest.id}
+                          quest={quest}
+                          today={today}
+                          onToggle={toggleQuest}
+                          onSelect={(targetQuest) => {
+                            if (suppressClickRef.current) return;
+                            setSelectedQuestId(targetQuest.id);
+                          }}
+                          isUpdating={savingQuestId === quest.id}
+                          isDragging={false}
+                          transformY={0}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="categoryList">
-              {groupedQuests.map((group) => (
-                <section className="categoryGroup" key={group.category}>
-                  <div className="categoryHeading">
-                    <h3>{group.category}</h3>
-                    <span>{group.quests.length}</span>
-                  </div>
-                  <div className="questList">
-                    {group.quests.map((quest) => (
-                      <QuestCard
-                        key={quest.id}
-                        quest={quest}
-                        today={today}
-                        onToggle={toggleQuest}
-                        onSelect={(targetQuest) => {
-                          if (suppressClickRef.current) return;
-                          setSelectedQuestId(targetQuest.id);
-                        }}
-                        isUpdating={savingQuestId === quest.id}
-                        isDragging={false}
-                        transformY={0}
-                      />
-                    ))}
-                  </div>
-                </section>
-              ))}
+              {groupedQuests.map((group) => {
+                const groupOpen = group.quests.filter((q) => !q.completed);
+                const groupCompleted = group.quests.filter((q) => q.completed);
+                const isGroupExpanded = expandedCategories[group.category] ?? false;
+
+                return (
+                  <section className="categoryGroup" key={group.category}>
+                    <div className="categoryHeading">
+                      <h3>{group.category}</h3>
+                      <span>{groupOpen.length}</span>
+                    </div>
+
+                    <div className="questList">
+                      {groupOpen.length === 0 && groupCompleted.length === 0 ? (
+                        <p className="emptyStateCategory">No quests in this category.</p>
+                      ) : groupOpen.length === 0 ? (
+                        <p className="emptyStateCategory">All quests in this category completed.</p>
+                      ) : (
+                        groupOpen.map((quest) => (
+                          <QuestCard
+                            key={quest.id}
+                            quest={quest}
+                            today={today}
+                            onToggle={toggleQuest}
+                            onSelect={(targetQuest) => {
+                              if (suppressClickRef.current) return;
+                              setSelectedQuestId(targetQuest.id);
+                            }}
+                            isUpdating={savingQuestId === quest.id}
+                            isDragging={false}
+                            transformY={0}
+                          />
+                        ))
+                      )}
+                    </div>
+
+                    {groupCompleted.length > 0 ? (
+                      <div className="completedSection categoryCompletedSection">
+                        <button
+                          type="button"
+                          className="completedToggle"
+                          onClick={() =>
+                            setExpandedCategories((prev) => ({
+                              ...prev,
+                              [group.category]: !prev[group.category],
+                            }))
+                          }
+                          aria-expanded={isGroupExpanded}
+                        >
+                          <span>Completed ({groupCompleted.length})</span>
+                          <svg
+                            className={`completedChevron ${isGroupExpanded ? "isOpen" : ""}`}
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <polyline points="6 9 12 15 18 9" />
+                          </svg>
+                        </button>
+
+                        {isGroupExpanded ? (
+                          <div className="questList completedQuestList">
+                            {groupCompleted.map((quest) => (
+                              <QuestCard
+                                key={quest.id}
+                                quest={quest}
+                                today={today}
+                                onToggle={toggleQuest}
+                                onSelect={(targetQuest) => {
+                                  if (suppressClickRef.current) return;
+                                  setSelectedQuestId(targetQuest.id);
+                                }}
+                                isUpdating={savingQuestId === quest.id}
+                                isDragging={false}
+                                transformY={0}
+                              />
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </section>
+                );
+              })}
             </div>
           )}
         </section>
@@ -1503,6 +1647,7 @@ export default function QuestApp({ today }: QuestAppProps) {
         onNavigateHome={handleHomeNavigation}
         onNavigateSchool={handleSchoolNavigation}
         onNavigateStats={handleStatsNavigation}
+        onNavigateJournal={handleJournalNavigation}
       />
         </main>
       )}

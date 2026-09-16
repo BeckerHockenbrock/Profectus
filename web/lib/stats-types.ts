@@ -218,6 +218,9 @@ export interface UserStatsProfile {
   lifetimePeakCumulativeRR: number;
   seasonHistory: SeasonHistoryItem[];
   attributeOverrides?: Partial<Record<LifeAttribute, number>>;
+  bonusXP?: number;
+  bonusRR?: number;
+  bonusFocusMins?: number;
   lastResetNotice?: {
     seasonId: string;
     previousRank: string;

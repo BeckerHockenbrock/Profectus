@@ -240,21 +240,25 @@ export function loadUserStats(userId?: string | null, quests: Quest[] = []): Use
     const parsed: UserStatsProfile = JSON.parse(raw);
     const checked = checkAndApplyMonthlyReset(parsed);
 
-    // Sync loaded profile with real live quest progression
+    // Sync loaded profile with real live quest progression (XP strictly reflects live tasks)
     const totalFocus = quests.reduce((sum, q) => sum + (q.focusMinutes || 0), 0);
     const completedCount = quests.filter((q) => q.completed).length;
     const questEarnedXP = totalFocus + completedCount * 25;
 
+    const liveXP = questEarnedXP + (checked.bonusXP || 0);
+    const liveRR = questEarnedXP + (checked.bonusRR || 0);
+    const liveFocus = totalFocus + (checked.bonusFocusMins || 0);
+
     const synced: UserStatsProfile = {
       ...checked,
-      seasonCumulativeRR: Math.max(checked.seasonCumulativeRR, questEarnedXP),
-      lifetimeXP: Math.max(checked.lifetimeXP, questEarnedXP),
-      monthFocusMinutes: Math.max(checked.monthFocusMinutes, totalFocus),
-      lifetimeFocusMinutes: Math.max(checked.lifetimeFocusMinutes, totalFocus),
-      monthQuestsCompleted: Math.max(checked.monthQuestsCompleted, completedCount),
-      lifetimeQuestsCompleted: Math.max(checked.lifetimeQuestsCompleted, completedCount),
-      seasonPeakCumulativeRR: Math.max(checked.seasonPeakCumulativeRR, checked.seasonCumulativeRR, questEarnedXP),
-      lifetimePeakCumulativeRR: Math.max(checked.lifetimePeakCumulativeRR, checked.lifetimeXP, questEarnedXP),
+      seasonCumulativeRR: liveRR,
+      lifetimeXP: liveXP,
+      monthFocusMinutes: liveFocus,
+      lifetimeFocusMinutes: liveFocus,
+      monthQuestsCompleted: completedCount,
+      lifetimeQuestsCompleted: completedCount,
+      seasonPeakCumulativeRR: Math.max(checked.seasonPeakCumulativeRR || 0, liveRR),
+      lifetimePeakCumulativeRR: Math.max(checked.lifetimePeakCumulativeRR || 0, liveXP),
     };
 
     return synced;
