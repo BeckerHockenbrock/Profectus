@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 
 type LiquidDockProps = {
-  activeTab?: "tasks" | "school" | "stats";
+  activeTab?: "tasks" | "school" | "stats" | "journal";
   onNavigateHome: () => void;
   onNavigateSchool?: () => void;
   onNavigateStats?: () => void;
+  onNavigateJournal?: () => void;
 };
 
 export function LiquidDock({
@@ -14,6 +15,7 @@ export function LiquidDock({
   onNavigateHome,
   onNavigateSchool,
   onNavigateStats,
+  onNavigateJournal,
 }: LiquidDockProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -134,27 +136,33 @@ export function LiquidDock({
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.8"
+          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <line x1="18" y1="20" x2="18" y2="4" strokeWidth="2.2" strokeLinecap="round" />
-          <line x1="12" y1="20" x2="12" y2="9" strokeWidth="2.2" strokeLinecap="round" />
-          <line x1="6" y1="20" x2="6" y2="14" strokeWidth="2.2" strokeLinecap="round" />
+          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+          <polyline points="16 7 22 7 22 13" />
         </svg>
         {activeTab === "stats" ? (
           <span className="dockItemIndicator" aria-hidden="true" />
         ) : null}
       </button>
 
-      {/* 5. Health icon */}
+      {/* 5. Journal icon */}
       <button
         type="button"
-        className="dockItem"
-        aria-label="Health"
-        title="Health"
-        onClick={() => handlePlaceholderClick("Health")}
+        className={`dockItem ${activeTab === "journal" ? "isActive" : ""}`}
+        aria-label="Journal"
+        title="Journal"
+        aria-current={activeTab === "journal" ? "page" : undefined}
+        onClick={() => {
+          if (onNavigateJournal) {
+            onNavigateJournal();
+          } else {
+            handlePlaceholderClick("Journal");
+          }
+        }}
       >
         <svg
           className="dockIcon"
@@ -168,8 +176,14 @@ export function LiquidDock({
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+          <path d="M12 5l7 7 3-3-7-7-3 3z" />
+          <path d="M18 11l-1.5 7.5L2 22l3.5-14.5L13 6l5 5z" />
+          <path d="M2 22l7.586-7.586" />
+          <circle cx="11" cy="13" r="1.5" />
         </svg>
+        {activeTab === "journal" ? (
+          <span className="dockItemIndicator" aria-hidden="true" />
+        ) : null}
       </button>
     </nav>
   );
