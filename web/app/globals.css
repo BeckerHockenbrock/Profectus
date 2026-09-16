@@ -138,6 +138,14 @@ textarea:focus-visible {
   object-position: center;
 }
 
+.brandName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  line-height: 1;
+}
+
 .topBarActions {
   display: flex;
   align-items: center;

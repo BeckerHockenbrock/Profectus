@@ -1218,7 +1218,7 @@ export default function QuestApp({ today }: QuestAppProps) {
       ) : (
         <main className="appShell">
       <header className="topBar">
-        <a className="brand" href="#top" aria-label="Todo Quest home">
+        <a className="brand" href="#top" aria-label="Altiora home">
           <Image
             className="brandLogo"
             src="/icon-192.png"
@@ -1228,6 +1228,7 @@ export default function QuestApp({ today }: QuestAppProps) {
             preload
             unoptimized
           />
+          <span className="brandName">Altiora</span>
         </a>
         <div className="topBarActions">
           {activeTab === "tasks" ? (
