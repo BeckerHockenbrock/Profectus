@@ -3,10 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 
 type LiquidDockProps = {
+  activeTab?: "tasks" | "school";
   onNavigateHome: () => void;
+  onNavigateSchool?: () => void;
 };
 
-export function LiquidDock({ onNavigateHome }: LiquidDockProps) {
+export function LiquidDock({
+  activeTab = "tasks",
+  onNavigateHome,
+  onNavigateSchool,
+}: LiquidDockProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -39,10 +45,17 @@ export function LiquidDock({ onNavigateHome }: LiquidDockProps) {
       {/* 1. School icon */}
       <button
         type="button"
-        className="dockItem"
+        className={`dockItem ${activeTab === "school" ? "isActive" : ""}`}
         aria-label="School"
-        title="School"
-        onClick={() => handlePlaceholderClick("School")}
+        title="School Schedule"
+        aria-current={activeTab === "school" ? "page" : undefined}
+        onClick={() => {
+          if (onNavigateSchool) {
+            onNavigateSchool();
+          } else {
+            handlePlaceholderClick("School");
+          }
+        }}
       >
         <svg
           className="dockIcon"
@@ -60,6 +73,9 @@ export function LiquidDock({ onNavigateHome }: LiquidDockProps) {
           <path d="M22 10v6" />
           <path d="M6 12.5V16c0 2.21 2.69 4 6 4s6-1.79 6-4v-3.5" />
         </svg>
+        {activeTab === "school" ? (
+          <span className="dockItemIndicator" aria-hidden="true" />
+        ) : null}
       </button>
 
       {/* 2. Deliberately blank spacer position */}
@@ -68,10 +84,10 @@ export function LiquidDock({ onNavigateHome }: LiquidDockProps) {
       {/* 3. Home icon in the center (visually emphasized center control) */}
       <button
         type="button"
-        className="dockHomeButton"
+        className={`dockHomeButton ${activeTab === "tasks" ? "isActive" : ""}`}
         aria-label="Tasks (Home)"
         title="Tasks"
-        aria-current="page"
+        aria-current={activeTab === "tasks" ? "page" : undefined}
         onClick={onNavigateHome}
       >
         <svg
@@ -89,7 +105,9 @@ export function LiquidDock({ onNavigateHome }: LiquidDockProps) {
           <path d="M3 10.5 12 3l9 7.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
           <path d="M9 21v-6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6" />
         </svg>
-        <span className="dockHomeIndicator" aria-hidden="true" />
+        {activeTab === "tasks" ? (
+          <span className="dockHomeIndicator" aria-hidden="true" />
+        ) : null}
       </button>
 
       {/* 4. Stats icon */}

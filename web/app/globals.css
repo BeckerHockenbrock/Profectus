@@ -1247,6 +1247,22 @@ textarea:focus {
   box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
 }
 
+.dockItem.isActive {
+  position: relative;
+  color: var(--accent-strong);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.dockItemIndicator {
+  position: absolute;
+  bottom: 0.32rem;
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+}
+
 .dockIcon {
   flex-shrink: 0;
   display: block;
@@ -1704,6 +1720,587 @@ textarea:focus {
     background: #282a30;
     border-color: rgba(255, 255, 255, 0.3);
   }
+}
+
+/* ==========================================================================
+   School Schedule Page Styles
+   ========================================================================== */
+
+.schoolContent {
+  display: grid;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.schoolHeader {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.schoolHeaderTop {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.schoolSubhead {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.schoolHeading {
+  margin: 0.15rem 0 0;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.schoolAddButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.45rem;
+  padding: 0.42rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: var(--accent-strong);
+  color: #050505;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: transform 100ms ease-out, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.schoolAddButton:hover {
+  background: #f0f0eb;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+}
+
+.schoolAddButton:active {
+  transform: scale(0.95);
+}
+
+.schoolLiveBanner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 1.15rem;
+  border-radius: 1.15rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.schoolLiveBanner.isLive {
+  border: 1px solid rgba(52, 211, 153, 0.38);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 78, 59, 0.2));
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+}
+
+.schoolLiveBanner.isUpcoming {
+  border: 1px solid rgba(251, 191, 36, 0.38);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(120, 53, 15, 0.18));
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.1);
+}
+
+.livePulseDot {
+  flex-shrink: 0;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: #34d399;
+  animation: livePulseAnim 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes livePulseAnim {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(52, 211, 153, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+  }
+}
+
+.upcomingDot {
+  flex-shrink: 0;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: #fbbf24;
+}
+
+.liveBannerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.liveBannerTag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  color: #6ee7b7;
+  text-transform: uppercase;
+}
+
+.upcomingBannerTag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  color: #fcd34d;
+  text-transform: uppercase;
+}
+
+.liveBannerTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.liveBannerMeta {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.schoolMetricsStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1.15rem;
+  background: var(--surface-soft);
+  text-align: center;
+}
+
+.metricItem span {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.metricItem strong {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.schoolPeriodSection {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.schoolSectionTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.schoolSectionTitleRow h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.periodCountBadge {
+  font-size: 0.74rem;
+  font-weight: 650;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+.periodList {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.periodCard {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 1.15rem;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+}
+
+.periodCard:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.periodCard.isPeriodCurrent {
+  border-color: rgba(52, 211, 153, 0.55);
+  box-shadow: 0 0 24px rgba(52, 211, 153, 0.14);
+}
+
+.periodCard.isPeriodNext {
+  border-color: rgba(251, 191, 36, 0.45);
+}
+
+.periodTimeColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.2rem;
+  padding: 0.42rem 0.5rem;
+  border-radius: 0.75rem;
+  background: rgba(0, 0, 0, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.periodTimeStart,
+.periodTimeEnd {
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.periodTimeDivider {
+  display: block;
+  width: 0.75rem;
+  height: 1px;
+  margin: 0.18rem 0;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.periodDurationTag {
+  margin-top: 0.22rem;
+  font-size: 0.64rem;
+  font-weight: 650;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.periodInfoColumn {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+}
+
+.periodTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.periodName {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.42rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statusBadge.inSession {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+}
+
+.statusBadge.upNext {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fcd34d;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+.periodMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.periodRoomTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.45rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.periodDaysList {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+
+.periodDayMiniTag {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 0.25rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.periodDayMiniTag.isActiveDay {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+.periodDayMiniTag.isTodayActive {
+  background: var(--accent-strong);
+  color: #050505;
+  font-weight: 800;
+}
+
+.periodDayMiniTag.isInactiveDay {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.periodActionsColumn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.periodActionBtn {
+  display: grid;
+  place-items: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--secondary);
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.periodActionBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent-strong);
+  transform: translateY(-1px);
+}
+
+.periodActionBtn:active {
+  transform: scale(0.94);
+}
+
+.periodActionBtn.isDelete:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+.formTimeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.daySelectionGroup {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.daySelectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.daySelectionLabel {
+  color: #e4e4de;
+  font-size: 0.76rem;
+  font-weight: 650;
+  letter-spacing: 0.035em;
+}
+
+.dayPresets {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.dayPresetBtn {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--secondary);
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.dayPresetBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.dayPillsRow {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.daySelectPill {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 2.35rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 700;
+  transition: all 120ms ease;
+}
+
+.daySelectPill.isSelected {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: #050505;
+  font-weight: 800;
+}
+
+.schoolEmptyState {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--line);
+  border-radius: 1.5rem;
+  background: var(--surface-soft);
+  gap: 0.85rem;
+}
+
+.emptyIconWrapper {
+  display: grid;
+  place-items: center;
+  width: 4.2rem;
+  height: 4.2rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  color: var(--secondary);
+  margin-bottom: 0.25rem;
+}
+
+.schoolEmptyState h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 750;
+  color: var(--text);
+}
+
+.schoolEmptyState p {
+  margin: 0;
+  max-width: 22rem;
+  font-size: 0.88rem;
+  color: var(--secondary);
+  line-height: 1.45;
+}
+
+.emptyActions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.schoolPrimaryButton {
+  min-height: 2.75rem;
+  padding: 0.55rem 1.25rem;
+  border: 0;
+  border-radius: 0.85rem;
+  background: var(--accent-strong);
+  color: #050505;
+  font-size: 0.85rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 100ms ease, background-color 150ms ease;
+}
+
+.schoolPrimaryButton:hover {
+  background: #f0f0eb;
+  transform: translateY(-1px);
+}
+
+.schoolPrimaryButton:active {
+  transform: scale(0.95);
+}
+
+.schoolSecondaryButton {
+  min-height: 2.75rem;
+  padding: 0.55rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.schoolSecondaryButton:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.schoolSecondaryButton:active {
+  transform: scale(0.95);
 }
 
 @media (prefers-contrast: more) {

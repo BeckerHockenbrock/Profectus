@@ -24,6 +24,7 @@ import {
 import { getFirebaseAuth, getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase";
 import type { Quest } from "@/lib/quest-types";
 import { LiquidDock } from "./liquid-dock";
+import { SchoolView } from "./school-view";
 import { TaskDetailModal } from "./task-detail-modal";
 import { useSheetSwipe } from "./use-sheet-swipe";
 
@@ -684,6 +685,7 @@ export default function QuestApp({ today }: QuestAppProps) {
   const firebaseConfigured = isFirebaseConfigured();
   const [quests, setQuests] = useState<Quest[]>([]);
   const [user, setUser] = useState<User | null | undefined>(firebaseConfigured ? undefined : null);
+  const [activeTab, setActiveTab] = useState<"tasks" | "school">("tasks");
   const [view, setView] = useState<"all" | "categories">("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<QuestForm>(emptyForm);
@@ -1058,6 +1060,9 @@ export default function QuestApp({ today }: QuestAppProps) {
   }
 
   const handleHomeNavigation = useCallback(() => {
+    if (activeTab !== "tasks") {
+      setActiveTab("tasks");
+    }
     if (sheetOpen) {
       setSheetOpen(false);
     }
@@ -1081,7 +1086,21 @@ export default function QuestApp({ today }: QuestAppProps) {
         behavior: prefersReducedMotion ? "auto" : "smooth",
       });
     }
-  }, [sheetOpen, view]);
+  }, [activeTab, sheetOpen, view]);
+
+  const handleSchoolNavigation = useCallback(() => {
+    if (sheetOpen) {
+      setSheetOpen(false);
+    }
+    setActiveTab("school");
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  }, [sheetOpen]);
 
   async function submitQuest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -1196,37 +1215,44 @@ export default function QuestApp({ today }: QuestAppProps) {
           />
         </a>
         <div className="topBarActions">
-          <button
-            className="topAddButton"
-            type="button"
-            onClick={() => setSheetOpen(true)}
-            aria-label="Create new quest"
-            title="New quest"
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+          {activeTab === "tasks" ? (
+            <button
+              className="topAddButton"
+              type="button"
+              onClick={() => setSheetOpen(true)}
+              aria-label="Create new quest"
+              title="New quest"
             >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            <span>New quest</span>
-          </button>
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>New quest</span>
+            </button>
+          ) : null}
           <button className="profileButton" type="button" onClick={signOutUser} title="Sign out" aria-label="Sign out">
             {(user.displayName ?? user.email ?? "U").slice(0, 1).toUpperCase()}
           </button>
         </div>
       </header>
 
-      <div className="content" id="top">
-        {showHomeScreenHint ? <HomeScreenHint onDismiss={dismissHomeScreenHint} /> : null}
+      {activeTab === "school" ? (
+        <div className="content" id="top">
+          <SchoolView userId={user?.uid} />
+        </div>
+      ) : (
+        <div className="content" id="top">
+          {showHomeScreenHint ? <HomeScreenHint onDismiss={dismissHomeScreenHint} /> : null}
         <section className="hero" aria-label="Todo Quest">
           <Image
             className="heroLogo"
@@ -1348,6 +1374,7 @@ export default function QuestApp({ today }: QuestAppProps) {
           )}
         </section>
       </div>
+      )}
 
 
       <div
@@ -1451,7 +1478,11 @@ export default function QuestApp({ today }: QuestAppProps) {
         />
       ) : null}
 
-      <LiquidDock onNavigateHome={handleHomeNavigation} />
+      <LiquidDock
+        activeTab={activeTab}
+        onNavigateHome={handleHomeNavigation}
+        onNavigateSchool={handleSchoolNavigation}
+      />
         </main>
       )}
     </>
