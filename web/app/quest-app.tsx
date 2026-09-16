@@ -19,11 +19,13 @@ import {
   query,
   runTransaction,
   updateDoc,
+  writeBatch,
 } from "firebase/firestore";
 import { getFirebaseAuth, getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase";
 import type { Quest } from "@/lib/quest-types";
 import { LiquidDock } from "./liquid-dock";
 import { TaskDetailModal } from "./task-detail-modal";
+import { useSheetSwipe } from "./use-sheet-swipe";
 
 type QuestAppProps = {
   today: string;
@@ -82,18 +84,32 @@ function QuestCard({
   onToggle,
   onSelect,
   isUpdating,
+  isDragging,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
 }: {
   quest: Quest;
   today: string;
   onToggle: (id: string) => void;
   onSelect: (quest: Quest) => void;
   isUpdating: boolean;
+  isDragging?: boolean;
+  onPointerDown?: (event: React.PointerEvent, questId: string) => void;
+  onPointerMove?: (event: React.PointerEvent) => void;
+  onPointerUp?: () => void;
 }) {
   return (
     <article
       className={`questCard${quest.completed ? " isComplete" : ""}`}
+      data-quest-id={quest.id}
+      data-dragging={isDragging ? "true" : undefined}
       role="button"
       tabIndex={0}
+      onPointerDown={(event) => onPointerDown?.(event, quest.id)}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
       onClick={() => onSelect(quest)}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -101,7 +117,7 @@ function QuestCard({
           onSelect(quest);
         }
       }}
-      aria-label={`${quest.title}, ${quest.completed ? "completed" : "incomplete"}. Click to view details`}
+      aria-label={`${quest.title}, ${quest.completed ? "completed" : "incomplete"}. Hold and drag to reorder, or click to view details`}
     >
       <button
         className="completeButton"
@@ -651,6 +667,24 @@ export default function QuestApp({ today }: QuestAppProps) {
   const [focusQuest, setFocusQuest] = useState<Quest | null>(null);
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
 
+  // Hold-and-drag reordering state
+  const [draggedQuestId, setDraggedQuestId] = useState<string | null>(null);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pointerStartPosRef = useRef<{ x: number; y: number } | null>(null);
+  const isDraggingRef = useRef(false);
+  const suppressClickRef = useRef(false);
+  const questsRef = useRef(quests);
+
+  useEffect(() => {
+    questsRef.current = quests;
+  }, [quests]);
+
+  const {
+    sheetRef: newSheetRef,
+    scrimRef: newSheetScrimRef,
+    dragHandleProps: newSheetDragHandleProps,
+  } = useSheetSwipe({ onClose: closeSheet });
+
   function handleFocusFinished(questId: string, addedMinutes: number) {
     setQuests((current) =>
       current.map((item) =>
@@ -709,20 +743,49 @@ export default function QuestApp({ today }: QuestAppProps) {
       stopQuestSync = onSnapshot(
         questQuery,
         (snapshot) => {
-          setQuests(
-            snapshot.docs.map((quest) => {
-              const data = quest.data();
-              return {
-                id: quest.id,
-                title: String(data.title ?? ""),
-                description: String(data.description ?? ""),
-                category: String(data.category ?? "General"),
-                dueDate: String(data.dueDate ?? ""),
-                completed: Boolean(data.completed),
-                focusMinutes: Number(data.focusMinutes ?? 0),
-              };
-            }),
-          );
+          const fetched = snapshot.docs.map((quest) => {
+            const data = quest.data();
+            return {
+              id: quest.id,
+              title: String(data.title ?? ""),
+              description: String(data.description ?? ""),
+              category: String(data.category ?? "General"),
+              dueDate: String(data.dueDate ?? ""),
+              completed: Boolean(data.completed),
+              focusMinutes: Number(data.focusMinutes ?? 0),
+              order: typeof data.order === "number" ? data.order : undefined,
+            };
+          });
+
+          try {
+            const cachedOrderJson = localStorage.getItem(`todo-quest-order-${nextUser.uid}`);
+            if (cachedOrderJson) {
+              const orderMap = new Map<string, number>(
+                (JSON.parse(cachedOrderJson) as string[]).map((id, index) => [id, index]),
+              );
+              fetched.sort((a, b) => {
+                const orderA = a.order ?? orderMap.get(a.id);
+                const orderB = b.order ?? orderMap.get(b.id);
+                if (typeof orderA === "number" && typeof orderB === "number") {
+                  return orderA - orderB;
+                }
+                if (typeof orderA === "number") return -1;
+                if (typeof orderB === "number") return 1;
+                return 0;
+              });
+            } else {
+              fetched.sort((a, b) => {
+                if (typeof a.order === "number" && typeof b.order === "number") {
+                  return a.order - b.order;
+                }
+                if (typeof a.order === "number") return -1;
+                if (typeof a.order === "number") return 1;
+                return 0;
+              });
+            }
+          } catch {}
+
+          setQuests(fetched);
         },
         () => setSaveError("Your quests could not be loaded. Try refreshing."),
       );
@@ -750,6 +813,133 @@ export default function QuestApp({ today }: QuestAppProps) {
     localStorage.setItem("todo-quest-home-screen-hint-dismissed", "true");
     setShowHomeScreenHint(false);
   }
+
+  const saveQuestOrder = useCallback(
+    async (reorderedQuests: Quest[]) => {
+      if (!user) return;
+
+      try {
+        localStorage.setItem(
+          `todo-quest-order-${user.uid}`,
+          JSON.stringify(reorderedQuests.map((q) => q.id)),
+        );
+      } catch {}
+
+      try {
+        const database = getFirebaseDb();
+        const batch = writeBatch(database);
+        reorderedQuests.forEach((quest, index) => {
+          const questRef = doc(database, "users", user.uid, "quests", quest.id);
+          batch.update(questRef, { order: index });
+        });
+        await batch.commit();
+      } catch (err) {
+        console.warn("Could not persist quest order to Firestore", err);
+      }
+    },
+    [user],
+  );
+
+  const handleCardPointerDown = useCallback((event: React.PointerEvent, questId: string) => {
+    if (event.button !== 0) return;
+    if ((event.target as HTMLElement).closest(".completeButton")) return;
+
+    pointerStartPosRef.current = { x: event.clientX, y: event.clientY };
+    isDraggingRef.current = false;
+
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+    }
+
+    holdTimerRef.current = setTimeout(() => {
+      isDraggingRef.current = true;
+      setDraggedQuestId(questId);
+      suppressClickRef.current = true;
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(15);
+      }
+      document.body.style.userSelect = "none";
+    }, 220);
+  }, []);
+
+  const handleCardPointerMove = useCallback((event: React.PointerEvent) => {
+    if (!pointerStartPosRef.current) return;
+
+    if (!isDraggingRef.current) {
+      const dx = event.clientX - pointerStartPosRef.current.x;
+      const dy = event.clientY - pointerStartPosRef.current.y;
+      if (Math.hypot(dx, dy) > 8) {
+        if (holdTimerRef.current) {
+          clearTimeout(holdTimerRef.current);
+          holdTimerRef.current = null;
+        }
+      }
+    }
+  }, []);
+
+  const handleCardPointerUp = useCallback(() => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    pointerStartPosRef.current = null;
+  }, []);
+
+  // Global window listeners while dragging
+  useEffect(() => {
+    if (!draggedQuestId) return;
+
+    const onPointerMove = (e: PointerEvent) => {
+      // Auto-scroll near viewport edges
+      if (e.clientY < 110) {
+        window.scrollBy({ top: -7, behavior: "auto" });
+      } else if (e.clientY > window.innerHeight - 110) {
+        window.scrollBy({ top: 7, behavior: "auto" });
+      }
+
+      // Find element under pointer
+      const element = document.elementFromPoint(e.clientX, e.clientY);
+      const targetCard = element?.closest<HTMLElement>("[data-quest-id]");
+      const targetId = targetCard?.getAttribute("data-quest-id");
+
+      if (targetId && targetId !== draggedQuestId) {
+        setQuests((current) => {
+          const fromIndex = current.findIndex((q) => q.id === draggedQuestId);
+          const toIndex = current.findIndex((q) => q.id === targetId);
+          if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
+            return current;
+          }
+          const next = [...current];
+          const [movedItem] = next.splice(fromIndex, 1);
+          next.splice(toIndex, 0, movedItem);
+          return next;
+        });
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          navigator.vibrate(8);
+        }
+      }
+    };
+
+    const onPointerUp = () => {
+      setDraggedQuestId(null);
+      isDraggingRef.current = false;
+      document.body.style.userSelect = "";
+      saveQuestOrder(questsRef.current);
+      setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 160);
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+    };
+  }, [draggedQuestId, saveQuestOrder]);
 
   async function toggleQuest(id: string) {
     const quest = quests.find((current) => current.id === id);
@@ -815,6 +1005,7 @@ export default function QuestApp({ today }: QuestAppProps) {
     setIsCreating(true);
 
     try {
+      const minOrder = quests.reduce((min, q) => Math.min(min, q.order ?? 0), 0);
       await addDoc(collection(getFirebaseDb(), "users", user.uid, "quests"), {
         title,
         description: form.description.trim(),
@@ -822,6 +1013,7 @@ export default function QuestApp({ today }: QuestAppProps) {
         dueDate: form.dueDate,
         completed: false,
         focusMinutes: 0,
+        order: minOrder - 1,
         createdAt: Date.now(),
       });
       setForm(emptyForm);
@@ -1023,8 +1215,15 @@ export default function QuestApp({ today }: QuestAppProps) {
                     quest={quest}
                     today={today}
                     onToggle={toggleQuest}
-                    onSelect={(targetQuest) => setSelectedQuestId(targetQuest.id)}
+                    onSelect={(targetQuest) => {
+                      if (suppressClickRef.current) return;
+                      setSelectedQuestId(targetQuest.id);
+                    }}
                     isUpdating={savingQuestId === quest.id}
+                    isDragging={draggedQuestId === quest.id}
+                    onPointerDown={handleCardPointerDown}
+                    onPointerMove={handleCardPointerMove}
+                    onPointerUp={handleCardPointerUp}
                   />
                 ))
               )}
@@ -1044,8 +1243,15 @@ export default function QuestApp({ today }: QuestAppProps) {
                         quest={quest}
                         today={today}
                         onToggle={toggleQuest}
-                        onSelect={(targetQuest) => setSelectedQuestId(targetQuest.id)}
+                        onSelect={(targetQuest) => {
+                          if (suppressClickRef.current) return;
+                          setSelectedQuestId(targetQuest.id);
+                        }}
                         isUpdating={savingQuestId === quest.id}
+                        isDragging={draggedQuestId === quest.id}
+                        onPointerDown={handleCardPointerDown}
+                        onPointerMove={handleCardPointerMove}
+                        onPointerUp={handleCardPointerUp}
                       />
                     ))}
                   </div>
@@ -1066,10 +1272,24 @@ export default function QuestApp({ today }: QuestAppProps) {
           if (event.key === "Escape") closeSheet();
         }}
       >
-        <button className="sheetScrim" type="button" aria-label="Close new quest form" onClick={closeSheet} />
-        <section className="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-          <div className="sheetHandle" aria-hidden="true" />
-          <div className="sheetHeading">
+        <button
+          ref={newSheetScrimRef as React.RefObject<HTMLButtonElement>}
+          className="sheetScrim"
+          type="button"
+          aria-label="Close new quest form"
+          onClick={closeSheet}
+        />
+        <section
+          ref={newSheetRef as React.RefObject<HTMLElement>}
+          className="sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sheet-title"
+        >
+          <div className="sheetHandleArea" {...newSheetDragHandleProps}>
+            <div className="sheetHandle" aria-hidden="true" />
+          </div>
+          <div className="sheetHeading" {...newSheetDragHandleProps}>
             <div>
               <h2 id="sheet-title">New quest</h2>
             </div>

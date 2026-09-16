@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import type { Quest } from "@/lib/quest-types";
+import { useSheetSwipe } from "./use-sheet-swipe";
 
 type TaskDetailModalProps = {
   quest: Quest;
@@ -40,6 +41,8 @@ export function TaskDetailModal({
   onStartFocus,
   isUpdating,
 }: TaskDetailModalProps) {
+  const { sheetRef, scrimRef, dragHandleProps } = useSheetSwipe({ onClose });
+
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -61,6 +64,7 @@ export function TaskDetailModal({
 
   return (
     <div
+      ref={scrimRef as React.RefObject<HTMLDivElement>}
       className="detailModalScrim"
       role="dialog"
       aria-modal="true"
@@ -69,10 +73,15 @@ export function TaskDetailModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <section className="detailModalSheet">
-        <div className="sheetHandle" aria-hidden="true" />
+      <section
+        ref={sheetRef as React.RefObject<HTMLElement>}
+        className="detailModalSheet"
+      >
+        <div className="sheetHandleArea" {...dragHandleProps}>
+          <div className="sheetHandle" aria-hidden="true" />
+        </div>
 
-        <header className="detailModalHeader">
+        <header className="detailModalHeader" {...dragHandleProps}>
           <span className="categoryPill">{quest.category}</span>
           <button
             type="button"

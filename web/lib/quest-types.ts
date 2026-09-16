@@ -6,6 +6,7 @@ export type Quest = {
   dueDate: string;
   completed: boolean;
   focusMinutes: number;
+  order?: number;
 };
 
 export type NewQuestInput = {
@@ -13,4 +14,5 @@ export type NewQuestInput = {
   description: string;
   category: string;
   dueDate: string;
+  order?: number;
 };
