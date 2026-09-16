@@ -3,15 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 
 type LiquidDockProps = {
-  activeTab?: "tasks" | "school";
+  activeTab?: "tasks" | "school" | "stats";
   onNavigateHome: () => void;
   onNavigateSchool?: () => void;
+  onNavigateStats?: () => void;
 };
 
 export function LiquidDock({
   activeTab = "tasks",
   onNavigateHome,
   onNavigateSchool,
+  onNavigateStats,
 }: LiquidDockProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -113,10 +115,17 @@ export function LiquidDock({
       {/* 4. Stats icon */}
       <button
         type="button"
-        className="dockItem"
+        className={`dockItem ${activeTab === "stats" ? "isActive" : ""}`}
         aria-label="Stats"
-        title="Stats"
-        onClick={() => handlePlaceholderClick("Stats")}
+        title="Progress & Stats"
+        aria-current={activeTab === "stats" ? "page" : undefined}
+        onClick={() => {
+          if (onNavigateStats) {
+            onNavigateStats();
+          } else {
+            handlePlaceholderClick("Stats");
+          }
+        }}
       >
         <svg
           className="dockIcon"
@@ -134,6 +143,9 @@ export function LiquidDock({
           <line x1="12" y1="20" x2="12" y2="9" strokeWidth="2.2" strokeLinecap="round" />
           <line x1="6" y1="20" x2="6" y2="14" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
+        {activeTab === "stats" ? (
+          <span className="dockItemIndicator" aria-hidden="true" />
+        ) : null}
       </button>
 
       {/* 5. Health icon */}

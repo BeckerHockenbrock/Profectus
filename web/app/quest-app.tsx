@@ -25,6 +25,7 @@ import { getFirebaseAuth, getFirebaseDb, isFirebaseConfigured } from "@/lib/fire
 import type { Quest } from "@/lib/quest-types";
 import { LiquidDock } from "./liquid-dock";
 import { SchoolView } from "./school-view";
+import { StatsView } from "./stats-view";
 import { TaskDetailModal } from "./task-detail-modal";
 import { useSheetSwipe } from "./use-sheet-swipe";
 
@@ -685,7 +686,7 @@ export default function QuestApp({ today }: QuestAppProps) {
   const firebaseConfigured = isFirebaseConfigured();
   const [quests, setQuests] = useState<Quest[]>([]);
   const [user, setUser] = useState<User | null | undefined>(firebaseConfigured ? undefined : null);
-  const [activeTab, setActiveTab] = useState<"tasks" | "school">("tasks");
+  const [activeTab, setActiveTab] = useState<"tasks" | "school" | "stats">("tasks");
   const [view, setView] = useState<"all" | "categories">("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<QuestForm>(emptyForm);
@@ -1102,6 +1103,20 @@ export default function QuestApp({ today }: QuestAppProps) {
     });
   }, [sheetOpen]);
 
+  const handleStatsNavigation = useCallback(() => {
+    if (sheetOpen) {
+      setSheetOpen(false);
+    }
+    setActiveTab("stats");
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  }, [sheetOpen]);
+
   async function submitQuest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -1249,6 +1264,10 @@ export default function QuestApp({ today }: QuestAppProps) {
       {activeTab === "school" ? (
         <div className="content" id="top">
           <SchoolView userId={user?.uid} />
+        </div>
+      ) : activeTab === "stats" ? (
+        <div className="content" id="top">
+          <StatsView key={user?.uid ?? "anon"} userId={user?.uid} quests={quests} />
         </div>
       ) : (
         <div className="content" id="top">
@@ -1482,6 +1501,7 @@ export default function QuestApp({ today }: QuestAppProps) {
         activeTab={activeTab}
         onNavigateHome={handleHomeNavigation}
         onNavigateSchool={handleSchoolNavigation}
+        onNavigateStats={handleStatsNavigation}
       />
         </main>
       )}
