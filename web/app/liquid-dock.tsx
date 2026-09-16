@@ -3,11 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 type LiquidDockProps = {
-  activeTab?: "tasks" | "school" | "stats" | "journal";
+  activeTab?: "tasks" | "school" | "stats";
   onNavigateHome: () => void;
   onNavigateSchool?: () => void;
   onNavigateStats?: () => void;
-  onNavigateJournal?: () => void;
 };
 
 export function LiquidDock({
@@ -15,7 +14,6 @@ export function LiquidDock({
   onNavigateHome,
   onNavigateSchool,
   onNavigateStats,
-  onNavigateJournal,
 }: LiquidDockProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -82,8 +80,32 @@ export function LiquidDock({
         ) : null}
       </button>
 
-      {/* 2. Deliberately blank spacer position */}
-      <div className="dockSpacer" aria-hidden="true" />
+      {/* 2. Journal icon */}
+      <button
+        type="button"
+        className="dockItem"
+        aria-label="Journal"
+        title="Journal"
+        onClick={() => handlePlaceholderClick("Journal")}
+      >
+        <svg
+          className="dockIcon"
+          width="23"
+          height="23"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 5l7 7 3-3-7-7-3 3z" />
+          <path d="M18 11l-1.5 7.5L2 22l3.5-14.5L13 6l5 5z" />
+          <path d="M2 22l7.586-7.586" />
+          <circle cx="11" cy="13" r="1.5" />
+        </svg>
+      </button>
 
       {/* 3. Home icon in the center (visually emphasized center control) */}
       <button
@@ -149,20 +171,13 @@ export function LiquidDock({
         ) : null}
       </button>
 
-      {/* 5. Journal icon */}
+      {/* 5. Health icon */}
       <button
         type="button"
-        className={`dockItem ${activeTab === "journal" ? "isActive" : ""}`}
-        aria-label="Journal"
-        title="Journal"
-        aria-current={activeTab === "journal" ? "page" : undefined}
-        onClick={() => {
-          if (onNavigateJournal) {
-            onNavigateJournal();
-          } else {
-            handlePlaceholderClick("Journal");
-          }
-        }}
+        className="dockItem"
+        aria-label="Health"
+        title="Health"
+        onClick={() => handlePlaceholderClick("Health")}
       >
         <svg
           className="dockIcon"
@@ -176,14 +191,8 @@ export function LiquidDock({
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <path d="M12 5l7 7 3-3-7-7-3 3z" />
-          <path d="M18 11l-1.5 7.5L2 22l3.5-14.5L13 6l5 5z" />
-          <path d="M2 22l7.586-7.586" />
-          <circle cx="11" cy="13" r="1.5" />
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
         </svg>
-        {activeTab === "journal" ? (
-          <span className="dockItemIndicator" aria-hidden="true" />
-        ) : null}
       </button>
     </nav>
   );
