@@ -85,9 +85,8 @@ function QuestCard({
   onSelect,
   isUpdating,
   isDragging,
+  transformY,
   onPointerDown,
-  onPointerMove,
-  onPointerUp,
 }: {
   quest: Quest;
   today: string;
@@ -95,21 +94,26 @@ function QuestCard({
   onSelect: (quest: Quest) => void;
   isUpdating: boolean;
   isDragging?: boolean;
-  onPointerDown?: (event: React.PointerEvent, questId: string) => void;
-  onPointerMove?: (event: React.PointerEvent) => void;
-  onPointerUp?: () => void;
+  transformY?: number;
+  onPointerDown?: (event: React.PointerEvent, questId: string, isHandle?: boolean) => void;
 }) {
   return (
     <article
       className={`questCard${quest.completed ? " isComplete" : ""}`}
       data-quest-id={quest.id}
       data-dragging={isDragging ? "true" : undefined}
+      style={{
+        transform: isDragging
+          ? `translateY(${transformY ?? 0}px) scale(1.025)`
+          : transformY && transformY !== 0
+            ? `translateY(${transformY}px)`
+            : undefined,
+        zIndex: isDragging ? 80 : undefined,
+        transition: isDragging ? "none" : "transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1)",
+      }}
       role="button"
       tabIndex={0}
-      onPointerDown={(event) => onPointerDown?.(event, quest.id)}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
+      onPointerDown={(event) => onPointerDown?.(event, quest.id, false)}
       onClick={() => onSelect(quest)}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -117,7 +121,7 @@ function QuestCard({
           onSelect(quest);
         }
       }}
-      aria-label={`${quest.title}, ${quest.completed ? "completed" : "incomplete"}. Hold and drag to reorder, or click to view details`}
+      aria-label={`${quest.title}, ${quest.completed ? "completed" : "incomplete"}. Hold or drag grip to reorder, or click to view details`}
     >
       <button
         className="completeButton"
@@ -165,11 +169,34 @@ function QuestCard({
         </div>
       </div>
 
-      <span className="questCardChevron" aria-hidden="true">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
-      </span>
+      <div className="questCardActionsRow">
+        {onPointerDown ? (
+          <span
+            className="dragGripHandle"
+            aria-label="Drag to reorder"
+            title="Drag to reorder"
+            onPointerDown={(event) => {
+              event.stopPropagation();
+              onPointerDown?.(event, quest.id, true);
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="9" cy="5" r="1.75" />
+              <circle cx="15" cy="5" r="1.75" />
+              <circle cx="9" cy="12" r="1.75" />
+              <circle cx="15" cy="12" r="1.75" />
+              <circle cx="9" cy="19" r="1.75" />
+              <circle cx="15" cy="19" r="1.75" />
+            </svg>
+          </span>
+        ) : null}
+
+        <span className="questCardChevron" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </span>
+      </div>
     </article>
   );
 }
@@ -668,11 +695,16 @@ export default function QuestApp({ today }: QuestAppProps) {
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
 
   // Hold-and-drag reordering state
-  const [draggedQuestId, setDraggedQuestId] = useState<string | null>(null);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragStartIndex, setDragStartIndex] = useState<number>(-1);
+  const [targetDropIndex, setTargetDropIndex] = useState<number>(-1);
+  const [dragDeltaY, setDragDeltaY] = useState<number>(0);
+  const [dragItemHeight, setDragItemHeight] = useState<number>(62);
+
+  const startPointerYRef = useRef<number>(0);
+  const isDraggingRef = useRef<boolean>(false);
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pointerStartPosRef = useRef<{ x: number; y: number } | null>(null);
-  const isDraggingRef = useRef(false);
-  const suppressClickRef = useRef(false);
+  const suppressClickRef = useRef<boolean>(false);
   const questsRef = useRef(quests);
 
   useEffect(() => {
@@ -840,97 +872,135 @@ export default function QuestApp({ today }: QuestAppProps) {
     [user],
   );
 
-  const handleCardPointerDown = useCallback((event: React.PointerEvent, questId: string) => {
-    if (event.button !== 0) return;
-    if ((event.target as HTMLElement).closest(".completeButton")) return;
+  const startDrag = useCallback((questId: string, clientY: number) => {
+    const index = questsRef.current.findIndex((q) => q.id === questId);
+    if (index === -1) return;
 
-    pointerStartPosRef.current = { x: event.clientX, y: event.clientY };
-    isDraggingRef.current = false;
-
-    if (holdTimerRef.current) {
-      clearTimeout(holdTimerRef.current);
+    const cardEl = document.querySelector(`[data-quest-id="${questId}"]`) as HTMLElement;
+    if (cardEl) {
+      const rect = cardEl.getBoundingClientRect();
+      const parentEl = cardEl.parentElement;
+      const rowGap = parentEl ? parseFloat(window.getComputedStyle(parentEl).rowGap || "7") || 7 : 7;
+      setDragItemHeight(rect.height + rowGap);
     }
 
-    holdTimerRef.current = setTimeout(() => {
-      isDraggingRef.current = true;
-      setDraggedQuestId(questId);
-      suppressClickRef.current = true;
-      if (typeof navigator !== "undefined" && navigator.vibrate) {
-        navigator.vibrate(15);
-      }
-      document.body.style.userSelect = "none";
-    }, 220);
+    startPointerYRef.current = clientY;
+    isDraggingRef.current = true;
+    setDraggedId(questId);
+    setDragStartIndex(index);
+    setTargetDropIndex(index);
+    setDragDeltaY(0);
+    suppressClickRef.current = true;
+
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(18);
+    }
+    document.body.style.userSelect = "none";
+    document.body.style.touchAction = "none";
   }, []);
 
-  const handleCardPointerMove = useCallback((event: React.PointerEvent) => {
-    if (!pointerStartPosRef.current) return;
+  const handleCardPointerDown = useCallback(
+    (event: React.PointerEvent, questId: string, isHandle?: boolean) => {
+      if (event.button !== 0) return;
+      if ((event.target as HTMLElement).closest(".completeButton")) return;
 
-    if (!isDraggingRef.current) {
-      const dx = event.clientX - pointerStartPosRef.current.x;
-      const dy = event.clientY - pointerStartPosRef.current.y;
-      if (Math.hypot(dx, dy) > 8) {
+      const clientY = event.clientY;
+      const clientX = event.clientX;
+
+      if (isHandle) {
+        event.preventDefault();
+        startDrag(questId, clientY);
+        return;
+      }
+
+      if (holdTimerRef.current) {
+        clearTimeout(holdTimerRef.current);
+      }
+
+      holdTimerRef.current = setTimeout(() => {
+        startDrag(questId, clientY);
+      }, 200);
+
+      const onCancelCheck = () => {
         if (holdTimerRef.current) {
           clearTimeout(holdTimerRef.current);
           holdTimerRef.current = null;
         }
-      }
-    }
-  }, []);
+        window.removeEventListener("pointermove", onCheckMove);
+        window.removeEventListener("pointerup", onCancelCheck);
+        window.removeEventListener("pointercancel", onCancelCheck);
+      };
 
-  const handleCardPointerUp = useCallback(() => {
-    if (holdTimerRef.current) {
-      clearTimeout(holdTimerRef.current);
-      holdTimerRef.current = null;
-    }
-    pointerStartPosRef.current = null;
-  }, []);
+      const onCheckMove = (moveEvt: PointerEvent) => {
+        const dist = Math.hypot(moveEvt.clientX - clientX, moveEvt.clientY - clientY);
+        if (dist > 16) {
+          onCancelCheck();
+        }
+      };
+
+      window.addEventListener("pointermove", onCheckMove, { passive: true });
+      window.addEventListener("pointerup", onCancelCheck, { once: true });
+      window.addEventListener("pointercancel", onCancelCheck, { once: true });
+    },
+    [startDrag],
+  );
 
   // Global window listeners while dragging
   useEffect(() => {
-    if (!draggedQuestId) return;
+    if (!draggedId) return;
 
     const onPointerMove = (e: PointerEvent) => {
-      // Auto-scroll near viewport edges
+      e.preventDefault();
+
       if (e.clientY < 110) {
-        window.scrollBy({ top: -7, behavior: "auto" });
+        window.scrollBy({ top: -8, behavior: "auto" });
       } else if (e.clientY > window.innerHeight - 110) {
-        window.scrollBy({ top: 7, behavior: "auto" });
+        window.scrollBy({ top: 8, behavior: "auto" });
       }
 
-      // Find element under pointer
-      const element = document.elementFromPoint(e.clientX, e.clientY);
-      const targetCard = element?.closest<HTMLElement>("[data-quest-id]");
-      const targetId = targetCard?.getAttribute("data-quest-id");
+      const deltaY = e.clientY - startPointerYRef.current;
+      setDragDeltaY(deltaY);
 
-      if (targetId && targetId !== draggedQuestId) {
-        setQuests((current) => {
-          const fromIndex = current.findIndex((q) => q.id === draggedQuestId);
-          const toIndex = current.findIndex((q) => q.id === targetId);
-          if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
-            return current;
-          }
-          const next = [...current];
-          const [movedItem] = next.splice(fromIndex, 1);
-          next.splice(toIndex, 0, movedItem);
-          return next;
-        });
-        if (typeof navigator !== "undefined" && navigator.vibrate) {
+      const h = dragItemHeight || 62;
+      const slotsMoved = Math.round(deltaY / h);
+      const newTarget = Math.max(0, Math.min(questsRef.current.length - 1, dragStartIndex + slotsMoved));
+
+      setTargetDropIndex((prev) => {
+        if (prev !== newTarget && typeof navigator !== "undefined" && navigator.vibrate) {
           navigator.vibrate(8);
         }
-      }
+        return newTarget;
+      });
     };
 
     const onPointerUp = () => {
-      setDraggedQuestId(null);
-      isDraggingRef.current = false;
-      document.body.style.userSelect = "";
-      saveQuestOrder(questsRef.current);
-      setTimeout(() => {
-        suppressClickRef.current = false;
-      }, 160);
+      if (isDraggingRef.current) {
+        const from = dragStartIndex;
+        const to = targetDropIndex;
+
+        if (from !== -1 && to !== -1 && from !== to) {
+          const next = [...questsRef.current];
+          const [moved] = next.splice(from, 1);
+          next.splice(to, 0, moved);
+          setQuests(next);
+          saveQuestOrder(next);
+        }
+
+        isDraggingRef.current = false;
+        setDraggedId(null);
+        setDragStartIndex(-1);
+        setTargetDropIndex(-1);
+        setDragDeltaY(0);
+        document.body.style.userSelect = "";
+        document.body.style.touchAction = "";
+
+        setTimeout(() => {
+          suppressClickRef.current = false;
+        }, 180);
+      }
     };
 
-    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointermove", onPointerMove, { passive: false });
     window.addEventListener("pointerup", onPointerUp);
     window.addEventListener("pointercancel", onPointerUp);
 
@@ -939,7 +1009,27 @@ export default function QuestApp({ today }: QuestAppProps) {
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);
     };
-  }, [draggedQuestId, saveQuestOrder]);
+  }, [draggedId, dragStartIndex, targetDropIndex, dragItemHeight, saveQuestOrder]);
+
+  function getCardTransformY(questId: string): number {
+    if (!draggedId) return 0;
+    if (draggedId === questId) return dragDeltaY;
+
+    const index = quests.findIndex((q) => q.id === questId);
+    if (index === -1) return 0;
+
+    const h = dragItemHeight || 62;
+    if (dragStartIndex < targetDropIndex) {
+      if (index > dragStartIndex && index <= targetDropIndex) {
+        return -h;
+      }
+    } else if (dragStartIndex > targetDropIndex) {
+      if (index >= targetDropIndex && index < dragStartIndex) {
+        return h;
+      }
+    }
+    return 0;
+  }
 
   async function toggleQuest(id: string) {
     const quest = quests.find((current) => current.id === id);
@@ -1220,10 +1310,9 @@ export default function QuestApp({ today }: QuestAppProps) {
                       setSelectedQuestId(targetQuest.id);
                     }}
                     isUpdating={savingQuestId === quest.id}
-                    isDragging={draggedQuestId === quest.id}
+                    isDragging={draggedId === quest.id}
+                    transformY={getCardTransformY(quest.id)}
                     onPointerDown={handleCardPointerDown}
-                    onPointerMove={handleCardPointerMove}
-                    onPointerUp={handleCardPointerUp}
                   />
                 ))
               )}
@@ -1248,10 +1337,8 @@ export default function QuestApp({ today }: QuestAppProps) {
                           setSelectedQuestId(targetQuest.id);
                         }}
                         isUpdating={savingQuestId === quest.id}
-                        isDragging={draggedQuestId === quest.id}
-                        onPointerDown={handleCardPointerDown}
-                        onPointerMove={handleCardPointerMove}
-                        onPointerUp={handleCardPointerUp}
+                        isDragging={false}
+                        transformY={0}
                       />
                     ))}
                   </div>
