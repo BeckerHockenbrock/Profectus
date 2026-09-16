@@ -286,7 +286,7 @@ export default function QuestApp({ today }: QuestAppProps) {
     return (
       <main className="authShell">
         <section className="authCard" aria-labelledby="sign-in-heading">
-          <Image src="/sisyphus.png" alt="Sisyphus carrying a boulder" width={120} height={142} priority />
+          <Image src="/sisyphus.png" alt="Sisyphus carrying a boulder" width={120} height={142} priority unoptimized />
           <p className="heroTitle">Todo Quest</p>
           <h1 id="sign-in-heading">Your quests, wherever you are.</h1>
           <p>Sign in with Google to keep this account&apos;s quests synced across your devices.</p>
@@ -306,11 +306,12 @@ export default function QuestApp({ today }: QuestAppProps) {
         <a className="brand" href="#top" aria-label="Todo Quest home">
           <Image
             className="brandLogo"
-            src="/sisyphus.png"
+            src="/icon-192.png"
             alt=""
             width={40}
             height={40}
             preload
+            unoptimized
           />
         </a>
         <button className="profileButton" type="button" onClick={signOutUser} title="Sign out" aria-label="Sign out">
@@ -329,6 +330,7 @@ export default function QuestApp({ today }: QuestAppProps) {
             height={1366}
             sizes="(max-width: 48rem) 70vw, 18rem"
             preload
+            unoptimized
           />
           <p className="heroTitle">Todo Quest</p>
         </section>
