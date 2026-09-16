@@ -22,6 +22,7 @@ import {
 } from "firebase/firestore";
 import { getFirebaseAuth, getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase";
 import type { Quest } from "@/lib/quest-types";
+import { LiquidDock } from "./liquid-dock";
 
 type QuestAppProps = {
   today: string;
@@ -751,6 +752,32 @@ export default function QuestApp({ today }: QuestAppProps) {
     setSheetOpen(false);
   }
 
+  const handleHomeNavigation = useCallback(() => {
+    if (sheetOpen) {
+      setSheetOpen(false);
+    }
+    if (view !== "all") {
+      setView("all");
+    }
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const taskHeading = document.getElementById("quest-heading") ?? document.getElementById("top");
+    if (taskHeading) {
+      taskHeading.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
+    } else {
+      window.scrollTo({
+        top: 0,
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+      });
+    }
+  }, [sheetOpen, view]);
+
   async function submitQuest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -1041,6 +1068,7 @@ export default function QuestApp({ today }: QuestAppProps) {
           </form>
         </section>
       </div>
+      <LiquidDock onNavigateHome={handleHomeNavigation} />
         </main>
       )}
     </>
