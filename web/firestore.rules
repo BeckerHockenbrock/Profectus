@@ -10,7 +10,7 @@ service cloud.firestore {
 
     function isValidQuest(data) {
       return data.keys().hasOnly([
-          'title', 'description', 'category', 'dueDate', 'completed', 'focusMinutes', 'createdAt'
+          'title', 'description', 'category', 'dueDate', 'completed', 'focusMinutes', 'createdAt', 'order'
         ])
         && data.keys().hasAll([
           'title', 'description', 'category', 'dueDate', 'completed', 'focusMinutes', 'createdAt'
@@ -28,7 +28,8 @@ service cloud.firestore {
         && data.completed is bool
         && data.focusMinutes is int
         && data.focusMinutes >= 0
-        && data.createdAt is number;
+        && data.createdAt is number
+        && (!data.keys().hasAny(['order']) || data.order is int);
     }
 
     // Allowed updates: only `completed` and/or `focusMinutes` may be modified.
@@ -37,11 +38,12 @@ service cloud.firestore {
     // studied that duration. This is an intentional trust-the-client tradeoff for
     // this personal study timer application.
     function isValidQuestUpdate() {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['completed', 'focusMinutes'])
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['completed', 'focusMinutes', 'order'])
         && request.resource.data.completed is bool
         && request.resource.data.focusMinutes is int
         && request.resource.data.focusMinutes >= resource.data.focusMinutes
-        && request.resource.data.focusMinutes >= 0;
+        && request.resource.data.focusMinutes >= 0
+        && (!request.resource.data.keys().hasAny(['order']) || request.resource.data.order is int);
     }
 
     match /users/{accountId}/quests/{questId} {
