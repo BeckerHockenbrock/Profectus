@@ -32,6 +32,7 @@ web/
 │   │   └── types/focus.ts
 │   ├── quests/
 │   │   ├── components/category-list.tsx
+│   │   ├── components/date-list.tsx
 │   │   ├── components/quest-card.tsx
 │   │   ├── components/quest-form-modal.tsx
 │   │   ├── components/quest-list.tsx
@@ -144,6 +145,7 @@ Progression stays local-first. `stats-storage.ts` owns `todo-quest-stats-v2-<uid
 | Quest card DOM | `features/quests/components/quest-card.tsx` |
 | All/Completed list composition | `features/quests/components/quest-list.tsx` |
 | Category grouping UI | `features/quests/components/category-list.tsx` |
+| Date grouping UI | `features/quests/components/date-list.tsx` |
 | Quest order localStorage | `features/quests/data/quest-storage.ts` |
 | Quest Firestore paths and writes | `features/quests/data/quest-firestore.ts` |
 | Focus timer behavior | `features/focus/hooks/use-focus-timer.ts` |

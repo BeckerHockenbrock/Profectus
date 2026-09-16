@@ -4,7 +4,9 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import type React from "react";
 import type { Quest, QuestView } from "../types/quest";
+import { groupQuestsByDate } from "../domain/date-utils";
 import { CategoryList } from "./category-list";
+import { DateList } from "./date-list";
 import { QuestList } from "./quest-list";
 
 type TasksViewProps = {
@@ -44,6 +46,7 @@ export function TasksView({
 }: TasksViewProps) {
   const [showCompleted, setShowCompleted] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
 
   const groupedQuests = useMemo(() => {
     const categories = Array.from(new Set(quests.map((quest) => quest.category))).sort();
@@ -52,6 +55,8 @@ export function TasksView({
       quests: quests.filter((quest) => quest.category === category),
     }));
   }, [quests]);
+
+  const dateGroups = useMemo(() => groupQuestsByDate(quests, today), [quests, today]);
 
   return (
     <>
@@ -102,6 +107,14 @@ export function TasksView({
             >
               Categories
             </button>
+            <button
+              type="button"
+              className={view === "dates" ? "isActive" : ""}
+              aria-pressed={view === "dates"}
+              onClick={() => onViewChange("dates")}
+            >
+              Dates
+            </button>
           </div>
         </div>
 
@@ -122,7 +135,7 @@ export function TasksView({
             onToggleQuest={onToggleQuest}
             onSelectQuest={onSelectQuest}
           />
-        ) : (
+        ) : view === "categories" ? (
           <CategoryList
             groups={groupedQuests}
             expandedCategories={expandedCategories}
@@ -130,6 +143,22 @@ export function TasksView({
               setExpandedCategories((previous) => ({
                 ...previous,
                 [category]: !previous[category],
+              }))
+            }
+            today={today}
+            savingQuestId={savingQuestId}
+            suppressClickRef={suppressClickRef}
+            onToggleQuest={onToggleQuest}
+            onSelectQuest={onSelectQuest}
+          />
+        ) : (
+          <DateList
+            groups={dateGroups}
+            expandedDates={expandedDates}
+            onToggleDate={(dateKey) =>
+              setExpandedDates((previous) => ({
+                ...previous,
+                [dateKey]: !previous[dateKey],
               }))
             }
             today={today}

@@ -9,7 +9,7 @@ export type Quest = {
   order?: number;
 };
 
-export type QuestView = "all" | "categories";
+export type QuestView = "all" | "categories" | "dates";
 
 export type NewQuestInput = {
   title: string;
