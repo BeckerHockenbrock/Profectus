@@ -1,9 +1,10 @@
 "use client";
 
 import { type FormEvent, useEffect, useMemo, useState } from "react";
-import type { DayOfWeek, Period } from "@/lib/school-types";
+import type { DayOfWeek, Period, PeriodIconId } from "@/lib/school-types";
 import {
   ALL_DAYS,
+  PERIOD_ICONS,
   WEEKDAYS,
   calculateDurationMinutes,
   formatDuration,
@@ -17,7 +18,6 @@ import { useSheetSwipe } from "./use-sheet-swipe";
 
 type SchoolViewProps = {
   userId?: string | null;
-  onOpenAddPeriod?: () => void;
 };
 
 type PeriodFormData = {
@@ -26,6 +26,7 @@ type PeriodFormData = {
   endTime: string;
   room: string;
   days: DayOfWeek[];
+  icon: PeriodIconId;
 };
 
 const initialFormData: PeriodFormData = {
@@ -34,16 +35,254 @@ const initialFormData: PeriodFormData = {
   endTime: "09:25",
   room: "",
   days: WEEKDAYS,
+  icon: "book",
 };
+
+export function PeriodIcon({
+  name,
+  className = "",
+  size = 18,
+}: {
+  name?: PeriodIconId;
+  className?: string;
+  size?: number;
+}) {
+  switch (name) {
+    case "calculator":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="4" y="2" width="16" height="20" rx="2" />
+          <line x1="8" y1="6" x2="16" y2="6" />
+          <line x1="16" y1="14" x2="16" y2="18" />
+          <path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" />
+        </svg>
+      );
+    case "flask":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M10 2v7.31L4.12 19.24A2 2 0 0 0 5.8 22h12.4a2 2 0 0 0 1.68-2.76L14 9.31V2" />
+          <line x1="8.5" y1="2" x2="15.5" y2="2" />
+          <line x1="6.5" y1="16" x2="17.5" y2="16" />
+        </svg>
+      );
+    case "globe":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+        </svg>
+      );
+    case "laptop":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="12" rx="2" />
+          <path d="M2 20h20" />
+        </svg>
+      );
+    case "palette":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="13.5" cy="6.5" r=".5" />
+          <circle cx="17.5" cy="10.5" r=".5" />
+          <circle cx="8.5" cy="7.5" r=".5" />
+          <circle cx="6.5" cy="12.5" r=".5" />
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+        </svg>
+      );
+    case "music":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M9 18V5l12-2v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="16" r="3" />
+        </svg>
+      );
+    case "trophy":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+          <path d="M4 22h16" />
+          <path d="M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34" />
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+        </svg>
+      );
+    case "pencil":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+          <path d="m15 5 4 4" />
+        </svg>
+      );
+    case "bell":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+      );
+    case "coffee":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+          <line x1="6" y1="1" x2="6" y2="4" />
+          <line x1="10" y1="1" x2="10" y2="4" />
+          <line x1="14" y1="1" x2="14" y2="4" />
+        </svg>
+      );
+    case "book":
+    default:
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
+      );
+  }
+}
+
+function PeriodDetailModal({
+  period,
+  liveStatus,
+  todayDay,
+  onClose,
+  onEdit,
+  onDelete,
+}: {
+  period: Period;
+  liveStatus: { status: "current" | "next" | "upcoming" | "past"; minutesUntil?: number; minutesRemaining?: number } | null;
+  todayDay: DayOfWeek;
+  onClose: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { sheetRef, scrimRef, dragHandleProps } = useSheetSwipe({ onClose });
+
+  return (
+    <div
+      ref={scrimRef as React.RefObject<HTMLDivElement>}
+      className="detailModalScrim"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="period-detail-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <section
+        ref={sheetRef as React.RefObject<HTMLElement>}
+        className="detailModalSheet"
+      >
+        <div className="sheetHandleArea" {...dragHandleProps}>
+          <div className="sheetHandle" aria-hidden="true" />
+        </div>
+
+        <header className="detailModalHeader" {...dragHandleProps}>
+          <div className="periodDetailHeaderBadge">
+            <PeriodIcon name={period.icon || "book"} size={18} />
+            <span>{formatDuration(calculateDurationMinutes(period.startTime, period.endTime))}</span>
+          </div>
+          <button
+            type="button"
+            className="detailCloseButton"
+            onClick={onClose}
+            aria-label="Close details"
+          >
+            ×
+          </button>
+        </header>
+
+        <div className="detailModalBody">
+          <h2 id="period-detail-title" className="detailTitle">
+            {period.name}
+          </h2>
+
+          {liveStatus ? (
+            <div className="detailMetaRow">
+              {liveStatus.status === "current" ? (
+                <span className="detailStatusPill isCompleted">
+                  In Session · {liveStatus.minutesRemaining}m remaining
+                </span>
+              ) : liveStatus.status === "next" ? (
+                <span className="detailStatusPill inProgress">
+                  Up Next · Starts in {liveStatus.minutesUntil}m
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="periodDetailGrid">
+            <div className="periodDetailItem">
+              <span className="periodDetailLabel">Time</span>
+              <strong className="periodDetailValue">
+                {formatTime12Hour(period.startTime)} – {formatTime12Hour(period.endTime)}
+              </strong>
+            </div>
+
+            <div className="periodDetailItem">
+              <span className="periodDetailLabel">Room / Location</span>
+              <strong className="periodDetailValue">
+                {period.room ? period.room : "No room set"}
+              </strong>
+            </div>
+
+            <div className="periodDetailItem fullWidth">
+              <span className="periodDetailLabel">Active Days</span>
+              <div className="periodDetailDays">
+                {ALL_DAYS.map((d) => {
+                  const active = (period.days || WEEKDAYS).includes(d);
+                  const isToday = d === todayDay;
+                  return (
+                    <span
+                      key={d}
+                      className={`detailDayPill ${active ? "isActive" : ""} ${isToday && active ? "isToday" : ""}`}
+                    >
+                      {d}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="periodDetailActions">
+            <button
+              type="button"
+              className="schoolPrimaryButton fullWidth"
+              onClick={onEdit}
+            >
+              Edit Period
+            </button>
+
+            <button
+              type="button"
+              className="periodDeleteDirectBtn"
+              onClick={onDelete}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              </svg>
+              <span>Delete Period</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
 
 export function SchoolView({ userId }: SchoolViewProps) {
   const [periods, setPeriods] = useState<Period[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingPeriodId, setEditingPeriodId] = useState<string | null>(null);
   const [form, setForm] = useState<PeriodFormData>(initialFormData);
   const [formError, setFormError] = useState("");
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
   // Load periods on mount and when userId changes
@@ -63,7 +302,7 @@ export function SchoolView({ userId }: SchoolViewProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const closeSheet = () => {
+  const closeFormSheet = () => {
     setSheetOpen(false);
     setEditingPeriodId(null);
     setForm(initialFormData);
@@ -71,12 +310,21 @@ export function SchoolView({ userId }: SchoolViewProps) {
   };
 
   const {
-    sheetRef,
-    scrimRef,
-    dragHandleProps,
-  } = useSheetSwipe({ onClose: closeSheet });
+    sheetRef: formSheetRef,
+    scrimRef: formScrimRef,
+    dragHandleProps: formDragHandleProps,
+  } = useSheetSwipe({ onClose: closeFormSheet });
 
   const todayDay = useMemo(() => getTodayDayOfWeek(currentTime), [currentTime]);
+
+  const selectedPeriod = useMemo(() => {
+    return periods.find((p) => p.id === selectedPeriodId) ?? null;
+  }, [periods, selectedPeriodId]);
+
+  const selectedLiveStatus = useMemo(() => {
+    if (!selectedPeriod) return null;
+    return getPeriodStatus(selectedPeriod, currentTime);
+  }, [selectedPeriod, currentTime]);
 
   // Determine current active period or next upcoming period today
   const { currentPeriod, nextPeriod } = useMemo(() => {
@@ -113,6 +361,7 @@ export function SchoolView({ userId }: SchoolViewProps) {
       endTime: periods.length > 0 ? calculateNextEndTime(periods[periods.length - 1].endTime, 50) : "09:20",
       room: "",
       days: WEEKDAYS,
+      icon: "book",
     });
     setFormError("");
     setSheetOpen(true);
@@ -126,6 +375,7 @@ export function SchoolView({ userId }: SchoolViewProps) {
       endTime: period.endTime,
       room: period.room || "",
       days: period.days && period.days.length > 0 ? period.days : WEEKDAYS,
+      icon: period.icon || "book",
     });
     setFormError("");
     setSheetOpen(true);
@@ -135,7 +385,6 @@ export function SchoolView({ userId }: SchoolViewProps) {
     setForm((prev) => {
       const exists = prev.days.includes(day);
       if (exists) {
-        // Keep at least one day selected
         if (prev.days.length === 1) return prev;
         return { ...prev, days: prev.days.filter((d) => d !== day) };
       }
@@ -181,6 +430,7 @@ export function SchoolView({ userId }: SchoolViewProps) {
               endTime: form.endTime,
               room: form.room.trim() || undefined,
               days: form.days,
+              icon: form.icon,
             }
           : p,
       );
@@ -194,20 +444,24 @@ export function SchoolView({ userId }: SchoolViewProps) {
         endTime: form.endTime,
         room: form.room.trim() || undefined,
         days: form.days,
+        icon: form.icon,
       };
       const updated = [...periods, newPeriod];
       setPeriods(updated);
       savePeriods(updated, userId);
     }
 
-    closeSheet();
+    closeFormSheet();
   };
 
+  // Direct delete without confirmation prompt per user request
   const handleDelete = (id: string) => {
     const updated = periods.filter((p) => p.id !== id);
     setPeriods(updated);
     savePeriods(updated, userId);
-    setDeleteConfirmId(null);
+    if (selectedPeriodId === id) {
+      setSelectedPeriodId(null);
+    }
   };
 
   const handleLoadSample = () => {
@@ -254,7 +508,14 @@ export function SchoolView({ userId }: SchoolViewProps) {
 
         {/* Live Day & Period Status Banner */}
         {currentPeriod ? (
-          <div className="schoolLiveBanner isLive" role="status" aria-live="polite">
+          <div
+            className="schoolLiveBanner isLive"
+            role="status"
+            aria-live="polite"
+            onClick={() => setSelectedPeriodId(currentPeriod.period.id)}
+            style={{ cursor: "pointer" }}
+            title="Click to view details"
+          >
             <div className="livePulseDot" aria-hidden="true" />
             <div className="liveBannerInfo">
               <span className="liveBannerTag">IN SESSION NOW</span>
@@ -267,7 +528,14 @@ export function SchoolView({ userId }: SchoolViewProps) {
             </div>
           </div>
         ) : nextPeriod ? (
-          <div className="schoolLiveBanner isUpcoming" role="status" aria-live="polite">
+          <div
+            className="schoolLiveBanner isUpcoming"
+            role="status"
+            aria-live="polite"
+            onClick={() => setSelectedPeriodId(nextPeriod.period.id)}
+            style={{ cursor: "pointer" }}
+            title="Click to view details"
+          >
             <div className="upcomingDot" aria-hidden="true" />
             <div className="liveBannerInfo">
               <span className="upcomingBannerTag">UP NEXT TODAY</span>
@@ -312,21 +580,7 @@ export function SchoolView({ userId }: SchoolViewProps) {
         ) : periods.length === 0 ? (
           <div className="schoolEmptyState">
             <div className="emptyIconWrapper">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
-                <path d="M22 10v6" />
-                <path d="M6 12.5V16c0 2.21 2.69 4 6 4s6-1.79 6-4v-3.5" />
-              </svg>
+              <PeriodIcon name="book" size={32} />
             </div>
             <h3>No periods yet</h3>
             <p>Add your class periods and when they take place so your day is organized.</p>
@@ -349,9 +603,8 @@ export function SchoolView({ userId }: SchoolViewProps) {
           </div>
         ) : (
           <div className="periodList">
-            {periods.map((period, index) => {
+            {periods.map((period) => {
               const liveStatus = getPeriodStatus(period, currentTime);
-              const duration = calculateDurationMinutes(period.startTime, period.endTime);
               const isCurrent = liveStatus?.status === "current";
               const isNext = liveStatus?.status === "next";
 
@@ -359,112 +612,44 @@ export function SchoolView({ userId }: SchoolViewProps) {
                 <article
                   key={period.id}
                   className={`periodCard ${isCurrent ? "isPeriodCurrent" : ""} ${isNext ? "isPeriodNext" : ""}`}
+                  onClick={() => setSelectedPeriodId(period.id)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${period.name}, from ${formatTime12Hour(period.startTime)} to ${formatTime12Hour(period.endTime)}. Tap to view details.`}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setSelectedPeriodId(period.id);
+                    }
+                  }}
                 >
-                  <div className="periodTimeColumn">
-                    <span className="periodTimeStart">{formatTime12Hour(period.startTime)}</span>
-                    <span className="periodTimeDivider" aria-hidden="true" />
-                    <span className="periodTimeEnd">{formatTime12Hour(period.endTime)}</span>
-                    <span className="periodDurationTag">{formatDuration(duration)}</span>
+                  <div className="periodIconBadge" aria-hidden="true">
+                    <PeriodIcon name={period.icon || "book"} size={18} />
                   </div>
 
-                  <div className="periodInfoColumn">
-                    <div className="periodTitleRow">
-                      <h3 className="periodName">{period.name}</h3>
-                      {isCurrent ? (
-                        <span className="statusBadge inSession">In session</span>
-                      ) : isNext ? (
-                        <span className="statusBadge upNext">Up next</span>
-                      ) : null}
-                    </div>
-
-                    <div className="periodMetaRow">
+                  <div className="periodCardContent">
+                    <h3 className="periodName">{period.name}</h3>
+                    <div className="periodCardMeta">
+                      <span className="periodTimeRange">
+                        {formatTime12Hour(period.startTime)} – {formatTime12Hour(period.endTime)}
+                      </span>
                       {period.room ? (
-                        <span className="periodRoomTag">
-                          <svg
-                            width="11"
-                            height="11"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                          >
-                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                            <circle cx="12" cy="10" r="3" />
-                          </svg>
-                          <span>{period.room}</span>
-                        </span>
+                        <span className="periodRoomMini">· {period.room}</span>
                       ) : null}
-
-                      <div className="periodDaysList" aria-label="Days active">
-                        {ALL_DAYS.map((day) => {
-                          const isActive = (period.days || WEEKDAYS).includes(day);
-                          const isToday = day === todayDay;
-                          return (
-                            <span
-                              key={day}
-                              className={`periodDayMiniTag ${isActive ? "isActiveDay" : "isInactiveDay"} ${
-                                isToday && isActive ? "isTodayActive" : ""
-                              }`}
-                              title={`${day}: ${isActive ? "Active" : "Off"}`}
-                            >
-                              {day.slice(0, 1)}
-                            </span>
-                          );
-                        })}
-                      </div>
                     </div>
                   </div>
 
-                  <div className="periodActionsColumn">
-                    <button
-                      type="button"
-                      className="periodActionBtn"
-                      onClick={() => handleOpenEdit(period)}
-                      aria-label={`Edit ${period.name}`}
-                      title="Edit period"
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                        <path d="m15 5 4 4" />
+                  <div className="periodCardRight">
+                    {isCurrent ? (
+                      <span className="statusBadge inSession">In session</span>
+                    ) : isNext ? (
+                      <span className="statusBadge upNext">Up next</span>
+                    ) : null}
+                    <span className="periodCardChevron" aria-hidden="true">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
                       </svg>
-                    </button>
-
-                    <button
-                      type="button"
-                      className="periodActionBtn isDelete"
-                      onClick={() => setDeleteConfirmId(period.id)}
-                      aria-label={`Delete ${period.name}`}
-                      title="Delete period"
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M3 6h18" />
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                      </svg>
-                    </button>
+                    </span>
                   </div>
                 </article>
               );
@@ -473,38 +658,22 @@ export function SchoolView({ userId }: SchoolViewProps) {
         )}
       </section>
 
-      {/* Delete Confirmation Modal Dialog */}
-      {deleteConfirmId ? (
-        <div
-          className="focusModalOverlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="delete-period-title"
-        >
-          <div className="focusModalCard">
-            <h2 id="delete-period-title">Delete this period?</h2>
-            <p>
-              Are you sure you want to remove this period from your school schedule?
-            </p>
-            <div className="focusModalActions">
-              <button
-                type="button"
-                className="quitConfirmButton"
-                onClick={() => handleDelete(deleteConfirmId)}
-                autoFocus
-              >
-                Delete
-              </button>
-              <button
-                type="button"
-                className="quitCancelButton"
-                onClick={() => setDeleteConfirmId(null)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Period Details Modal Sheet */}
+      {selectedPeriod ? (
+        <PeriodDetailModal
+          period={selectedPeriod}
+          liveStatus={selectedLiveStatus}
+          todayDay={todayDay}
+          onClose={() => setSelectedPeriodId(null)}
+          onEdit={() => {
+            const toEdit = selectedPeriod;
+            setSelectedPeriodId(null);
+            handleOpenEdit(toEdit);
+          }}
+          onDelete={() => {
+            handleDelete(selectedPeriod.id);
+          }}
+        />
       ) : null}
 
       {/* Add / Edit Period Bottom Sheet */}
@@ -514,27 +683,27 @@ export function SchoolView({ userId }: SchoolViewProps) {
         aria-hidden={!sheetOpen}
         inert={!sheetOpen}
         onKeyDown={(event) => {
-          if (event.key === "Escape") closeSheet();
+          if (event.key === "Escape") closeFormSheet();
         }}
       >
         <button
-          ref={scrimRef as React.RefObject<HTMLButtonElement>}
+          ref={formScrimRef as React.RefObject<HTMLButtonElement>}
           className="sheetScrim"
           type="button"
           aria-label="Close form"
-          onClick={closeSheet}
+          onClick={closeFormSheet}
         />
         <section
-          ref={sheetRef as React.RefObject<HTMLElement>}
+          ref={formSheetRef as React.RefObject<HTMLElement>}
           className="sheet"
           role="dialog"
           aria-modal="true"
           aria-labelledby="period-sheet-title"
         >
-          <div className="sheetHandleArea" {...dragHandleProps}>
+          <div className="sheetHandleArea" {...formDragHandleProps}>
             <div className="sheetHandle" aria-hidden="true" />
           </div>
-          <div className="sheetHeading" {...dragHandleProps}>
+          <div className="sheetHeading" {...formDragHandleProps}>
             <div>
               <h2 id="period-sheet-title">
                 {editingPeriodId ? "Edit Period" : "New Period"}
@@ -543,7 +712,7 @@ export function SchoolView({ userId }: SchoolViewProps) {
             <button
               className="closeButton"
               type="button"
-              onClick={closeSheet}
+              onClick={closeFormSheet}
               aria-label="Close"
             >
               ×
@@ -565,6 +734,30 @@ export function SchoolView({ userId }: SchoolViewProps) {
                 placeholder="e.g. Period 1: AP Chemistry, Math, Advisory…"
               />
             </label>
+
+            {/* Icon Picker */}
+            <div className="iconSelectionGroup">
+              <span className="daySelectionLabel">Choose icon</span>
+              <div className="iconPickerGrid" role="radiogroup" aria-label="Choose subject icon">
+                {PERIOD_ICONS.map(({ id, label }) => {
+                  const isSelected = form.icon === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      className={`iconPickerOption ${isSelected ? "isSelected" : ""}`}
+                      onClick={() => setForm((prev) => ({ ...prev, icon: id }))}
+                      aria-checked={isSelected}
+                      role="radio"
+                      title={label}
+                    >
+                      <PeriodIcon name={id} size={18} />
+                      <span className="iconPickerLabel">{id}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <div className="formTimeGrid">
               <label>
@@ -645,6 +838,25 @@ export function SchoolView({ userId }: SchoolViewProps) {
             <button className="saveButton" type="submit">
               {editingPeriodId ? "Save changes" : "Add period"}
             </button>
+
+            {editingPeriodId ? (
+              <button
+                type="button"
+                className="periodDeleteDirectBtn"
+                style={{ marginTop: "0.25rem" }}
+                onClick={() => {
+                  handleDelete(editingPeriodId);
+                  closeFormSheet();
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+                <span>Delete this period</span>
+              </button>
+            ) : null}
           </form>
         </section>
       </div>

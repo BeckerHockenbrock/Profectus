@@ -11,6 +11,7 @@ export const SAMPLE_PERIODS: Omit<Period, "id">[] = [
     room: "Room 102",
     days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
     color: "#4f46e5",
+    icon: "calculator",
   },
   {
     name: "Period 2: Chemistry",
@@ -19,6 +20,7 @@ export const SAMPLE_PERIODS: Omit<Period, "id">[] = [
     room: "Lab B",
     days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
     color: "#059669",
+    icon: "flask",
   },
   {
     name: "Period 3: English Literature",
@@ -27,6 +29,7 @@ export const SAMPLE_PERIODS: Omit<Period, "id">[] = [
     room: "Room 204",
     days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
     color: "#d97706",
+    icon: "book",
   },
   {
     name: "Lunch Break",
@@ -35,6 +38,7 @@ export const SAMPLE_PERIODS: Omit<Period, "id">[] = [
     room: "Cafeteria",
     days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
     color: "#6b7280",
+    icon: "coffee",
   },
   {
     name: "Period 4: History",
@@ -43,6 +47,7 @@ export const SAMPLE_PERIODS: Omit<Period, "id">[] = [
     room: "Room 310",
     days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
     color: "#dc2626",
+    icon: "globe",
   },
   {
     name: "Period 5: Computer Science",
@@ -51,6 +56,7 @@ export const SAMPLE_PERIODS: Omit<Period, "id">[] = [
     room: "Tech Hall 1",
     days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
     color: "#2563eb",
+    icon: "laptop",
   },
   {
     name: "Period 6: Physical Education",
@@ -59,6 +65,7 @@ export const SAMPLE_PERIODS: Omit<Period, "id">[] = [
     room: "Gymnasium",
     days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
     color: "#7c3aed",
+    icon: "trophy",
   },
 ];
 
