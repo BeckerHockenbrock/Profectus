@@ -3,7 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Each quest is stored at users/{accountId}/quests/{questId}.
-    // All fields are required. Only `completed` may change after creation.
+    // All fields are required. Only `completed` and `focusMinutes` may change after creation.
     function ownsAccount(accountId) {
       return request.auth != null && request.auth.uid == accountId;
     }
@@ -26,14 +26,22 @@ service cloud.firestore {
         && data.dueDate is string
         && data.dueDate.matches('^$|^\\d{4}-\\d{2}-\\d{2}$')
         && data.completed is bool
-        && data.focusMinutes is number
+        && data.focusMinutes is int
         && data.focusMinutes >= 0
         && data.createdAt is number;
     }
 
-    function onlyChangesCompletion() {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['completed'])
-        && request.resource.data.completed is bool;
+    // Allowed updates: only `completed` and/or `focusMinutes` may be modified.
+    // `focusMinutes` must be an integer and cannot decrease (monotonic non-negative).
+    // Note: The monotonic rule prevents decreases, but cannot prove a client truly
+    // studied that duration. This is an intentional trust-the-client tradeoff for
+    // this personal study timer application.
+    function isValidQuestUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['completed', 'focusMinutes'])
+        && request.resource.data.completed is bool
+        && request.resource.data.focusMinutes is int
+        && request.resource.data.focusMinutes >= resource.data.focusMinutes
+        && request.resource.data.focusMinutes >= 0;
     }
 
     match /users/{accountId}/quests/{questId} {
@@ -44,7 +52,7 @@ service cloud.firestore {
         && request.resource.data.focusMinutes == 0;
       allow update: if ownsAccount(accountId)
         && isValidQuest(request.resource.data)
-        && onlyChangesCompletion();
+        && isValidQuestUpdate();
     }
   }
 }
