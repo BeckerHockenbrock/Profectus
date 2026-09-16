@@ -23,6 +23,7 @@ import {
 import { getFirebaseAuth, getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase";
 import type { Quest } from "@/lib/quest-types";
 import { LiquidDock } from "./liquid-dock";
+import { TaskDetailModal } from "./task-detail-modal";
 
 type QuestAppProps = {
   today: string;
@@ -79,58 +80,80 @@ function QuestCard({
   quest,
   today,
   onToggle,
-  onStartFocus,
+  onSelect,
   isUpdating,
 }: {
   quest: Quest;
   today: string;
   onToggle: (id: string) => void;
-  onStartFocus: (quest: Quest) => void;
+  onSelect: (quest: Quest) => void;
   isUpdating: boolean;
 }) {
   return (
-    <article className={`questCard${quest.completed ? " isComplete" : ""}`}>
+    <article
+      className={`questCard${quest.completed ? " isComplete" : ""}`}
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect(quest)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect(quest);
+        }
+      }}
+      aria-label={`${quest.title}, ${quest.completed ? "completed" : "incomplete"}. Click to view details`}
+    >
       <button
         className="completeButton"
         type="button"
-        aria-label={quest.completed ? `Reopen ${quest.title}` : `Complete ${quest.title}`}
+        aria-label={quest.completed ? `Mark ${quest.title} as incomplete` : `Mark ${quest.title} as completed`}
         aria-pressed={quest.completed}
-        onClick={() => onToggle(quest.id)}
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggle(quest.id);
+        }}
         disabled={isUpdating}
       >
-        <span aria-hidden="true">{quest.completed ? "✓" : ""}</span>
+        <span className="checkIcon" aria-hidden="true">
+          {quest.completed ? "✓" : ""}
+        </span>
       </button>
 
       <div className="questContent">
+        <h3 className="questTitle">{quest.title}</h3>
         <div className="questMeta">
-          <span className="categoryPill">{quest.category}</span>
           <span className={quest.dueDate === today ? "dueLabel isToday" : "dueLabel"}>
-            {formatDueDate(quest.dueDate, today)}
-          </span>
-        </div>
-        <h3>{quest.title}</h3>
-        {quest.description ? <p>{quest.description}</p> : null}
-
-        <div className="questCardActions">
-          <div className="questReward" aria-label={`${quest.focusMinutes} minutes focused`}>
-            <span>{quest.focusMinutes} min focused</span>
-            <span aria-hidden="true">·</span>
-            <strong>{quest.focusMinutes} XP</strong>
-          </div>
-
-          <button
-            type="button"
-            className="startFocusButton"
-            onClick={() => onStartFocus(quest)}
-            aria-label={`Start focus on ${quest.title}`}
-          >
-            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8 5v14l11-7z" />
+            <svg
+              className="dueCalendarIcon"
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            <span>Start focus</span>
-          </button>
+            <span>{formatDueDate(quest.dueDate, today)}</span>
+          </span>
+          <span className="categoryPill">{quest.category}</span>
+          {quest.focusMinutes > 0 ? (
+            <span className="questXPBadge">{quest.focusMinutes}m</span>
+          ) : null}
         </div>
       </div>
+
+      <span className="questCardChevron" aria-hidden="true">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </span>
     </article>
   );
 }
@@ -626,6 +649,7 @@ export default function QuestApp({ today }: QuestAppProps) {
   const [saveError, setSaveError] = useState(firebaseConfigured ? "" : "Firebase is not configured yet.");
   const [showHomeScreenHint, setShowHomeScreenHint] = useState(false);
   const [focusQuest, setFocusQuest] = useState<Quest | null>(null);
+  const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
 
   function handleFocusFinished(questId: string, addedMinutes: number) {
     setQuests((current) =>
@@ -640,6 +664,7 @@ export default function QuestApp({ today }: QuestAppProps) {
       ),
     );
     setFocusQuest(null);
+    setSelectedQuestId(null);
   }
 
   const openCount = quests.filter((quest) => !quest.completed).length;
@@ -848,6 +873,10 @@ export default function QuestApp({ today }: QuestAppProps) {
     );
   }
 
+  const selectedQuest = selectedQuestId
+    ? quests.find((q) => q.id === selectedQuestId) ?? null
+    : null;
+
   const activeFocusQuest = focusQuest
     ? quests.find((q) => q.id === focusQuest.id) ?? focusQuest
     : null;
@@ -994,7 +1023,7 @@ export default function QuestApp({ today }: QuestAppProps) {
                     quest={quest}
                     today={today}
                     onToggle={toggleQuest}
-                    onStartFocus={(targetQuest) => setFocusQuest(targetQuest)}
+                    onSelect={(targetQuest) => setSelectedQuestId(targetQuest.id)}
                     isUpdating={savingQuestId === quest.id}
                   />
                 ))
@@ -1015,7 +1044,7 @@ export default function QuestApp({ today }: QuestAppProps) {
                         quest={quest}
                         today={today}
                         onToggle={toggleQuest}
-                        onStartFocus={(targetQuest) => setFocusQuest(targetQuest)}
+                        onSelect={(targetQuest) => setSelectedQuestId(targetQuest.id)}
                         isUpdating={savingQuestId === quest.id}
                       />
                     ))}
@@ -1101,6 +1130,20 @@ export default function QuestApp({ today }: QuestAppProps) {
           </form>
         </section>
       </div>
+      {selectedQuest ? (
+        <TaskDetailModal
+          quest={selectedQuest}
+          today={today}
+          onClose={() => setSelectedQuestId(null)}
+          onToggleComplete={toggleQuest}
+          onStartFocus={(targetQuest) => {
+            setSelectedQuestId(null);
+            setFocusQuest(targetQuest);
+          }}
+          isUpdating={savingQuestId === selectedQuest.id}
+        />
+      ) : null}
+
       <LiquidDock onNavigateHome={handleHomeNavigation} />
         </main>
       )}
