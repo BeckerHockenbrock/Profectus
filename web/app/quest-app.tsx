@@ -712,6 +712,7 @@ export default function QuestApp({ today }: QuestAppProps) {
 
   const [showCompleted, setShowCompleted] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [isCreatingNewCategory, setIsCreatingNewCategory] = useState(false);
 
   const openQuests = useMemo(() => quests.filter((quest) => !quest.completed), [quests]);
   const completedQuests = useMemo(() => quests.filter((quest) => quest.completed), [quests]);
@@ -756,7 +757,7 @@ export default function QuestApp({ today }: QuestAppProps) {
   }, [quests]);
 
   const categories = useMemo(
-    () => Array.from(new Set(quests.map((quest) => quest.category))).sort(),
+    () => Array.from(new Set(["General", ...quests.map((quest) => quest.category)])).sort(),
     [quests],
   );
 
@@ -1068,6 +1069,7 @@ export default function QuestApp({ today }: QuestAppProps) {
 
   function closeSheet() {
     setSheetOpen(false);
+    setIsCreatingNewCategory(false);
   }
 
   const handleHomeNavigation = useCallback(() => {
@@ -1527,7 +1529,7 @@ export default function QuestApp({ today }: QuestAppProps) {
         className="sheetLayer"
         data-open={sheetOpen}
         aria-hidden={!sheetOpen}
-        inert={!sheetOpen}
+        {...(!sheetOpen ? { inert: true } : {})}
         onKeyDown={(event) => {
           if (event.key === "Escape") closeSheet();
         }}
@@ -1571,18 +1573,65 @@ export default function QuestApp({ today }: QuestAppProps) {
 
             <label>
               Category
-              <input
-                required
-                list="categories"
-                value={form.category}
-                onChange={(event) => setForm({ ...form, category: event.target.value })}
-                placeholder="CIS 25, Work, College…"
-              />
-              <datalist id="categories">
-                {categories.map((category) => (
-                  <option key={category} value={category} />
-                ))}
-              </datalist>
+              {isCreatingNewCategory ? (
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                  <input
+                    required
+                    autoFocus
+                    value={form.category}
+                    onChange={(event) => setForm({ ...form, category: event.target.value })}
+                    placeholder="New category name…"
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    className="categoryBackButton"
+                    onClick={() => {
+                      setIsCreatingNewCategory(false);
+                      setForm({ ...form, category: "General" });
+                    }}
+                    aria-label="Cancel new category"
+                    style={{
+                      minHeight: "3rem",
+                      padding: "0 0.75rem",
+                      border: "1px solid var(--line)",
+                      borderRadius: "0.9rem",
+                      background: "rgba(255, 255, 255, 0.055)",
+                      color: "var(--secondary)",
+                      cursor: "pointer",
+                      fontSize: "0.82rem",
+                      fontWeight: 600,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <select
+                  required
+                  value={form.category || ""}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    if (value === "__new__") {
+                      setIsCreatingNewCategory(true);
+                      setForm({ ...form, category: "" });
+                    } else {
+                      setForm({ ...form, category: value });
+                    }
+                  }}
+                >
+                  <option value="" disabled>
+                    Select a category…
+                  </option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                  <option value="__new__">＋ Create new category…</option>
+                </select>
+              )}
             </label>
 
             <label>
