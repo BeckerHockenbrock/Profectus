@@ -1,5 +1,5 @@
-import type { Period } from "./school-types";
-import { timeToMinutes } from "./school-types";
+import type { Period } from "../types/school";
+import { timeToMinutes } from "../domain/period-clock";
 
 const STORAGE_KEY_PREFIX = "todo-quest-periods";
 

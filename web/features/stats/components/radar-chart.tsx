@@ -1,8 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { LifeAttribute } from "@/lib/stats-types";
-import { ATTRIBUTE_ORDER, LIFE_ATTRIBUTES } from "@/lib/stats-types";
+import type { LifeAttribute } from "../types/stats";
+import { ATTRIBUTE_ORDER, LIFE_ATTRIBUTES } from "../types/stats";
+import {
+  RADAR_ANGLES,
+  RADAR_CENTER,
+  RADAR_GRID_POLYGONS,
+  RADAR_LEVELS,
+  RADAR_MAX_RADIUS,
+  RADAR_SIZE,
+  RADAR_SPOKES,
+  getRadarPoint,
+} from "../domain/stats-chart-math";
 
 interface RadarChartProps {
   scores: Record<LifeAttribute, number>;
@@ -12,38 +22,9 @@ interface RadarChartProps {
   selectedAttribute?: LifeAttribute | null;
 }
 
-const RADAR_SIZE = 380;
-const RADAR_CENTER = RADAR_SIZE / 2;
-const RADAR_MAX_RADIUS = 118;
-const RADAR_LEVELS = [0.25, 0.5, 0.75, 1.0] as const;
-
-const RADAR_ANGLES = ATTRIBUTE_ORDER.map((_, i) => -Math.PI / 2 + (i * Math.PI) / 3);
-
-function getRadarPoint(angle: number, radius: number) {
-  return {
-    x: RADAR_CENTER + radius * Math.cos(angle),
-    y: RADAR_CENTER + radius * Math.sin(angle),
-  };
-}
-
-const RADAR_GRID_POLYGONS = RADAR_LEVELS.map((lvl) => {
-  const radius = RADAR_MAX_RADIUS * lvl;
-  const points = RADAR_ANGLES.map((a) => {
-    const p = getRadarPoint(a, radius);
-    return `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
-  });
-  return points.join(" ");
-});
-
-const RADAR_SPOKES = RADAR_ANGLES.map((a) => {
-  const p = getRadarPoint(a, RADAR_MAX_RADIUS);
-  return { x1: RADAR_CENTER, y1: RADAR_CENTER, x2: p.x, y2: p.y };
-});
-
 export function RadarChart({
   scores,
   overallRating,
-  totalXP = 0,
   onSelectAttribute,
   selectedAttribute,
 }: RadarChartProps) {

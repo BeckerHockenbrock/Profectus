@@ -1,0 +1,119 @@
+import {
+  addDoc,
+  collection,
+  doc,
+  orderBy,
+  query,
+  onSnapshot,
+  runTransaction,
+  updateDoc,
+  writeBatch,
+} from "firebase/firestore";
+import { getFirebaseDb } from "@/lib/firebase";
+import type { Quest, QuestForm } from "../types/quest";
+import { saveQuestOrder, sortQuestsByStoredOrder } from "./quest-storage";
+
+export function subscribeQuests(
+  userId: string,
+  onData: (quests: Quest[]) => void,
+  onError: (err: unknown) => void,
+): () => void {
+  const database = getFirebaseDb();
+  const questQuery = query(
+    collection(database, "users", userId, "quests"),
+    orderBy("createdAt", "desc"),
+  );
+
+  return onSnapshot(
+    questQuery,
+    (snapshot) => {
+      const fetched: Quest[] = snapshot.docs.map((quest) => {
+        const data = quest.data();
+        return {
+          id: quest.id,
+          title: String(data.title ?? ""),
+          description: String(data.description ?? ""),
+          category: String(data.category ?? "General"),
+          dueDate: String(data.dueDate ?? ""),
+          completed: Boolean(data.completed),
+          focusMinutes: Number(data.focusMinutes ?? 0),
+          order: typeof data.order === "number" ? data.order : undefined,
+        };
+      });
+
+      onData(sortQuestsByStoredOrder(fetched, userId));
+    },
+    onError,
+  );
+}
+
+export async function toggleQuestInFirestore(
+  userId: string,
+  questId: string,
+  completed: boolean,
+): Promise<void> {
+  const database = getFirebaseDb();
+  await updateDoc(doc(database, "users", userId, "quests", questId), { completed });
+}
+
+export async function createQuestInFirestore(
+  userId: string,
+  form: QuestForm,
+  minOrder: number,
+): Promise<string> {
+  const database = getFirebaseDb();
+  const docRef = await addDoc(collection(database, "users", userId, "quests"), {
+    title: form.title.trim(),
+    description: form.description.trim(),
+    category: form.category.trim(),
+    dueDate: form.dueDate,
+    completed: false,
+    focusMinutes: 0,
+    order: minOrder - 1,
+    createdAt: Date.now(),
+  });
+  return docRef.id;
+}
+
+export async function saveQuestOrderToFirestore(
+  userId: string,
+  reorderedQuests: Quest[],
+): Promise<void> {
+  saveQuestOrder(userId, reorderedQuests);
+
+  try {
+    const database = getFirebaseDb();
+    const batch = writeBatch(database);
+    reorderedQuests.forEach((quest, index) => {
+      const questRef = doc(database, "users", userId, "quests", quest.id);
+      batch.update(questRef, { order: index });
+    });
+    await batch.commit();
+  } catch (err) {
+    console.warn("Could not persist quest order to Firestore", err);
+  }
+}
+
+export async function completeQuestFocusSession(
+  userId: string,
+  questId: string,
+  addedMinutes: number,
+): Promise<void> {
+  const database = getFirebaseDb();
+  const questRef = doc(database, "users", userId, "quests", questId);
+
+  await runTransaction(database, async (transaction) => {
+    const questDoc = await transaction.get(questRef);
+    if (!questDoc.exists()) {
+      throw new Error("Quest no longer exists.");
+    }
+    const data = questDoc.data();
+    const currentFocus = typeof data.focusMinutes === "number" ? Math.floor(data.focusMinutes) : 0;
+    const newFocusMinutes = currentFocus + addedMinutes;
+
+    transaction.update(questRef, {
+      completed: true,
+      focusMinutes: newFocusMinutes,
+    });
+  });
+}

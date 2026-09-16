@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import type { Quest } from "@/lib/quest-types";
-import { useSheetSwipe } from "./use-sheet-swipe";
+import type { Quest } from "../types/quest";
+import { formatDueDateDetail } from "../domain/date-utils";
+import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
 
 type TaskDetailModalProps = {
   quest: Quest;
@@ -12,26 +13,6 @@ type TaskDetailModalProps = {
   onStartFocus: (quest: Quest) => void;
   isUpdating: boolean;
 };
-
-function addDays(isoDate: string, daysToAdd: number) {
-  const [year, month, day] = isoDate.split("-").map(Number);
-  const date = new Date(year, month - 1, day + daysToAdd);
-  const nextYear = date.getFullYear();
-  const nextMonth = String(date.getMonth() + 1).padStart(2, "0");
-  const nextDay = String(date.getDate()).padStart(2, "0");
-  return `${nextYear}-${nextMonth}-${nextDay}`;
-}
-
-function formatDueDateDetail(dueDate: string, today: string) {
-  if (!dueDate) return "No due date";
-  if (dueDate === today) return "Due today";
-  if (dueDate === addDays(today, 1)) return "Due tomorrow";
-
-  const [year, month, day] = dueDate.split("-");
-  const currentYear = today.slice(0, 4);
-  const formatted = year === currentYear ? `${month}/${day}` : `${month}/${day}/${year}`;
-  return `Due ${formatted}`;
-}
 
 export function TaskDetailModal({
   quest,

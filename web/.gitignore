@@ -1,2 +1,8 @@
 .env.local
 .next/
+verification/refactor-parity/post-refactor/
+verification/refactor-parity/legacy-reference/
+verification/refactor-parity/invalid-baseline-backups/
+verification/refactor-parity/capture-results.json
+verification/refactor-parity/verification-results.json
+verification/refactor-parity/verification-report.md

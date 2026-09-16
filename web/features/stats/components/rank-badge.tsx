@@ -1,7 +1,7 @@
 "use client";
 
-import type { RankTier } from "@/lib/stats-types";
-import { RANK_TIERS } from "@/lib/stats-types";
+import type { RankTier } from "../types/stats";
+import { RANK_TIERS } from "../types/stats";
 
 interface RankBadgeProps {
   tier: RankTier;

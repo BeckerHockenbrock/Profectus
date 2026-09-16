@@ -9,10 +9,19 @@ export type Quest = {
   order?: number;
 };
 
+export type QuestView = "all" | "categories";
+
 export type NewQuestInput = {
   title: string;
   description: string;
   category: string;
   dueDate: string;
   order?: number;
+};
+
+export type QuestForm = {
+  title: string;
+  description: string;
+  category: string;
+  dueDate: string;
 };

@@ -1,3 +1,17 @@
+/**
+ * ALTIORA / TODO QUEST - GLOBAL STYLESHEET
+ *
+ * TABLE OF CONTENTS:
+ * 1. DESIGN TOKENS & RESET .................... Lines ~20+
+ * 2. APP SHELL & TOP BAR ...................... Lines ~100+
+ * 3. TASKS VIEW & QUEST CARDS ................. Lines ~480+
+ * 4. TASK DETAIL MODAL ........................ Lines ~1050+
+ * 5. LIQUID GLASS DOCK ........................ Lines ~1310+
+ * 6. FOCUS SCREEN & SISYPHUS ANIMATION ........ Lines ~1470+
+ * 7. SCHOOL VIEW & PERIOD MODALS .............. Lines ~1880+
+ * 8. STATS VIEW, RADAR CHART & RANK LADDER .... Lines ~2650+
+ */
+
 :root {
   color-scheme: dark;
   --background: #000;

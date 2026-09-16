@@ -1,4 +1,4 @@
-import QuestApp from "./quest-app";
+import { AppShell } from "./app-shell";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,5 +13,5 @@ function toISODate(date: Date) {
 export default function Home() {
   const today = toISODate(new Date());
 
-  return <QuestApp today={today} />;
+  return <AppShell today={today} />;
 }

@@ -1,54 +1,5 @@
-export type DayOfWeek = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
-
-export const ALL_DAYS: DayOfWeek[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-export const WEEKDAYS: DayOfWeek[] = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-
-export type PeriodIconId =
-  | "book"
-  | "calculator"
-  | "flask"
-  | "globe"
-  | "laptop"
-  | "palette"
-  | "music"
-  | "trophy"
-  | "pencil"
-  | "bell"
-  | "coffee";
-
-export const PERIOD_ICONS: { id: PeriodIconId; label: string }[] = [
-  { id: "book", label: "Reading & English" },
-  { id: "calculator", label: "Math & STEM" },
-  { id: "flask", label: "Science & Lab" },
-  { id: "globe", label: "History & Social Studies" },
-  { id: "laptop", label: "Computer & Tech" },
-  { id: "palette", label: "Art & Design" },
-  { id: "music", label: "Music & Band" },
-  { id: "trophy", label: "PE & Sports" },
-  { id: "pencil", label: "Writing & Study" },
-  { id: "bell", label: "Homeroom & Advisory" },
-  { id: "coffee", label: "Break & Lunch" },
-];
-
-export type Period = {
-  id: string;
-  name: string;
-  startTime: string; // "HH:mm" 24-hour format
-  endTime: string;   // "HH:mm" 24-hour format
-  room?: string;
-  days?: DayOfWeek[];
-  color?: string;
-  icon?: PeriodIconId;
-};
-
-export type PeriodFormInput = {
-  name: string;
-  startTime: string;
-  endTime: string;
-  room: string;
-  days: DayOfWeek[];
-  icon: PeriodIconId;
-};
+import type { DayOfWeek, Period, PeriodStatusInfo } from "../types/school";
+import { WEEKDAYS } from "../types/school";
 
 export function timeToMinutes(time24: string): number {
   if (!time24) return 0;
@@ -100,12 +51,10 @@ export function getTodayDayOfWeek(date: Date = new Date()): DayOfWeek {
   return map[dayIndex] ?? "Mon";
 }
 
-export type PeriodLiveStatus = "current" | "next" | "upcoming" | "past";
-
 export function getPeriodStatus(
   period: Period,
   now: Date = new Date(),
-): { status: PeriodLiveStatus; minutesUntil?: number; minutesRemaining?: number } | null {
+): PeriodStatusInfo | null {
   const todayDay = getTodayDayOfWeek(now);
   const days = period.days && period.days.length > 0 ? period.days : WEEKDAYS;
 
@@ -139,4 +88,11 @@ export function getPeriodStatus(
   }
 
   return { status: "past" };
+}
+
+export function calculateNextEndTime(startTime: string, durationMinutes: number): string {
+  const mins = timeToMinutes(startTime) + durationMinutes;
+  const h = Math.floor(mins / 60) % 24;
+  const m = mins % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
