@@ -5,7 +5,9 @@ import type { Quest, QuestForm } from "../types/quest";
 import {
   completeQuestFocusSession,
   createQuestInFirestore,
+  deleteQuestInFirestore,
   toggleQuestInFirestore,
+  updateQuestInFirestore,
 } from "../data/quest-firestore";
 
 type UseQuestMutationsProps = {
@@ -66,6 +68,64 @@ export function useQuestMutations({
     }
   };
 
+  const updateQuest = async (id: string, form: QuestForm) => {
+    const quest = quests.find((current) => current.id === id);
+    const title = form.title.trim();
+    const category = form.category.trim();
+
+    if (!quest || !title || !category || !userId || savingQuestId !== null) return false;
+
+    const updatedQuest = {
+      ...quest,
+      title,
+      description: form.description.trim(),
+      category,
+      dueDate: form.dueDate,
+    };
+
+    setMutationError("");
+    setSavingQuestId(id);
+    setQuests((current) => current.map((item) => (item.id === id ? updatedQuest : item)));
+
+    try {
+      await updateQuestInFirestore(userId, id, form);
+      return true;
+    } catch {
+      setQuests((current) => current.map((item) => (item.id === id ? quest : item)));
+      setMutationError("That quest did not save. Try again.");
+      return false;
+    } finally {
+      setSavingQuestId(null);
+    }
+  };
+
+  const deleteQuest = async (id: string) => {
+    const questIndex = quests.findIndex((current) => current.id === id);
+    const quest = questIndex >= 0 ? quests[questIndex] : undefined;
+
+    if (!quest || !userId || savingQuestId !== null) return false;
+
+    setMutationError("");
+    setSavingQuestId(id);
+    setQuests((current) => current.filter((item) => item.id !== id));
+
+    try {
+      await deleteQuestInFirestore(userId, id);
+      return true;
+    } catch {
+      setQuests((current) => {
+        if (current.some((item) => item.id === id)) return current;
+        const restored = [...current];
+        restored.splice(Math.min(questIndex, restored.length), 0, quest);
+        return restored;
+      });
+      setMutationError("That quest could not be deleted. Try again.");
+      return false;
+    } finally {
+      setSavingQuestId(null);
+    }
+  };
+
   const finishFocusSession = async (questId: string, addedMinutes: number) => {
     if (!userId) {
       throw new Error("Could not save focus session. Please check your connection and retry.");
@@ -92,6 +152,8 @@ export function useQuestMutations({
     setMutationError,
     toggleQuest,
     createQuest,
+    updateQuest,
+    deleteQuest,
     finishFocusSession,
   };
 }

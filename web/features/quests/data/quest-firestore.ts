@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   orderBy,
   query,
@@ -73,6 +74,25 @@ export async function createQuestInFirestore(
     createdAt: Date.now(),
   });
   return docRef.id;
+}
+
+export async function updateQuestInFirestore(
+  userId: string,
+  questId: string,
+  form: QuestForm,
+): Promise<void> {
+  const database = getFirebaseDb();
+  await updateDoc(doc(database, "users", userId, "quests", questId), {
+    title: form.title.trim(),
+    description: form.description.trim(),
+    category: form.category.trim(),
+    dueDate: form.dueDate,
+  });
+}
+
+export async function deleteQuestInFirestore(userId: string, questId: string): Promise<void> {
+  const database = getFirebaseDb();
+  await deleteDoc(doc(database, "users", userId, "quests", questId));
 }
 
 export async function saveQuestOrderToFirestore(

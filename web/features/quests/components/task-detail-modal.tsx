@@ -9,6 +9,8 @@ type TaskDetailModalProps = {
   quest: Quest;
   today: string;
   onClose: () => void;
+  onEdit: () => void;
+  onDelete: () => void | Promise<void>;
   onToggleComplete: (id: string) => void;
   onStartFocus: (quest: Quest) => void;
   isUpdating: boolean;
@@ -18,6 +20,8 @@ export function TaskDetailModal({
   quest,
   today,
   onClose,
+  onEdit,
+  onDelete,
   onToggleComplete,
   onStartFocus,
   isUpdating,
@@ -144,11 +148,27 @@ export function TaskDetailModal({
         <footer className="detailModalFooter">
           <button
             type="button"
+            className="detailEditButton"
+            onClick={onEdit}
+            disabled={isUpdating}
+          >
+            Edit quest
+          </button>
+          <button
+            type="button"
             className={`detailCompleteToggle${quest.completed ? " isReopen" : ""}`}
             onClick={() => onToggleComplete(quest.id)}
             disabled={isUpdating}
           >
             {quest.completed ? "Reopen Quest" : "Mark Completed"}
+          </button>
+          <button
+            type="button"
+            className="questDeleteButton"
+            onClick={onDelete}
+            disabled={isUpdating}
+          >
+            Delete quest
           </button>
         </footer>
       </section>

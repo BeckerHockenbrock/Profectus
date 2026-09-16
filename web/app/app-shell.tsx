@@ -36,6 +36,7 @@ export function AppShell({ today }: AppShellProps) {
   const [activeTab, setActiveTab] = useState<ActiveTab>("tasks");
   const [questView, setQuestView] = useState<QuestView>("all");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [editingQuestId, setEditingQuestId] = useState<string | null>(null);
   const [form, setForm] = useState<QuestForm>(emptyForm);
   const [focusQuest, setFocusQuest] = useState<Quest | null>(null);
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
@@ -46,8 +47,11 @@ export function AppShell({ today }: AppShellProps) {
     savingQuestId,
     isCreating,
     mutationError,
+    setMutationError,
     toggleQuest,
     createQuest,
+    updateQuest,
+    deleteQuest,
     finishFocusSession,
   } = useQuestMutations({
     userId: user?.uid,
@@ -111,11 +115,44 @@ export function AppShell({ today }: AppShellProps) {
 
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const success = await createQuest(form);
+    const success = editingQuestId
+      ? await updateQuest(editingQuestId, form)
+      : await createQuest(form);
     if (success) {
       setForm(emptyForm);
+      setEditingQuestId(null);
       setSheetOpen(false);
     }
+  };
+
+  const openNewQuest = () => {
+    setMutationError("");
+    setEditingQuestId(null);
+    setForm(emptyForm);
+    setSheetOpen(true);
+  };
+
+  const openQuestEditor = (quest: Quest) => {
+    setMutationError("");
+    setSelectedQuestId(null);
+    setEditingQuestId(quest.id);
+    setForm({
+      title: quest.title,
+      description: quest.description,
+      category: quest.category,
+      dueDate: quest.dueDate,
+    });
+    setSheetOpen(true);
+  };
+
+  const closeQuestForm = () => {
+    setSheetOpen(false);
+    setEditingQuestId(null);
+  };
+
+  const handleDeleteQuest = async (id: string) => {
+    if (!window.confirm("Delete this quest? This cannot be undone.")) return;
+    await deleteQuest(id);
   };
 
   if (user === undefined) {
@@ -164,7 +201,7 @@ export function AppShell({ today }: AppShellProps) {
           <AppHeader
             activeTab={activeTab}
             userInitial={userInitial}
-            onOpenNewQuest={() => setSheetOpen(true)}
+            onOpenNewQuest={openNewQuest}
             onSignOut={signOut}
           />
 
@@ -196,18 +233,20 @@ export function AppShell({ today }: AppShellProps) {
                 suppressClickRef={suppressClickRef}
                 onToggleQuest={toggleQuest}
                 onSelectQuest={(targetQuest) => setSelectedQuestId(targetQuest.id)}
-                onOpenNewQuest={() => setSheetOpen(true)}
+            onOpenNewQuest={openNewQuest}
               />
             </div>
           )}
 
           <QuestFormModal
             sheetOpen={sheetOpen}
+            editingQuestId={editingQuestId}
             form={form}
             setForm={setForm}
             categories={categories}
-            isCreating={isCreating}
-            onClose={() => setSheetOpen(false)}
+            isSaving={isCreating || savingQuestId !== null}
+            formError={mutationError}
+            onClose={closeQuestForm}
             onSubmit={handleFormSubmit}
           />
 
@@ -216,6 +255,8 @@ export function AppShell({ today }: AppShellProps) {
               quest={selectedQuest}
               today={today}
               onClose={() => setSelectedQuestId(null)}
+              onEdit={() => openQuestEditor(selectedQuest)}
+              onDelete={() => handleDeleteQuest(selectedQuest.id)}
               onToggleComplete={toggleQuest}
               onStartFocus={(targetQuest) => {
                 setSelectedQuestId(null);

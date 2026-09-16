@@ -6,20 +6,24 @@ import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
 
 type QuestFormModalProps = {
   sheetOpen: boolean;
+  editingQuestId: string | null;
   form: QuestForm;
   setForm: React.Dispatch<React.SetStateAction<QuestForm>>;
   categories: string[];
-  isCreating: boolean;
+  isSaving: boolean;
+  formError: string;
   onClose: () => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
 };
 
 export function QuestFormModal({
   sheetOpen,
+  editingQuestId,
   form,
   setForm,
   categories,
-  isCreating,
+  isSaving,
+  formError,
   onClose,
   onSubmit,
 }: QuestFormModalProps) {
@@ -50,7 +54,7 @@ export function QuestFormModal({
         ref={scrimRef as React.RefObject<HTMLButtonElement>}
         className="sheetScrim"
         type="button"
-        aria-label="Close new quest form"
+        aria-label="Close quest form"
         onClick={handleClose}
       />
       <section
@@ -65,7 +69,7 @@ export function QuestFormModal({
         </div>
         <div className="sheetHeading" {...dragHandleProps}>
           <div>
-            <h2 id="sheet-title">New quest</h2>
+            <h2 id="sheet-title">{editingQuestId ? "Edit quest" : "New quest"}</h2>
           </div>
           <button className="closeButton" type="button" onClick={handleClose} aria-label="Close">
             ×
@@ -73,6 +77,8 @@ export function QuestFormModal({
         </div>
 
         <form onSubmit={onSubmit}>
+          {formError ? <p className="formError" role="alert">{formError}</p> : null}
+
           <label>
             Quest title
             <input
@@ -165,8 +171,8 @@ export function QuestFormModal({
             />
           </label>
 
-          <button className="saveButton" type="submit" disabled={isCreating}>
-            {isCreating ? "Saving…" : "Create quest"}
+          <button className="saveButton" type="submit" disabled={isSaving}>
+            {isSaving ? "Saving…" : editingQuestId ? "Save changes" : "Create quest"}
           </button>
         </form>
       </section>

@@ -32,13 +32,15 @@ service cloud.firestore {
         && (!data.keys().hasAny(['order']) || data.order is int);
     }
 
-    // Allowed updates: only `completed` and/or `focusMinutes` may be modified.
+    // Allowed updates: editable quest fields, completion/focus state, and order.
     // `focusMinutes` must be an integer and cannot decrease (monotonic non-negative).
     // Note: The monotonic rule prevents decreases, but cannot prove a client truly
     // studied that duration. This is an intentional trust-the-client tradeoff for
     // this personal study timer application.
     function isValidQuestUpdate() {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['completed', 'focusMinutes', 'order'])
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'title', 'description', 'category', 'dueDate', 'completed', 'focusMinutes', 'order'
+        ])
         && request.resource.data.completed is bool
         && request.resource.data.focusMinutes is int
         && request.resource.data.focusMinutes >= resource.data.focusMinutes
