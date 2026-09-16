@@ -461,6 +461,45 @@ h2 {
   font-weight: 650;
 }
 
+.questCardActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.startFocusButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  transition: background-color 160ms ease, border-color 160ms ease, transform 100ms ease-out;
+}
+
+.startFocusButton:hover {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+.startFocusButton:active {
+  transform: scale(0.96);
+}
+
+.startFocusButton svg {
+  flex-shrink: 0;
+}
+
 .emptyState,
 .formError {
   margin: 0;
@@ -716,6 +755,372 @@ textarea:focus {
   }
 }
 
+/* Full-Screen Focus Mode */
+.focusScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.055), transparent 48rem), #000;
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  padding: max(1.2rem, env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right)) max(1.35rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+  overflow-y: auto;
+  overflow-x: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.focusContainer {
+  width: min(100%, 36rem);
+  min-height: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.focusHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding-top: 0.25rem;
+}
+
+.focusCategoryPill {
+  display: inline-flex;
+  min-height: 1.55rem;
+  align-items: center;
+  padding: 0.18rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--secondary);
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.focusQuestTitle {
+  margin: 0;
+  font-size: clamp(1.25rem, 4.2vw, 1.8rem);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.22;
+  max-width: 92%;
+  word-break: break-word;
+}
+
+.focusQuestDesc {
+  margin: 0.1rem 0 0;
+  color: var(--secondary);
+  font-size: 0.82rem;
+  line-height: 1.42;
+  max-width: 28rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.focusVisualSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  margin: 0.5rem 0;
+}
+
+.sisyphusAnimationWrapper {
+  position: relative;
+  width: min(74vw, 42vh, 19rem);
+  width: min(74vw, 42dvh, 19rem);
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sisyphusFrameStage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.sisyphusFrameStage::before {
+  position: absolute;
+  inset: 12%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.07), transparent 68%);
+  content: "";
+  filter: blur(16px);
+}
+
+.sisyphusFrame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.08));
+  transition: opacity 180ms ease;
+}
+
+.sisyphusFrameStage[data-ready="false"] .sisyphusFrame,
+.focusScreen[data-paused="true"] .sisyphusFrame {
+  opacity: 0.72;
+}
+
+.focusTimerBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.focusTimerNumerals {
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", "Courier New", monospace;
+  font-size: clamp(3.2rem, 14vw, 5.2rem);
+  font-weight: 340;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+  color: #f1f1ed;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.4), 0 0 18px rgba(255, 255, 255, 0.08);
+  filter: url(#pencil-stroke);
+  transition: opacity 200ms ease;
+}
+
+.focusScreen[data-paused="true"] .focusTimerNumerals {
+  opacity: 0.72;
+}
+
+.focusStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 680;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  min-height: 1.25rem;
+}
+
+.focusStatusDot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  transition: background-color 200ms ease, opacity 200ms ease;
+}
+
+.focusScreen[data-paused="true"] .focusStatusDot {
+  background: var(--muted);
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.focusControls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 23rem;
+  margin: 0 auto;
+}
+
+.focusPrimaryRow {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.focusPauseButton,
+.focusFinishButton {
+  min-height: 3.25rem;
+  border-radius: 1rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: transform 100ms ease-out, background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+.focusPauseButton {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.065);
+  color: var(--text);
+}
+
+.focusPauseButton:hover {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+.focusScreen[data-paused="true"] .focusPauseButton {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--accent-strong);
+}
+
+.focusFinishButton {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: var(--accent-strong);
+  color: #050505;
+}
+
+.focusFinishButton:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.focusFinishButton:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.focusPauseButton:active:not(:disabled),
+.focusFinishButton:active:not(:disabled),
+.quitConfirmButton:active,
+.quitCancelButton:active {
+  transform: scale(0.96);
+}
+
+.focusQuitButton {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.5rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: color 160ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.focusQuitButton:hover {
+  color: var(--secondary);
+}
+
+.focusErrorBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.95rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 75, 75, 0.12);
+  border: 1px solid rgba(255, 100, 100, 0.35);
+  color: #ffcccc;
+  font-size: 0.8rem;
+}
+
+.focusErrorRetryButton {
+  flex-shrink: 0;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 680;
+  cursor: pointer;
+}
+
+.focusModalScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+.focusModalCard {
+  background: #141414;
+  border: 1px solid var(--line);
+  border-radius: 1.4rem;
+  padding: 1.6rem 1.4rem;
+  width: min(100%, 22rem);
+  text-align: center;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.focusModalCard h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.focusModalCard p {
+  margin: 0;
+  color: var(--secondary);
+  font-size: 0.84rem;
+  line-height: 1.42;
+}
+
+.focusModalActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.quitConfirmButton {
+  min-height: 3rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 75, 75, 0.45);
+  background: rgba(255, 75, 75, 0.15);
+  color: #ffa4a4;
+  font-weight: 680;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.quitCancelButton {
+  min-height: 3rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  font-weight: 680;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -726,6 +1131,12 @@ textarea:focus {
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .sisyphusFrame {
+    transition: none !important;
   }
 }
 

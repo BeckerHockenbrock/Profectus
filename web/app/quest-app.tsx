@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { FormEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -10,7 +10,16 @@ import {
   signOut,
   type User,
 } from "firebase/auth";
-import { addDoc, collection, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  runTransaction,
+  updateDoc,
+} from "firebase/firestore";
 import { getFirebaseAuth, getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase";
 import type { Quest } from "@/lib/quest-types";
 
@@ -69,11 +78,13 @@ function QuestCard({
   quest,
   today,
   onToggle,
+  onStartFocus,
   isUpdating,
 }: {
   quest: Quest;
   today: string;
   onToggle: (id: string) => void;
+  onStartFocus: (quest: Quest) => void;
   isUpdating: boolean;
 }) {
   return (
@@ -98,13 +109,507 @@ function QuestCard({
         </div>
         <h3>{quest.title}</h3>
         {quest.description ? <p>{quest.description}</p> : null}
-        <div className="questReward" aria-label={`${quest.focusMinutes} minutes focused`}>
-          <span>{quest.focusMinutes} min focused</span>
-          <span aria-hidden="true">·</span>
-          <strong>{quest.focusMinutes} XP</strong>
+
+        <div className="questCardActions">
+          <div className="questReward" aria-label={`${quest.focusMinutes} minutes focused`}>
+            <span>{quest.focusMinutes} min focused</span>
+            <span aria-hidden="true">·</span>
+            <strong>{quest.focusMinutes} XP</strong>
+          </div>
+
+          <button
+            type="button"
+            className="startFocusButton"
+            onClick={() => onStartFocus(quest)}
+            aria-label={`Start focus on ${quest.title}`}
+          >
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            <span>Start focus</span>
+          </button>
         </div>
       </div>
     </article>
+  );
+}
+
+function formatTimerDigits(totalMilliseconds: number) {
+  const totalSeconds = Math.floor(totalMilliseconds / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const mm = String(minutes).padStart(2, "0");
+  const ss = String(seconds).padStart(2, "0");
+
+  if (hours > 0) {
+    const hh = String(hours).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
+  }
+  return `${mm}:${ss}`;
+}
+
+const SISYPHUS_FOCUS_FRAMES = Array.from(
+  { length: 12 },
+  (_, index) => `/focus/sisyphus/frame-${String(index + 1).padStart(2, "0")}.png`,
+);
+const SISYPHUS_FRAME_DURATION_MS = 120;
+
+function SisyphusFrameAnimation({ isPaused }: { isPaused: boolean }) {
+  const [frameIndex, setFrameIndex] = useState(0);
+  const [sequenceReady, setSequenceReady] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const animationFrameRef = useRef<number | null>(null);
+  const previousTimestampRef = useRef<number | null>(null);
+  const accumulatedFrameMsRef = useRef(0);
+
+  useEffect(() => {
+    if (prefersReducedMotion || sequenceReady) return;
+
+    let cancelled = false;
+    const preloadedFrames = SISYPHUS_FOCUS_FRAMES.map((src) => {
+      const image = new window.Image();
+      image.src = src;
+      return image;
+    });
+
+    void Promise.all(preloadedFrames.map((image) => image.decode())).then(
+      () => {
+        if (!cancelled) setSequenceReady(true);
+      },
+      () => {
+        if (!cancelled) setSequenceReady(false);
+      },
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [prefersReducedMotion, sequenceReady]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncPreference = () => setPrefersReducedMotion(mediaQuery.matches);
+
+    syncPreference();
+    mediaQuery.addEventListener("change", syncPreference);
+    return () => mediaQuery.removeEventListener("change", syncPreference);
+  }, []);
+
+  const framesReady = prefersReducedMotion || sequenceReady;
+
+  useEffect(() => {
+    if (!sequenceReady || isPaused || prefersReducedMotion) {
+      previousTimestampRef.current = null;
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      return;
+    }
+
+    const animate = (timestamp: number) => {
+      const previousTimestamp = previousTimestampRef.current;
+      previousTimestampRef.current = timestamp;
+
+      if (previousTimestamp !== null) {
+        accumulatedFrameMsRef.current += Math.min(timestamp - previousTimestamp, 250);
+        const framesToAdvance = Math.floor(
+          accumulatedFrameMsRef.current / SISYPHUS_FRAME_DURATION_MS,
+        );
+
+        if (framesToAdvance > 0) {
+          accumulatedFrameMsRef.current %= SISYPHUS_FRAME_DURATION_MS;
+          setFrameIndex(
+            (currentFrame) =>
+              (currentFrame + framesToAdvance) % SISYPHUS_FOCUS_FRAMES.length,
+          );
+        }
+      }
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [sequenceReady, isPaused, prefersReducedMotion]);
+
+  const visibleFrameIndex = prefersReducedMotion ? 0 : frameIndex;
+
+  return (
+    <div
+      className="sisyphusFrameStage"
+      data-ready={framesReady}
+      role="img"
+      aria-label="Sisyphus steadily pushing a boulder uphill"
+    >
+      <Image
+        className="sisyphusFrame"
+        src={SISYPHUS_FOCUS_FRAMES[visibleFrameIndex]}
+        alt=""
+        width={768}
+        height={768}
+        sizes="(max-width: 48rem) 74vw, 19rem"
+        loading="eager"
+        decoding="sync"
+        draggable={false}
+        unoptimized
+      />
+    </div>
+  );
+}
+
+type FocusScreenProps = {
+  quest: Quest;
+  user: User;
+  onQuit: () => void;
+  onFinished: (questId: string, addedMinutes: number) => void;
+};
+
+function FocusScreen({ quest, user, onQuit, onFinished }: FocusScreenProps) {
+  const [isPaused, setIsPaused] = useState(false);
+  const [displayMs, setDisplayMs] = useState(0);
+  const [isFinishing, setIsFinishing] = useState(false);
+  const [finishError, setFinishError] = useState<string | null>(null);
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false);
+
+  const accumulatedMsRef = useRef(0);
+  const segmentStartRef = useRef<number | null>(null);
+  const isPausedRef = useRef(false);
+  const isFinishingRef = useRef(false);
+  const wasRunningBeforeQuitRef = useRef(false);
+  const pauseButtonRef = useRef<HTMLButtonElement>(null);
+
+  const getElapsedMs = useCallback(() => {
+    if (isPausedRef.current) {
+      return accumulatedMsRef.current;
+    }
+    const start = segmentStartRef.current;
+    if (start === null) {
+      return accumulatedMsRef.current;
+    }
+    return accumulatedMsRef.current + Math.max(0, Date.now() - start);
+  }, []);
+
+  // Initialize start timestamp, lock body scroll, and move focus on entry
+  useEffect(() => {
+    segmentStartRef.current = Date.now();
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    // Auto-focus primary control
+    const timer = setTimeout(() => {
+      pauseButtonRef.current?.focus();
+    }, 40);
+
+    return () => {
+      clearTimeout(timer);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
+  // Timer ticker and visibility/focus handlers to prevent background drift
+  useEffect(() => {
+    const updateDisplay = () => {
+      setDisplayMs(getElapsedMs());
+    };
+
+    const intervalId = setInterval(updateDisplay, 200);
+
+    const handleSync = () => {
+      updateDisplay();
+    };
+
+    document.addEventListener("visibilitychange", handleSync);
+    window.addEventListener("focus", handleSync);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleSync);
+      window.removeEventListener("focus", handleSync);
+    };
+  }, [getElapsedMs]);
+
+  const handleTogglePause = useCallback(() => {
+    if (isFinishingRef.current) return;
+
+    if (isPausedRef.current) {
+      // Resume
+      segmentStartRef.current = Date.now();
+      isPausedRef.current = false;
+      setIsPaused(false);
+      setDisplayMs(accumulatedMsRef.current);
+    } else {
+      // Pause
+      const now = Date.now();
+      const start = segmentStartRef.current ?? now;
+      const elapsedSegment = Math.max(0, now - start);
+      accumulatedMsRef.current += elapsedSegment;
+      segmentStartRef.current = null;
+      isPausedRef.current = true;
+      setIsPaused(true);
+      setDisplayMs(accumulatedMsRef.current);
+    }
+  }, []);
+
+  const handleQuitClick = useCallback(() => {
+    if (isFinishingRef.current) return;
+
+    const elapsed = getElapsedMs();
+    if (elapsed < 1000) {
+      // Immediate exit if no time has elapsed
+      onQuit();
+      return;
+    }
+
+    // Freeze motion/timer while quit confirmation is open
+    if (!isPausedRef.current) {
+      wasRunningBeforeQuitRef.current = true;
+      handleTogglePause();
+    } else {
+      wasRunningBeforeQuitRef.current = false;
+    }
+
+    setShowQuitConfirm(true);
+  }, [getElapsedMs, handleTogglePause, onQuit]);
+
+  const confirmQuit = () => {
+    setShowQuitConfirm(false);
+    onQuit();
+  };
+
+  const cancelQuit = useCallback(() => {
+    setShowQuitConfirm(false);
+    if (wasRunningBeforeQuitRef.current && isPausedRef.current) {
+      handleTogglePause();
+    }
+  }, [handleTogglePause]);
+
+  const handleFinish = async () => {
+    if (isFinishingRef.current) return;
+    isFinishingRef.current = true;
+    setIsFinishing(true);
+    setFinishError(null);
+
+    // Freeze timer locally
+    const finalElapsedMs = getElapsedMs();
+    if (!isPausedRef.current) {
+      accumulatedMsRef.current = finalElapsedMs;
+      isPausedRef.current = true;
+      setIsPaused(true);
+      setDisplayMs(finalElapsedMs);
+    }
+
+    const elapsedSeconds = Math.floor(finalElapsedMs / 1000);
+    // Conscious product policy: full completed minutes only
+    const addedMinutes = Math.floor(elapsedSeconds / 60);
+
+    try {
+      const database = getFirebaseDb();
+      const questRef = doc(database, "users", user.uid, "quests", quest.id);
+
+      await runTransaction(database, async (transaction) => {
+        const questDoc = await transaction.get(questRef);
+        if (!questDoc.exists()) {
+          throw new Error("Quest no longer exists.");
+        }
+        const data = questDoc.data();
+        const currentFocus = typeof data.focusMinutes === "number" ? Math.floor(data.focusMinutes) : 0;
+        const newFocusMinutes = currentFocus + addedMinutes;
+
+        transaction.update(questRef, {
+          completed: true,
+          focusMinutes: newFocusMinutes,
+        });
+      });
+
+      onFinished(quest.id, addedMinutes);
+    } catch (err) {
+      // Retain the focus screen on failure so progress is not lost, and allow retry
+      isFinishingRef.current = false;
+      setIsFinishing(false);
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : "Could not save focus session. Please check your connection and retry.";
+      setFinishError(message);
+    }
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (showQuitConfirm) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          cancelQuit();
+        }
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        handleQuitClick();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showQuitConfirm, handleQuitClick, cancelQuit]);
+
+  const minutesFocused = Math.floor(displayMs / 60000);
+
+  return (
+    <section
+      className="focusScreen"
+      data-paused={isPaused}
+      aria-label={`Focus mode for ${quest.title}`}
+    >
+      <div className="focusContainer">
+        <header className="focusHeader">
+          <span className="focusCategoryPill">{quest.category}</span>
+          <h1 className="focusQuestTitle">{quest.title}</h1>
+          {quest.description ? <p className="focusQuestDesc">{quest.description}</p> : null}
+        </header>
+
+        <div className="focusVisualSection">
+          <div className="sisyphusAnimationWrapper">
+            <SisyphusFrameAnimation isPaused={isPaused} />
+          </div>
+
+          <div
+            className="focusTimerBox"
+            role="timer"
+            aria-live="off"
+            aria-label={`Elapsed focus time: ${minutesFocused} minutes ${Math.floor((displayMs % 60000) / 1000)} seconds`}
+          >
+            <div className="focusTimerNumerals" aria-hidden="true">
+              {formatTimerDigits(displayMs)}
+            </div>
+            <div className="focusStatusBadge">
+              <span className="focusStatusDot" aria-hidden="true" />
+              <span>{isPaused ? "Paused" : "Focusing"}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="focusControls">
+          {finishError ? (
+            <div className="focusErrorBanner" role="alert">
+              <span>{finishError}</span>
+              <button
+                type="button"
+                className="focusErrorRetryButton"
+                onClick={handleFinish}
+                disabled={isFinishing}
+              >
+                Retry
+              </button>
+            </div>
+          ) : null}
+
+          <div className="focusPrimaryRow">
+            <button
+              ref={pauseButtonRef}
+              type="button"
+              className="focusPauseButton"
+              onClick={handleTogglePause}
+              disabled={isFinishing}
+              aria-label={isPaused ? "Resume focus timer" : "Pause focus timer"}
+            >
+              {isPaused ? (
+                <>
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  <span>Resume</span>
+                </>
+              ) : (
+                <>
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                  </svg>
+                  <span>Pause</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              className="focusFinishButton"
+              onClick={handleFinish}
+              disabled={isFinishing}
+              aria-label="Finished focus session. Save progress and mark quest completed"
+            >
+              {isFinishing ? (
+                <span>Saving…</span>
+              ) : (
+                <>
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
+                  <span>Finished</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="focusQuitButton"
+            onClick={handleQuitClick}
+            disabled={isFinishing}
+            aria-label="Quit focus session without saving"
+          >
+            Quit session
+          </button>
+        </div>
+      </div>
+
+      {showQuitConfirm ? (
+        <div
+          className="focusModalScrim"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="quit-dialog-title"
+          aria-describedby="quit-dialog-desc"
+        >
+          <div className="focusModalCard">
+            <h2 id="quit-dialog-title">Discard session?</h2>
+            <p id="quit-dialog-desc">
+              {minutesFocused > 0
+                ? `${minutesFocused} minute${minutesFocused === 1 ? "" : "s"} of focus will not be saved.`
+                : "Your elapsed focus time will not be saved."}
+            </p>
+            <div className="focusModalActions">
+              <button
+                type="button"
+                className="quitConfirmButton"
+                onClick={confirmQuit}
+                autoFocus
+              >
+                Discard and quit
+              </button>
+              <button
+                type="button"
+                className="quitCancelButton"
+                onClick={cancelQuit}
+              >
+                Keep focusing
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -119,6 +624,22 @@ export default function QuestApp({ today }: QuestAppProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [saveError, setSaveError] = useState(firebaseConfigured ? "" : "Firebase is not configured yet.");
   const [showHomeScreenHint, setShowHomeScreenHint] = useState(false);
+  const [focusQuest, setFocusQuest] = useState<Quest | null>(null);
+
+  function handleFocusFinished(questId: string, addedMinutes: number) {
+    setQuests((current) =>
+      current.map((item) =>
+        item.id === questId
+          ? {
+              ...item,
+              completed: true,
+              focusMinutes: item.focusMinutes + addedMinutes,
+            }
+          : item,
+      ),
+    );
+    setFocusQuest(null);
+  }
 
   const openCount = quests.filter((quest) => !quest.completed).length;
   const completedCount = quests.length - openCount;
@@ -300,8 +821,30 @@ export default function QuestApp({ today }: QuestAppProps) {
     );
   }
 
+  const activeFocusQuest = focusQuest
+    ? quests.find((q) => q.id === focusQuest.id) ?? focusQuest
+    : null;
+
   return (
-    <main className="appShell">
+    <>
+      <svg aria-hidden="true" style={{ position: "absolute", width: 0, height: 0, pointerEvents: "none" }}>
+        <defs>
+          <filter id="pencil-stroke">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.4" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+
+      {activeFocusQuest ? (
+        <FocusScreen
+          quest={activeFocusQuest}
+          user={user}
+          onQuit={() => setFocusQuest(null)}
+          onFinished={handleFocusFinished}
+        />
+      ) : (
+        <main className="appShell">
       <header className="topBar">
         <a className="brand" href="#top" aria-label="Todo Quest home">
           <Image
@@ -387,6 +930,7 @@ export default function QuestApp({ today }: QuestAppProps) {
                     quest={quest}
                     today={today}
                     onToggle={toggleQuest}
+                    onStartFocus={(targetQuest) => setFocusQuest(targetQuest)}
                     isUpdating={savingQuestId === quest.id}
                   />
                 ))
@@ -407,6 +951,7 @@ export default function QuestApp({ today }: QuestAppProps) {
                         quest={quest}
                         today={today}
                         onToggle={toggleQuest}
+                        onStartFocus={(targetQuest) => setFocusQuest(targetQuest)}
                         isUpdating={savingQuestId === quest.id}
                       />
                     ))}
@@ -496,6 +1041,8 @@ export default function QuestApp({ today }: QuestAppProps) {
           </form>
         </section>
       </div>
-    </main>
+        </main>
+      )}
+    </>
   );
 }
