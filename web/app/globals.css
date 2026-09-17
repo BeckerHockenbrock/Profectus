@@ -1736,6 +1736,133 @@ select:focus {
   color: var(--accent-strong);
 }
 
+/*
+ * Desktop workspace
+ *
+ * The application stays mobile-first.  Once the available viewport can hold a
+ * navigation rail and a useful task canvas at the same time, the same controls
+ * become a persistent desktop rail.  CSS owns this breakpoint so it responds
+ * immediately to resizing, orientation changes, and hybrid devices without a
+ * client-side device check or hydration-dependent markup.
+ */
+@media (min-width: 64rem) {
+  .appShell {
+    padding: 0 2.25rem 2.5rem calc(14rem + 3.5rem);
+  }
+
+  .topBar {
+    min-height: calc(5.35rem + env(safe-area-inset-top));
+    padding: calc(0.9rem + env(safe-area-inset-top)) max(2.25rem, env(safe-area-inset-right)) 0.9rem max(2.25rem, env(safe-area-inset-left));
+  }
+
+  .content {
+    width: min(100%, 76rem);
+    padding: 2rem 0 3rem;
+  }
+
+  .hero {
+    padding: 1rem 0 1.25rem;
+  }
+
+  .heroLogo {
+    width: min(28vw, 13rem);
+  }
+
+  .questSection {
+    padding-top: 1.8rem;
+  }
+
+  .sectionHeading {
+    margin-bottom: 1.25rem;
+  }
+
+  /* The rail owns the same view switches on desktop. */
+  .viewSwitch {
+    display: none;
+  }
+
+  .liquidGlassDock {
+    top: max(1.25rem, env(safe-area-inset-top));
+    right: auto;
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+    left: max(1.25rem, env(safe-area-inset-left));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 14rem;
+    padding: 0.75rem;
+    align-items: stretch;
+    gap: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.25rem;
+    background: rgba(12, 12, 13, 0.86);
+    box-shadow: 12px 0 32px rgba(0, 0, 0, 0.24);
+  }
+
+  .dockItem {
+    min-height: 3.25rem;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.85rem;
+    font-size: 0.83rem;
+    text-align: left;
+  }
+
+  .dockItem.isActive {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .dockIcon {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  .dockCreateButton {
+    margin-top: auto;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.055);
+  }
+}
+
+/* A two-column task workspace is only useful once both columns stay roomy. */
+@media (min-width: 78rem) {
+  .content {
+    display: grid;
+    grid-template-columns: minmax(13rem, 18rem) minmax(0, 1fr);
+    align-items: start;
+    column-gap: clamp(2.5rem, 5vw, 5rem);
+  }
+
+  .homeScreenHint {
+    grid-column: 1 / -1;
+  }
+
+  .hero {
+    justify-items: start;
+    padding: 1rem 0;
+    text-align: left;
+  }
+
+  .heroLogo {
+    width: min(100%, 16rem);
+  }
+
+  .questSection {
+    min-width: 0;
+    padding-top: 1rem;
+  }
+
+  .questList {
+    gap: 0.6rem;
+  }
+
+  .questCard {
+    padding: 0.78rem 1.05rem;
+  }
+}
+
 /* Full-Screen Focus Mode */
 
 .focusScreen {
