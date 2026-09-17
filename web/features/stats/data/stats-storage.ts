@@ -1,5 +1,6 @@
 import type { Quest } from "@/features/quests/types/quest";
 import type {
+  LifeAttribute,
   SeasonHistoryItem,
   UserStatsProfile,
 } from "../types/stats";
@@ -37,6 +38,14 @@ export function getInitialStatsProfile(quests: Quest[] = []): UserStatsProfile {
     lifetimePeakCumulativeRR: calculatedXP,
     seasonHistory: [],
     attributeOverrides: {},
+    attributeBonusPoints: {
+      discipline: 0,
+      intellect: 0,
+      love: 0,
+      social: 0,
+      exercise: 0,
+      sleep: 0,
+    },
   };
 }
 
@@ -178,4 +187,46 @@ export function simulateMonthlyReset(profile: UserStatsProfile): UserStatsProfil
       shown: false,
     },
   };
+}
+
+export function applyJournalRewards(
+  userId: string | null | undefined,
+  statGains: Partial<Record<LifeAttribute, number>>,
+  earnedXP: number,
+): UserStatsProfile {
+  const current = loadUserStats(userId);
+  const currentBonuses = current.attributeBonusPoints || {};
+
+  const updatedBonuses: Record<LifeAttribute, number> = {
+    discipline: (currentBonuses.discipline || 0) + (statGains.discipline || 0),
+    intellect: (currentBonuses.intellect || 0) + (statGains.intellect || 0),
+    love: (currentBonuses.love || 0) + (statGains.love || 0),
+    social: (currentBonuses.social || 0) + (statGains.social || 0),
+    exercise: (currentBonuses.exercise || 0) + (statGains.exercise || 0),
+    sleep: (currentBonuses.sleep || 0) + (statGains.sleep || 0),
+  };
+
+  const newBonusXP = (current.bonusXP || 0) + earnedXP;
+  const newBonusRR = (current.bonusRR || 0) + earnedXP;
+  const newTotalXP = (current.lifetimeXP || 0) + earnedXP;
+  const newTotalRR = (current.seasonCumulativeRR || 0) + earnedXP;
+
+  const updated: UserStatsProfile = {
+    ...current,
+    bonusXP: newBonusXP,
+    bonusRR: newBonusRR,
+    lifetimeXP: newTotalXP,
+    seasonCumulativeRR: newTotalRR,
+    attributeBonusPoints: updatedBonuses,
+    seasonPeakCumulativeRR: Math.max(current.seasonPeakCumulativeRR || 0, newTotalRR),
+    lifetimePeakCumulativeRR: Math.max(current.lifetimePeakCumulativeRR || 0, newTotalXP),
+  };
+
+  saveUserStats(updated, userId);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("altiora-stats-updated", { detail: updated }));
+  }
+
+  return updated;
 }

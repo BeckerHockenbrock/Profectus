@@ -1,10 +1,10 @@
 export type LifeAttribute =
-  | "physical"
-  | "social"
   | "discipline"
-  | "mental"
   | "intellect"
-  | "ambition";
+  | "love"
+  | "social"
+  | "exercise"
+  | "sleep";
 
 export interface AttributeMeta {
   id: LifeAttribute;
@@ -16,21 +16,21 @@ export interface AttributeMeta {
 }
 
 export const LIFE_ATTRIBUTES: Record<LifeAttribute, AttributeMeta> = {
-  physical: {
-    id: "physical",
-    name: "Physical",
+  exercise: {
+    id: "exercise",
+    name: "Exercise",
     color: "#10b981", // Emerald Green (top vertex)
     glowColor: "rgba(16, 185, 129, 0.4)",
-    description: "Body, fitness, sleep, nutrition & vitality",
-    keywords: ["gym", "workout", "cardio", "run", "fitness", "sleep", "health", "diet", "lift", "training", "exercise", "walk", "stretch"],
+    description: "Workouts, cardio, lifting, sports & physical activity",
+    keywords: ["gym", "workout", "cardio", "run", "fitness", "lift", "training", "exercise", "walk", "stretch", "swim", "bike", "sports", "pushups"],
   },
-  social: {
-    id: "social",
-    name: "Social",
-    color: "#3b82f6", // Bright Blue (top-right vertex)
-    glowColor: "rgba(59, 130, 246, 0.4)",
-    description: "Relationships, family, friends & networking",
-    keywords: ["social", "call", "friend", "family", "dinner", "party", "network", "meeting", "hangout", "catchup", "date", "club"],
+  intellect: {
+    id: "intellect",
+    name: "Intellect",
+    color: "#06b6d4", // Bright Cyan (top-right vertex)
+    glowColor: "rgba(6, 182, 212, 0.4)",
+    description: "Academics, learning, deep reading & critical thinking",
+    keywords: ["school", "cis", "study", "exam", "reading", "read", "math", "class", "lecture", "homework", "learn", "course", "algorithm", "code", "dev"],
   },
   discipline: {
     id: "discipline",
@@ -38,41 +38,41 @@ export const LIFE_ATTRIBUTES: Record<LifeAttribute, AttributeMeta> = {
     color: "#ef4444", // Crimson Red (bottom-right vertex)
     glowColor: "rgba(239, 68, 68, 0.4)",
     description: "Consistency, morning routines, habits & grit",
-    keywords: ["habit", "discipline", "routine", "morning", "chores", "clean", "streak", "daily", "organize", "focus", "grit"],
+    keywords: ["habit", "discipline", "routine", "morning", "chores", "clean", "streak", "daily", "organize", "focus", "grit", "willpower"],
   },
-  mental: {
-    id: "mental",
-    name: "Mental",
-    color: "#eab308", // Vivid Yellow (bottom vertex)
-    glowColor: "rgba(234, 179, 8, 0.4)",
-    description: "Mindfulness, clarity, resilience & inner peace",
-    keywords: ["mental", "meditate", "journal", "relax", "mindfulness", "therapy", "peace", "breathe", "reflection", "calm"],
+  sleep: {
+    id: "sleep",
+    name: "Sleep",
+    color: "#8b5cf6", // Vivid Violet / Purple (bottom vertex)
+    glowColor: "rgba(139, 92, 246, 0.4)",
+    description: "Sleep hygiene, rest, bedtime consistency & recovery",
+    keywords: ["sleep", "nap", "rest", "bedtime", "wake", "bed", "dream", "recovery", "insomnia", "circadian", "night"],
   },
-  intellect: {
-    id: "intellect",
-    name: "Intellect",
-    color: "#f97316", // Vivid Orange (bottom-left vertex)
-    glowColor: "rgba(249, 115, 22, 0.4)",
-    description: "Academics, learning, deep reading & critical thinking",
-    keywords: ["school", "cis", "study", "exam", "reading", "read", "math", "class", "lecture", "homework", "learn", "course", "algorithm"],
+  love: {
+    id: "love",
+    name: "Love",
+    color: "#f43f5e", // Rose Pink (bottom-left vertex)
+    glowColor: "rgba(244, 63, 94, 0.4)",
+    description: "Romance, gratitude, self-love, kindness & deep affection",
+    keywords: ["love", "date", "partner", "gratitude", "relationship", "family", "care", "heart", "compassion", "kindness", "selfcare"],
   },
-  ambition: {
-    id: "ambition",
-    name: "Ambition",
-    color: "#a855f7", // Vivid Purple (top-left vertex)
-    glowColor: "rgba(168, 85, 247, 0.4)",
-    description: "Career, entrepreneurial drive, coding & major goals",
-    keywords: ["work", "project", "code", "dev", "build", "startup", "career", "finance", "business", "portfolio", "goal", "launch"],
+  social: {
+    id: "social",
+    name: "Social",
+    color: "#3b82f6", // Vivid Blue (top-left vertex)
+    glowColor: "rgba(59, 130, 246, 0.4)",
+    description: "Friendships, connection, hangouts & community",
+    keywords: ["social", "call", "friend", "dinner", "party", "network", "meeting", "hangout", "catchup", "club", "talk", "group"],
   },
 };
 
 export const ATTRIBUTE_ORDER: LifeAttribute[] = [
-  "physical",
-  "social",
-  "discipline",
-  "mental",
+  "exercise",
   "intellect",
-  "ambition",
+  "discipline",
+  "sleep",
+  "love",
+  "social",
 ];
 
 export type RankTier =
@@ -218,6 +218,7 @@ export interface UserStatsProfile {
   lifetimePeakCumulativeRR: number;
   seasonHistory: SeasonHistoryItem[];
   attributeOverrides?: Partial<Record<LifeAttribute, number>>;
+  attributeBonusPoints?: Partial<Record<LifeAttribute, number>>;
   bonusXP?: number;
   bonusRR?: number;
   bonusFocusMins?: number;

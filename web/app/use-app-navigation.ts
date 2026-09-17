@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import type React from "react";
 import type { QuestView } from "@/features/quests/types/quest";
 
-export type ActiveTab = "tasks" | "school" | "stats";
+export type ActiveTab = "tasks" | "school" | "journal" | "stats";
 
 type UseAppNavigationOptions = {
   activeTab: ActiveTab;
@@ -59,6 +59,17 @@ export function useAppNavigation({
     });
   }, [setActiveTab, setSheetOpen, sheetOpen]);
 
+  const handleJournalNavigation = useCallback(() => {
+    if (sheetOpen) {
+      setSheetOpen(false);
+    }
+    setActiveTab("journal");
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+    });
+  }, [setActiveTab, setSheetOpen, sheetOpen]);
+
   const handleStatsNavigation = useCallback(() => {
     if (sheetOpen) {
       setSheetOpen(false);
@@ -73,6 +84,7 @@ export function useAppNavigation({
   return {
     handleHomeNavigation,
     handleSchoolNavigation,
+    handleJournalNavigation,
     handleStatsNavigation,
   };
 }

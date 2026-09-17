@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Quest } from "@/features/quests/types/quest";
 import type { LifeAttribute, RankPosition, UserStatsProfile } from "../types/stats";
 import { LIFE_ATTRIBUTES } from "../types/stats";
@@ -21,6 +21,25 @@ export function useUserStats(userId?: string | null, quests: Quest[] = []) {
   const [selectedAttr, setSelectedAttr] = useState<LifeAttribute | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [resetNotice, setResetNotice] = useState<string | null>(null);
+
+  // Synchronize profile updates from journal or other tabs
+  useEffect(() => {
+    const handleStatsUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<UserStatsProfile>;
+      if (customEvent.detail) {
+        setProfile(customEvent.detail);
+      } else {
+        setProfile(loadUserStats(userId, quests));
+      }
+    };
+
+    window.addEventListener("altiora-stats-updated", handleStatsUpdated);
+    window.addEventListener("storage", handleStatsUpdated);
+    return () => {
+      window.removeEventListener("altiora-stats-updated", handleStatsUpdated);
+      window.removeEventListener("storage", handleStatsUpdated);
+    };
+  }, [userId, quests]);
 
   // Save profile updates
   const updateProfile = (updater: (prev: UserStatsProfile) => UserStatsProfile) => {
@@ -44,10 +63,10 @@ export function useUserStats(userId?: string | null, quests: Quest[] = []) {
   const effectiveFocusMins = liveQuestStats.focusMins + (profile.bonusFocusMins || 0);
   const effectiveQuestsCompleted = liveQuestStats.completedCount;
 
-  // Compute live attribute scores strictly from activity
+  // Compute live attribute scores strictly from activity plus journal gains
   const attributeScores = useMemo(() => {
-    return calculateAttributeScores(quests, profile.attributeOverrides);
-  }, [quests, profile.attributeOverrides]);
+    return calculateAttributeScores(quests, profile.attributeOverrides, profile.attributeBonusPoints);
+  }, [quests, profile.attributeOverrides, profile.attributeBonusPoints]);
 
   // Compute live rank
   const rank: RankPosition = useMemo(() => {

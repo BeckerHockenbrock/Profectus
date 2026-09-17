@@ -63,10 +63,10 @@ export function RadarChart({
       let dy = "0.35em";
 
       if (i === 0) {
-        // Physical (Top)
+        // Exercise (Top)
         dy = "-0.5em";
       } else if (i === 1) {
-        // Social (Top-Right)
+        // Intellect (Top-Right)
         textAnchor = "start";
         dy = "-0.2em";
       } else if (i === 2) {
@@ -74,14 +74,14 @@ export function RadarChart({
         textAnchor = "start";
         dy = "0.8em";
       } else if (i === 3) {
-        // Mental (Bottom)
+        // Sleep (Bottom)
         dy = "1.2em";
       } else if (i === 4) {
-        // Intellect (Bottom-Left)
+        // Love (Bottom-Left)
         textAnchor = "end";
         dy = "0.8em";
       } else if (i === 5) {
-        // Ambition (Top-Left)
+        // Social (Top-Left)
         textAnchor = "end";
         dy = "-0.2em";
       }

@@ -120,12 +120,12 @@ export function classifyCategory(category: string, title?: string): LifeAttribut
   }
 
   // Category heuristics
-  if (/work|job|boss|career|money|business|crypto|app|client/i.test(text)) return "ambition";
-  if (/school|college|uni|class|study|math|cis|read|hw|exam|homework/i.test(text)) return "intellect";
-  if (/gym|run|lift|sleep|walk|cardio|water|diet|eat|food|doctor/i.test(text)) return "physical";
-  if (/meditat|mind|breathe|journal|pray|relax/i.test(text)) return "mental";
-  if (/habit|clean|room|laundry|routine|morning|discipline/i.test(text)) return "discipline";
-  if (/call|talk|friend|mom|dad|sister|bro|hang|meet/i.test(text)) return "social";
+  if (/gym|run|lift|workout|walk|cardio|fitness|sport|train|pushup|swim|bike/i.test(text)) return "exercise";
+  if (/sleep|nap|bed|rest|wake|dream|recovery/i.test(text)) return "sleep";
+  if (/school|college|uni|class|study|math|cis|read|hw|exam|homework|code|dev|algorithm/i.test(text)) return "intellect";
+  if (/love|date|partner|romance|gratitude|care|heart|compassion/i.test(text)) return "love";
+  if (/call|talk|friend|mom|dad|sister|bro|hang|meet|party|social|dinner/i.test(text)) return "social";
+  if (/habit|clean|room|laundry|routine|morning|discipline|organize|focus/i.test(text)) return "discipline";
 
   return "discipline";
 }
@@ -133,25 +133,26 @@ export function classifyCategory(category: string, title?: string): LifeAttribut
 export function calculateAttributeScores(
   quests: Quest[] = [],
   overrides?: Partial<Record<LifeAttribute, number>>,
+  bonusPoints?: Partial<Record<LifeAttribute, number>>,
 ): Record<LifeAttribute, number> {
   // Baseline scores strictly start at 0 and track actual activity
   const baseScores: Record<LifeAttribute, number> = {
-    physical: 0,
-    social: 0,
     discipline: 0,
-    mental: 0,
     intellect: 0,
-    ambition: 0,
+    love: 0,
+    social: 0,
+    exercise: 0,
+    sleep: 0,
   };
 
   // Tally completed quests and focus minutes per attribute
   const attributeActivity: Record<LifeAttribute, { completed: number; focusMins: number }> = {
-    physical: { completed: 0, focusMins: 0 },
-    social: { completed: 0, focusMins: 0 },
     discipline: { completed: 0, focusMins: 0 },
-    mental: { completed: 0, focusMins: 0 },
     intellect: { completed: 0, focusMins: 0 },
-    ambition: { completed: 0, focusMins: 0 },
+    love: { completed: 0, focusMins: 0 },
+    social: { completed: 0, focusMins: 0 },
+    exercise: { completed: 0, focusMins: 0 },
+    sleep: { completed: 0, focusMins: 0 },
   };
 
   for (const q of quests) {
@@ -170,7 +171,8 @@ export function calculateAttributeScores(
     const act = attributeActivity[attr];
     // Each completed quest gives +5 points, every 10 min focus gives +1 point
     const earnedBonus = act.completed * 5 + Math.floor(act.focusMins / 10);
-    const score = Math.min(99, Math.max(0, earnedBonus));
+    const extraBonus = bonusPoints?.[attr] || 0;
+    const score = Math.min(99, Math.max(0, earnedBonus + extraBonus));
     finalScores[attr] = score;
 
     // Apply manual override if explicitly provided

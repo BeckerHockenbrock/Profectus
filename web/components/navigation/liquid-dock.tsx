@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 type LiquidDockProps = {
-  activeTab?: "tasks" | "school" | "stats";
+  activeTab?: "tasks" | "school" | "journal" | "stats";
   onNavigateHome: () => void;
   onNavigateSchool?: () => void;
+  onNavigateJournal?: () => void;
   onNavigateStats?: () => void;
 };
 
@@ -13,6 +14,7 @@ export function LiquidDock({
   activeTab = "tasks",
   onNavigateHome,
   onNavigateSchool,
+  onNavigateJournal,
   onNavigateStats,
 }: LiquidDockProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -83,10 +85,17 @@ export function LiquidDock({
       {/* 2. Journal icon */}
       <button
         type="button"
-        className="dockItem"
+        className={`dockItem ${activeTab === "journal" ? "isActive" : ""}`}
         aria-label="Journal"
         title="Journal"
-        onClick={() => handlePlaceholderClick("Journal")}
+        aria-current={activeTab === "journal" ? "page" : undefined}
+        onClick={() => {
+          if (onNavigateJournal) {
+            onNavigateJournal();
+          } else {
+            handlePlaceholderClick("Journal");
+          }
+        }}
       >
         <svg
           className="dockIcon"
@@ -105,6 +114,9 @@ export function LiquidDock({
           <path d="M2 22l7.586-7.586" />
           <circle cx="11" cy="13" r="1.5" />
         </svg>
+        {activeTab === "journal" ? (
+          <span className="dockItemIndicator" aria-hidden="true" />
+        ) : null}
       </button>
 
       {/* 3. Home icon in the center (visually emphasized center control) */}

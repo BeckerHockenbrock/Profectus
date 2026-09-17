@@ -14,8 +14,8 @@ interface StatsViewProps {
   quests: Quest[];
 }
 
-const LEFT_COLUMN_ATTRIBUTES: LifeAttribute[] = ["social", "intellect", "mental"];
-const RIGHT_COLUMN_ATTRIBUTES: LifeAttribute[] = ["physical", "discipline", "ambition"];
+const LEFT_COLUMN_ATTRIBUTES: LifeAttribute[] = ["discipline", "intellect", "love"];
+const RIGHT_COLUMN_ATTRIBUTES: LifeAttribute[] = ["social", "exercise", "sleep"];
 
 export function StatsView({ userId, quests }: StatsViewProps) {
   const {

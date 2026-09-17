@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 type AppHeaderProps = {
-  activeTab: "tasks" | "school" | "stats";
+  activeTab: "tasks" | "school" | "journal" | "stats";
   userInitial: string;
   onOpenNewQuest: () => void;
   onSignOut: () => void;

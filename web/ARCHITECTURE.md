@@ -30,6 +30,15 @@ web/
 │   │   ├── domain/timer-format.ts
 │   │   ├── hooks/use-focus-timer.ts
 │   │   └── types/focus.ts
+│   ├── journal/
+│   │   ├── components/journal-entry-card.tsx
+│   │   ├── components/journal-key-modal.tsx
+│   │   ├── components/journal-view.tsx
+│   │   ├── data/journal-api.ts
+│   │   ├── data/journal-storage.ts
+│   │   ├── domain/journal-heuristics.ts
+│   │   ├── hooks/use-journal.ts
+│   │   └── types/journal.ts
 │   ├── quests/
 │   │   ├── components/category-list.tsx
 │   │   ├── components/date-list.tsx

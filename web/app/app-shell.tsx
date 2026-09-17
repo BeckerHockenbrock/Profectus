@@ -17,6 +17,7 @@ import { useQuestSubscription } from "@/features/quests/hooks/use-quest-subscrip
 import { getLocalTodayString } from "@/features/quests/domain/date-utils";
 import type { Quest, QuestForm, QuestView } from "@/features/quests/types/quest";
 import { SchoolView } from "@/features/school/components/school-view";
+import { JournalView } from "@/features/journal/components/journal-view";
 import { StatsView } from "@/features/stats/components/stats-view";
 import { useAppNavigation } from "./use-app-navigation";
 import type { ActiveTab } from "./use-app-navigation";
@@ -104,6 +105,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
   const {
     handleHomeNavigation,
     handleSchoolNavigation,
+    handleJournalNavigation,
     handleStatsNavigation,
   } = useAppNavigation({
     activeTab,
@@ -235,6 +237,10 @@ export function AppShell({ today: initialToday }: AppShellProps) {
             <div className="content" id="top">
               <SchoolView userId={user.uid} />
             </div>
+          ) : activeTab === "journal" ? (
+            <div className="content" id="top">
+              <JournalView key={user.uid} userId={user.uid} />
+            </div>
           ) : activeTab === "stats" ? (
             <div className="content" id="top">
               <StatsView key={user.uid} userId={user.uid} quests={quests} />
@@ -297,6 +303,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
             activeTab={activeTab}
             onNavigateHome={handleHomeNavigation}
             onNavigateSchool={handleSchoolNavigation}
+            onNavigateJournal={handleJournalNavigation}
             onNavigateStats={handleStatsNavigation}
           />
         </main>
