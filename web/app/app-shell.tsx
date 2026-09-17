@@ -14,6 +14,7 @@ import { TasksView } from "@/features/quests/components/tasks-view";
 import { useQuestMutations } from "@/features/quests/hooks/use-quest-mutations";
 import { useQuestReorder } from "@/features/quests/hooks/use-quest-reorder";
 import { useQuestSubscription } from "@/features/quests/hooks/use-quest-subscription";
+import { getLocalTodayString } from "@/features/quests/domain/date-utils";
 import type { Quest, QuestForm, QuestView } from "@/features/quests/types/quest";
 import { SchoolView } from "@/features/school/components/school-view";
 import { StatsView } from "@/features/stats/components/stats-view";
@@ -21,7 +22,7 @@ import { useAppNavigation } from "./use-app-navigation";
 import type { ActiveTab } from "./use-app-navigation";
 
 type AppShellProps = {
-  today: string;
+  today?: string;
 };
 
 const emptyForm: QuestForm = {
@@ -32,7 +33,25 @@ const emptyForm: QuestForm = {
   subtasks: [],
 };
 
-export function AppShell({ today }: AppShellProps) {
+export function AppShell({ today: initialToday }: AppShellProps) {
+  const [today, setToday] = useState<string>(() => initialToday || getLocalTodayString());
+
+  useEffect(() => {
+    const updateToday = () => {
+      const local = getLocalTodayString();
+      setToday((previous) => (previous !== local ? local : previous));
+    };
+
+    updateToday();
+    window.addEventListener("focus", updateToday);
+    const interval = setInterval(updateToday, 30000);
+
+    return () => {
+      window.removeEventListener("focus", updateToday);
+      clearInterval(interval);
+    };
+  }, []);
+
   const { user, authError, signIn, signOut } = useAuthUser();
   const [activeTab, setActiveTab] = useState<ActiveTab>("tasks");
   const [questView, setQuestView] = useState<QuestView>("dates");
