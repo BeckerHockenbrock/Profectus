@@ -93,6 +93,14 @@ export function TasksView({
           <div className="viewSwitch" aria-label="Quest view">
             <button
               type="button"
+              className={view === "dates" ? "isActive" : ""}
+              aria-pressed={view === "dates"}
+              onClick={() => onViewChange("dates")}
+            >
+              Dates
+            </button>
+            <button
+              type="button"
               className={view === "all" ? "isActive" : ""}
               aria-pressed={view === "all"}
               onClick={() => onViewChange("all")}
@@ -106,14 +114,6 @@ export function TasksView({
               onClick={() => onViewChange("categories")}
             >
               Categories
-            </button>
-            <button
-              type="button"
-              className={view === "dates" ? "isActive" : ""}
-              aria-pressed={view === "dates"}
-              onClick={() => onViewChange("dates")}
-            >
-              Dates
             </button>
           </div>
         </div>

@@ -32,7 +32,7 @@ export function useAppNavigation({
     if (sheetOpen) {
       setSheetOpen(false);
     }
-    setQuestView("all");
+    setQuestView("dates");
 
     const taskHeading = document.getElementById("quest-heading") ?? document.getElementById("top");
     if (taskHeading) {

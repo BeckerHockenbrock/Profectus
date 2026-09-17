@@ -35,7 +35,7 @@ const emptyForm: QuestForm = {
 export function AppShell({ today }: AppShellProps) {
   const { user, authError, signIn, signOut } = useAuthUser();
   const [activeTab, setActiveTab] = useState<ActiveTab>("tasks");
-  const [questView, setQuestView] = useState<QuestView>("all");
+  const [questView, setQuestView] = useState<QuestView>("dates");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingQuestId, setEditingQuestId] = useState<string | null>(null);
   const [form, setForm] = useState<QuestForm>(emptyForm);

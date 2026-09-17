@@ -29,6 +29,16 @@ export function DateList({
     onSelectQuest(quest);
   };
 
+  if (groups.length === 0) {
+    return (
+      <div className="questListContainer">
+        <div className="questList">
+          <p className="emptyState">Your path is clear. Add the first quest when you are ready.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="categoryList">
       {groups.map((group) => {
