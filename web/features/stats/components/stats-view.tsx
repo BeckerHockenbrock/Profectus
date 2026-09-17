@@ -31,7 +31,6 @@ export function StatsView({ userId, quests }: StatsViewProps) {
     effectiveFocusMins,
     effectiveQuestsCompleted,
     attributeScores,
-    overallRating,
     rank,
     daysRemaining,
     seasonName,
@@ -68,10 +67,9 @@ export function StatsView({ userId, quests }: StatsViewProps) {
         </div>
       ) : null}
 
-      <section className="statsRadarSection" aria-label="Overall Attributes Hexagon Chart">
+      <section className="statsRadarSection" aria-label="Life Attributes Hexagon Chart">
         <RadarChart
           scores={attributeScores}
-          overallRating={overallRating}
           totalXP={effectiveLifetimeXP}
           selectedAttribute={selectedAttr}
           onSelectAttribute={toggleAttribute}

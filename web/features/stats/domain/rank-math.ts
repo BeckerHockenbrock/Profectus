@@ -181,8 +181,3 @@ export function calculateAttributeScores(
 
   return finalScores;
 }
-
-export function calculateOverallRating(scores: Record<LifeAttribute, number>): number {
-  const sum = ATTRIBUTE_ORDER.reduce((acc, attr) => acc + (scores[attr] || 0), 0);
-  return Math.round(sum / ATTRIBUTE_ORDER.length);
-}

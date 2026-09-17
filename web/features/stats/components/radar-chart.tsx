@@ -16,7 +16,6 @@ import {
 
 interface RadarChartProps {
   scores: Record<LifeAttribute, number>;
-  overallRating: number;
   totalXP?: number;
   onSelectAttribute?: (attr: LifeAttribute) => void;
   selectedAttribute?: LifeAttribute | null;
@@ -24,7 +23,6 @@ interface RadarChartProps {
 
 export function RadarChart({
   scores,
-  overallRating,
   onSelectAttribute,
   selectedAttribute,
 }: RadarChartProps) {
@@ -231,41 +229,6 @@ export function RadarChart({
           })}
         </g>
 
-        {/* Center Score & OVR Display */}
-        <g className="radarCenterBadge" pointerEvents="none">
-          <text
-            x={RADAR_CENTER}
-            y={RADAR_CENTER - 3}
-            textAnchor="middle"
-            dominantBaseline="central"
-            className="radarCenterRating"
-            fill="#ffffff"
-            style={{
-              fontSize: "46px",
-              fontWeight: "800",
-              letterSpacing: "-0.03em",
-              fontFamily: "ui-rounded, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
-            }}
-          >
-            {overallRating}
-          </text>
-          <text
-            x={RADAR_CENTER}
-            y={RADAR_CENTER + 24}
-            textAnchor="middle"
-            dominantBaseline="central"
-            className="radarCenterOvrLabel"
-            fill="#9ca3af"
-            style={{
-              fontSize: "10px",
-              fontWeight: "700",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-            }}
-          >
-            OVERALL
-          </text>
-        </g>
 
         {/* Attribute Labels Around the Hexagon */}
         <g className="radarLabelsGroup">

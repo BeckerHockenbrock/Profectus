@@ -6,7 +6,6 @@ import type { LifeAttribute, RankPosition, UserStatsProfile } from "../types/sta
 import { LIFE_ATTRIBUTES } from "../types/stats";
 import {
   calculateAttributeScores,
-  calculateOverallRating,
   calculateRankFromRR,
   getDaysRemainingInSeason,
   getSeasonDisplayName,
@@ -49,10 +48,6 @@ export function useUserStats(userId?: string | null, quests: Quest[] = []) {
   const attributeScores = useMemo(() => {
     return calculateAttributeScores(quests, profile.attributeOverrides);
   }, [quests, profile.attributeOverrides]);
-
-  const overallRating = useMemo(() => {
-    return calculateOverallRating(attributeScores);
-  }, [attributeScores]);
 
   // Compute live rank
   const rank: RankPosition = useMemo(() => {
@@ -123,7 +118,6 @@ export function useUserStats(userId?: string | null, quests: Quest[] = []) {
     effectiveFocusMins,
     effectiveQuestsCompleted,
     attributeScores,
-    overallRating,
     rank,
     daysRemaining,
     seasonName,
