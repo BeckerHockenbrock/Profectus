@@ -1,6 +1,6 @@
-# Altiora Web Architecture
+# Todo Quest Web Architecture
 
-Altiora is a client-interactive Next.js 16 application for quests, focus sessions, school schedules, and progression statistics. `app/page.tsx` remains a Server Component; it supplies the current date to the client-owned `AppShell`.
+Todo Quest is a client-interactive Next.js 16 task application with optional focus sessions. `app/page.tsx` remains a Server Component; it supplies the current date to the client-owned `AppShell`.
 
 ## Directory map
 
@@ -90,12 +90,11 @@ web/
 `AppShell` owns only state that crosses feature boundaries:
 
 - authenticated user composition;
-- active dock tab;
-- the controlled Tasks subview, so pressing the Tasks dock button always resets Categories to All;
+- the controlled task subview, so the dock can switch between Today, All tasks, and Categories;
 - the active quest detail, quest form, and focus-session entry points;
 - focus completion coordination after the quest mutation layer commits successfully.
 
-`use-app-navigation.ts` preserves the original dock scrolling, sheet-closing, reduced-motion, and Tasks-reset behavior.
+`use-app-navigation.ts` preserves dock scrolling, sheet-closing, and reduced-motion behavior.
 
 ### Presentation versus persistence
 
@@ -123,19 +122,6 @@ The transaction reads and updates `users/{uid}/quests/{questId}`, sets `complete
 - `quest-storage.ts` exclusively owns the `todo-quest-order-<uid>` localStorage key and ordering fallback.
 - `date-utils.ts` is the shared pure date-formatting source for quest cards and details.
 
-### School boundaries
-
-- `SchoolView` composes the data, clock, and form hooks with focused period components.
-- `PeriodCard` contains the unchanged period-row DOM and keyboard interaction.
-- `use-periods-data.ts` owns cache-first hydration, subscription cleanup, optimistic local updates, and fire-and-forget Firestore persistence.
-- `school-storage.ts` owns the `todo-quest-periods-<uid>` localStorage schema.
-
-### Stats boundaries
-
-`StatsView` composes focused sections. Attribute cards/details, the competitive-rank card, and history modal own their existing DOM without adding wrapper elements.
-
-Progression stays local-first. `stats-storage.ts` owns `todo-quest-stats-v2-<uid>` and rollover persistence; `rank-math.ts` and `stats-chart-math.ts` contain pure calculations. Stats components do not write to Firestore.
-
 ### Authentication
 
 `use-auth-user.ts` is the only Firebase Authentication consumer. It owns the auth-state unsubscribe cleanup and sign-in/sign-out error strings. `AuthShell` renders signed-out and loading states; `AppShell` renders authentication failures that occur while the user remains signed in.
@@ -148,7 +134,7 @@ Progression stays local-first. `stats-storage.ts` owns `todo-quest-stats-v2-<uid
 
 | Change | Location |
 | --- | --- |
-| Dock target or Tasks reset behavior | `app/use-app-navigation.ts` |
+| Dock view selection | `app/use-app-navigation.ts` |
 | Auth lifecycle or error text | `features/auth/hooks/use-auth-user.ts` |
 | Signed-out/loading auth DOM | `features/auth/components/auth-shell.tsx` |
 | Quest card DOM | `features/quests/components/quest-card.tsx` |
@@ -159,11 +145,6 @@ Progression stays local-first. `stats-storage.ts` owns `todo-quest-stats-v2-<uid
 | Quest Firestore paths and writes | `features/quests/data/quest-firestore.ts` |
 | Focus timer behavior | `features/focus/hooks/use-focus-timer.ts` |
 | Focus completion orchestration | `features/quests/hooks/use-quest-mutations.ts` and `app/app-shell.tsx` |
-| Period row DOM | `features/school/components/period-card.tsx` |
-| School persistence | `features/school/data/` and `features/school/hooks/use-periods-data.ts` |
-| Attribute cards/details | `features/stats/components/attribute-*.tsx` |
-| Rank card/history | `features/stats/components/competitive-rank-card.tsx` and `history-modal.tsx` |
-| Rank and rollover math | `features/stats/domain/rank-math.ts` |
 
 ## Verification gates
 
