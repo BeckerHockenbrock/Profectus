@@ -133,10 +133,9 @@ export function classifyCategory(category: string, title?: string): LifeAttribut
 export function calculateAttributeScores(
   quests: Quest[] = [],
   overrides?: Partial<Record<LifeAttribute, number>>,
-  bonusPoints?: Partial<Record<LifeAttribute, number>>,
+  attributeAverages?: Partial<Record<LifeAttribute, number>>,
 ): Record<LifeAttribute, number> {
-  // Baseline scores strictly start at 0 and track actual activity
-  const baseScores: Record<LifeAttribute, number> = {
+  const finalScores: Record<LifeAttribute, number> = {
     discipline: 0,
     intellect: 0,
     love: 0,
@@ -145,7 +144,7 @@ export function calculateAttributeScores(
     sleep: 0,
   };
 
-  // Tally completed quests and focus minutes per attribute
+  // Activity from quests as fallback baseline if no journal entries exist yet
   const attributeActivity: Record<LifeAttribute, { completed: number; focusMins: number }> = {
     discipline: { completed: 0, focusMins: 0 },
     intellect: { completed: 0, focusMins: 0 },
@@ -165,19 +164,20 @@ export function calculateAttributeScores(
     }
   }
 
-  const finalScores: Record<LifeAttribute, number> = { ...baseScores };
-
   for (const attr of ATTRIBUTE_ORDER) {
-    const act = attributeActivity[attr];
-    // Each completed quest gives +5 points, every 10 min focus gives +1 point
-    const earnedBonus = act.completed * 5 + Math.floor(act.focusMins / 10);
-    const extraBonus = bonusPoints?.[attr] || 0;
-    const score = Math.min(99, Math.max(0, earnedBonus + extraBonus));
-    finalScores[attr] = score;
+    // If an evaluated journal average exists for this stat, use it directly (0-100% average)!
+    if (attributeAverages && typeof attributeAverages[attr] === "number") {
+      finalScores[attr] = Math.min(100, Math.max(0, Math.round(attributeAverages[attr]!)));
+    } else {
+      // Baseline activity fallback if unrated
+      const act = attributeActivity[attr];
+      const baseline = act.completed * 5 + Math.floor(act.focusMins / 10);
+      finalScores[attr] = Math.min(100, Math.max(0, baseline));
+    }
 
     // Apply manual override if explicitly provided
     if (overrides && typeof overrides[attr] === "number") {
-      finalScores[attr] = Math.min(99, Math.max(0, overrides[attr]!));
+      finalScores[attr] = Math.min(100, Math.max(0, overrides[attr]!));
     }
   }
 

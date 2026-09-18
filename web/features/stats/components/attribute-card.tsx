@@ -45,13 +45,13 @@ export function AttributeCard({
         boxShadow: isSelected ? `0 0 16px ${meta.glowColor}` : undefined,
       }}
       onClick={() => onSelect(attribute)}
-      aria-label={`${meta.name}: ${score} points. Click to view details`}
+      aria-label={`${meta.name}: ${score}%. Click to view details`}
     >
       <div className="statCardIconWrap">
         <HexagonBadgeIcon color={meta.color} size={36} />
       </div>
       <div className="statCardInfo">
-        <span className="statCardScore">{score}</span>
+        <span className="statCardScore">{score}%</span>
         <span className="statCardName" style={{ color: meta.color }}>
           {meta.name}
         </span>

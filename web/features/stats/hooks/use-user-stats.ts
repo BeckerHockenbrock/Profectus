@@ -63,10 +63,10 @@ export function useUserStats(userId?: string | null, quests: Quest[] = []) {
   const effectiveFocusMins = liveQuestStats.focusMins + (profile.bonusFocusMins || 0);
   const effectiveQuestsCompleted = liveQuestStats.completedCount;
 
-  // Compute live attribute scores strictly from activity plus journal gains
+  // Compute live attribute scores strictly from evaluated journal averages
   const attributeScores = useMemo(() => {
-    return calculateAttributeScores(quests, profile.attributeOverrides, profile.attributeBonusPoints);
-  }, [quests, profile.attributeOverrides, profile.attributeBonusPoints]);
+    return calculateAttributeScores(quests, profile.attributeOverrides, profile.attributeAverages);
+  }, [quests, profile.attributeOverrides, profile.attributeAverages]);
 
   // Compute live rank
   const rank: RankPosition = useMemo(() => {

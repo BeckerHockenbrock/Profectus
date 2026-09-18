@@ -3,14 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { AppHeader } from "@/components/navigation/app-header";
-import { LiquidDock } from "@/components/navigation/liquid-dock";
+import { type AppTab, LiquidDock } from "@/components/navigation/liquid-dock";
 import { HomeScreenHint } from "@/components/shared/home-screen-hint";
 import { AuthShell } from "@/features/auth/components/auth-shell";
 import { useAuthUser } from "@/features/auth/hooks/use-auth-user";
 import { FocusScreen } from "@/features/focus/components/focus-screen";
+import { UnderConstructionView } from "@/features/construction/components/under-construction-view";
 import { QuestFormModal } from "@/features/quests/components/quest-form-modal";
 import { TaskDetailModal } from "@/features/quests/components/task-detail-modal";
 import { TasksView } from "@/features/quests/components/tasks-view";
+import { SchoolView } from "@/features/school/components/school-view";
 import { useQuestMutations } from "@/features/quests/hooks/use-quest-mutations";
 import { useQuestReorder } from "@/features/quests/hooks/use-quest-reorder";
 import { useQuestSubscription } from "@/features/quests/hooks/use-quest-subscription";
@@ -50,6 +52,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
   }, []);
 
   const { user, authError, signIn, signOut } = useAuthUser();
+  const [activeTab, setActiveTab] = useState<AppTab>("tasks");
   const [questView, setQuestView] = useState<QuestView>("dates");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingQuestId, setEditingQuestId] = useState<string | null>(null);
@@ -98,13 +101,13 @@ export function AppShell({ today: initialToday }: AppShellProps) {
   });
 
   const {
-    handleDatesNavigation,
-    handleAllNavigation,
-    handleCategoriesNavigation,
+    handleTasksNavigation,
+    handleSchoolNavigation,
+    handleConstructionNavigation,
   } = useAppNavigation({
     sheetOpen,
     setSheetOpen,
-    setQuestView,
+    setActiveTab,
   });
 
   useEffect(() => {
@@ -220,30 +223,41 @@ export function AppShell({ today: initialToday }: AppShellProps) {
             userInitial={userInitial}
             onOpenNewQuest={openNewQuest}
             onSignOut={signOut}
+            onNavigateTasks={handleTasksNavigation}
           />
 
           {authError ? <p className="formError" role="alert">{authError}</p> : null}
 
-          <div className="content" id="top">
-            {showHomeScreenHint ? <HomeScreenHint onDismiss={dismissHomeScreenHint} /> : null}
-            <TasksView
-              today={today}
-              view={questView}
-              onViewChange={setQuestView}
-              quests={quests}
-              openQuests={openQuests}
-              completedQuests={completedQuests}
-              savingQuestId={savingQuestId}
-              saveError={displayError}
-              draggedId={draggedId}
-              getCardTransformY={getCardTransformY}
-              handleCardPointerDown={handleCardPointerDown}
-              suppressClickRef={suppressClickRef}
-              onToggleQuest={toggleQuest}
-              onSelectQuest={(targetQuest) => setSelectedQuestId(targetQuest.id)}
-              onOpenNewQuest={openNewQuest}
-            />
-          </div>
+          {activeTab === "school" ? (
+            <div className="content" id="top">
+              <SchoolView userId={user.uid} />
+            </div>
+          ) : activeTab === "construction" ? (
+            <div className="content" id="top">
+              <UnderConstructionView onBackToTasks={handleTasksNavigation} />
+            </div>
+          ) : (
+            <div className="content" id="top">
+              {showHomeScreenHint ? <HomeScreenHint onDismiss={dismissHomeScreenHint} /> : null}
+              <TasksView
+                today={today}
+                view={questView}
+                onViewChange={setQuestView}
+                quests={quests}
+                openQuests={openQuests}
+                completedQuests={completedQuests}
+                savingQuestId={savingQuestId}
+                saveError={displayError}
+                draggedId={draggedId}
+                getCardTransformY={getCardTransformY}
+                handleCardPointerDown={handleCardPointerDown}
+                suppressClickRef={suppressClickRef}
+                onToggleQuest={toggleQuest}
+                onSelectQuest={(targetQuest) => setSelectedQuestId(targetQuest.id)}
+                onOpenNewQuest={openNewQuest}
+              />
+            </div>
+          )}
 
           <QuestFormModal
             sheetOpen={sheetOpen}
@@ -277,10 +291,10 @@ export function AppShell({ today: initialToday }: AppShellProps) {
           ) : null}
 
           <LiquidDock
-            activeView={questView}
-            onNavigateDates={handleDatesNavigation}
-            onNavigateAll={handleAllNavigation}
-            onNavigateCategories={handleCategoriesNavigation}
+            activeTab={activeTab}
+            onNavigateTasks={handleTasksNavigation}
+            onNavigateSchool={handleSchoolNavigation}
+            onNavigateConstruction={handleConstructionNavigation}
             onOpenNewQuest={openNewQuest}
           />
         </main>

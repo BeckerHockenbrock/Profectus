@@ -1736,6 +1736,110 @@ select:focus {
   color: var(--accent-strong);
 }
 
+.dockConeItem.isActive {
+  color: #fbbf24;
+}
+
+.dockConeItem:hover {
+  color: #fde68a;
+}
+
+/* Under Construction view */
+.constructionSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 55vh;
+  padding: 2rem 1rem;
+}
+
+.constructionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 28rem;
+  width: 100%;
+  padding: 2.75rem 1.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+}
+
+.constructionConeWrapper {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1.2rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #f59e0b;
+  margin-bottom: 1.25rem;
+}
+
+.constructionConeIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.constructionBadge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+}
+
+.constructionTitle {
+  font-size: 1.45rem;
+  font-weight: 750;
+  color: #ffffff;
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.02em;
+}
+
+.constructionDescription {
+  font-size: 0.88rem;
+  color: var(--secondary);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.constructionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, transform 100ms ease;
+}
+
+.constructionButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.constructionButton:active {
+  transform: scale(0.97);
+}
+
 /*
  * Desktop workspace
  *
@@ -1776,10 +1880,6 @@ select:focus {
     margin-bottom: 1.25rem;
   }
 
-  /* The rail owns the same view switches on desktop. */
-  .viewSwitch {
-    display: none;
-  }
 
   .liquidGlassDock {
     top: max(1.25rem, env(safe-area-inset-top));

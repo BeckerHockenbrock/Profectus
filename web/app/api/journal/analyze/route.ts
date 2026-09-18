@@ -1,45 +1,22 @@
 import { NextResponse } from "next/server";
-import type { JournalAnalysis } from "@/features/journal/types/journal";
+import type { LifeAttribute } from "@/features/stats/types/stats";
+import { LIFE_ATTRIBUTES } from "@/features/stats/types/stats";
+import type { JournalStatEvaluation } from "@/features/journal/types/journal";
 
-const SYSTEM_PROMPT = `You are Altiora's progression and gamification AI coach.
-Your job is to analyze the user's daily journal entry and reward XP and stat gains across 6 core life attributes:
-1. discipline - habits, consistency, morning routines, grit, chores, focus, willpower
-2. intellect - study, academics, homework, reading, coding, learning, research, critical thinking
-3. love - romance, affection, self-care, deep gratitude, kindness, emotional health, compassion
-4. social - friendships, family calls, hangouts, team activities, conversations, community
-5. exercise - gym, workouts, lifting, running, cardio, sports, walking, physical movement
-6. sleep - sleep hygiene, hours rested, bedtime consistency, naps, recovery
-
-SCORING RULES:
-- For each of the 6 attributes, award an integer score between 0 and 15 based on the user's activities and reflections described in the entry.
-- If an attribute was not mentioned or practiced, assign 0.
-- "totalXP": sum of all awarded stat points multiplied by 5, plus 15 XP for taking the time to journal (integer between 20 and 150).
-- "feedback": 2 to 3 concise, motivating sentences evaluating their day, praising wins, and giving actionable insight.
-- "keyTakeaway": a short, punchy 3 to 6 word title/summary for the entry (e.g. "Unstoppable Cognitive & Physical Grind").
-- "sentiment": one of "positive", "reflective", "challenging", "neutral".
-- "suggestedFocus": one of the 6 attributes ("discipline", "intellect", "love", "social", "exercise", "sleep") that they could build upon tomorrow.
-
-Output MUST be strictly valid JSON matching this structure:
-{
-  "statGains": {
-    "discipline": 0,
-    "intellect": 0,
-    "love": 0,
-    "social": 0,
-    "exercise": 0,
-    "sleep": 0
-  },
-  "totalXP": 50,
-  "feedback": "...",
-  "keyTakeaway": "...",
-  "sentiment": "positive",
-  "suggestedFocus": "intellect"
-}`;
+const STAT_DESCRIPTIONS: Record<LifeAttribute, string> = {
+  discipline: "Consistency, morning routines, willpower, habits, chores, resistance to distraction, grit.",
+  intellect: "Academics, studying, critical reading, homework, lectures, programming/coding, deep learning.",
+  love: "Romance, self-compassion, heartfelt gratitude, kindness to family/partner, emotional health.",
+  social: "Meaningful connections, calling family, spending quality time with friends, networking, community.",
+  exercise: "Gym, intense workouts, running, lifting, cardio, sports, physical movement, pushing athletic limits.",
+  sleep: "Sleep duration (7-9 hours optimal), sleep quality, bedtime consistency, dark room wind-down, physical recovery.",
+};
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const entryText: string = body.entryText || "";
+    const stat: LifeAttribute = body.stat || "discipline";
 
     if (!entryText.trim()) {
       return NextResponse.json(
@@ -48,7 +25,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // Resolve API key: check process.env first, then request header
+    if (!LIFE_ATTRIBUTES[stat]) {
+      return NextResponse.json(
+        { success: false, error: `Invalid stat attribute: ${stat}` },
+        { status: 400 },
+      );
+    }
+
+    // Resolve API key
     const serverKey = process.env.GEMINI_API_KEY;
     const headerKey = request.headers.get("x-gemini-api-key");
     const apiKey = (serverKey && serverKey.trim()) ? serverKey.trim() : (headerKey ? headerKey.trim() : "");
@@ -65,10 +49,45 @@ export async function POST(request: Request) {
       );
     }
 
-    // Models to attempt (free-tier endpoints in priority order)
+    const statName = LIFE_ATTRIBUTES[stat].name;
+    const statContext = STAT_DESCRIPTIONS[stat];
+
+    const systemPrompt = `You are Altiora's rigorous progression AI judge.
+The user is submitting a journal entry specifically to evaluate their performance for: "${statName}" (${statContext}).
+
+CRITICAL GRADING DIRECTIVE:
+You must grade their performance on a strict 0 to 100 percentage scale ("score").
+Points are intentionally difficult to earn. Do NOT be generous or inflated:
+- 0-39%: Poor effort, procrastination, skipped habits, bad sleep, or excuses.
+- 40-59%: Bare minimum, casual, half-hearted attempt without pushing resistance.
+- 60-74%: Solid, respectable, standard daily consistency. This is where most decent days land.
+- 75-84%: High performance, notable friction overcome, rigorous session.
+- 85-94%: Elite execution, extraordinary grit, zero excuses, major athletic or intellectual breakthrough.
+- 95-100%: Legendary, virtually flawless human mastery. Reserved strictly for extraordinary feats.
+
+IMPORTANT:
+- An honest, typical day of doing tasks should receive 60-72%.
+- 80%+ must feel difficult and truly earned.
+- 95-100% should be exceptionally rare.
+- "score": integer 0-100.
+- "xpEarned": integer calculated as round(score * 0.5 + 10) (between 15 and 65 XP).
+- "feedback": 2 to 3 concise, candid, analytical sentences evaluating what they accomplished and what to elevate next.
+- "keyTakeaway": punchy 3 to 5 word summary (e.g. "Relentless Discipline Push").
+- "sentiment": "positive", "reflective", "challenging", or "neutral".
+
+Output MUST be strictly valid JSON matching:
+{
+  "stat": "${stat}",
+  "score": 72,
+  "xpEarned": 46,
+  "feedback": "...",
+  "keyTakeaway": "...",
+  "sentiment": "positive"
+}`;
+
     const modelsToTry = ["gemini-1.5-flash", "gemini-2.0-flash"];
     let lastError: Error | null = null;
-    let successfulAnalysis: JournalAnalysis | null = null;
+    let successfulEvaluation: JournalStatEvaluation | null = null;
     let modelUsed = "";
 
     for (const model of modelsToTry) {
@@ -86,13 +105,13 @@ export async function POST(request: Request) {
                 role: "user",
                 parts: [
                   {
-                    text: `${SYSTEM_PROMPT}\n\nUser's Journal Entry to analyze:\n"""\n${entryText}\n"""`,
+                    text: `${systemPrompt}\n\nUser's ${statName} Entry:\n"""\n${entryText}\n"""`,
                   },
                 ],
               },
             ],
             generationConfig: {
-              temperature: 0.3,
+              temperature: 0.25,
               responseMimeType: "application/json",
             },
           }),
@@ -110,46 +129,35 @@ export async function POST(request: Request) {
           throw new Error("No response generated from Gemini Flash.");
         }
 
-        // Clean any accidental markdown code fences
         const cleaned = candidateText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
         const parsed = JSON.parse(cleaned);
 
-        // Sanitize stat gains
-        const statGains = {
-          discipline: Math.max(0, Math.min(25, Number(parsed.statGains?.discipline || 0))),
-          intellect: Math.max(0, Math.min(25, Number(parsed.statGains?.intellect || 0))),
-          love: Math.max(0, Math.min(25, Number(parsed.statGains?.love || 0))),
-          social: Math.max(0, Math.min(25, Number(parsed.statGains?.social || 0))),
-          exercise: Math.max(0, Math.min(25, Number(parsed.statGains?.exercise || 0))),
-          sleep: Math.max(0, Math.min(25, Number(parsed.statGains?.sleep || 0))),
-        };
+        const score = Math.max(0, Math.min(100, Math.round(Number(parsed.score || 50))));
+        const xpEarned = Math.max(10, Math.min(100, Math.round(Number(parsed.xpEarned) || (score * 0.5 + 10))));
 
-        const totalStatSum = Object.values(statGains).reduce((sum, v) => sum + v, 0);
-        const totalXP = Math.max(20, Number(parsed.totalXP) || (totalStatSum * 5 + 15));
-
-        successfulAnalysis = {
-          statGains,
-          totalXP,
-          feedback: String(parsed.feedback || "Good reflection today. Keep building your daily momentum!"),
-          keyTakeaway: String(parsed.keyTakeaway || "Daily Reflection Complete"),
+        successfulEvaluation = {
+          stat,
+          score,
+          xpEarned,
+          feedback: String(parsed.feedback || `Evaluated ${statName} reflection. Keep holding yourself to a high standard.`),
+          keyTakeaway: String(parsed.keyTakeaway || `${statName} Check-in`),
           sentiment: parsed.sentiment || "positive",
-          suggestedFocus: parsed.suggestedFocus || "discipline",
         };
 
         modelUsed = model;
-        break; // Successfully got analysis
+        break;
       } catch (err: unknown) {
         lastError = err instanceof Error ? err : new Error(String(err));
       }
     }
 
-    if (!successfulAnalysis) {
-      throw lastError || new Error("Failed to generate analysis from Gemini Flash models.");
+    if (!successfulEvaluation) {
+      throw lastError || new Error("Failed to evaluate entry with Gemini Flash.");
     }
 
     return NextResponse.json({
       success: true,
-      analysis: successfulAnalysis,
+      evaluation: successfulEvaluation,
       modelUsed,
     });
   } catch (error: unknown) {

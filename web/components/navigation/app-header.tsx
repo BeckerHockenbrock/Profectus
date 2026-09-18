@@ -4,16 +4,28 @@ type AppHeaderProps = {
   userInitial: string;
   onOpenNewQuest: () => void;
   onSignOut: () => void;
+  onNavigateTasks?: () => void;
 };
 
 export function AppHeader({
   userInitial,
   onOpenNewQuest,
   onSignOut,
+  onNavigateTasks,
 }: AppHeaderProps) {
   return (
     <header className="topBar">
-      <a className="brand" href="#top" aria-label="Todo Quest home">
+      <a
+        className="brand"
+        href="#top"
+        aria-label="Todo Quest home"
+        onClick={(event) => {
+          if (onNavigateTasks) {
+            event.preventDefault();
+            onNavigateTasks();
+          }
+        }}
+      >
         <Image
           className="brandLogo"
           src="/icon-192.png"

@@ -219,6 +219,7 @@ export interface UserStatsProfile {
   seasonHistory: SeasonHistoryItem[];
   attributeOverrides?: Partial<Record<LifeAttribute, number>>;
   attributeBonusPoints?: Partial<Record<LifeAttribute, number>>;
+  attributeAverages?: Partial<Record<LifeAttribute, number>>;
   bonusXP?: number;
   bonusRR?: number;
   bonusFocusMins?: number;

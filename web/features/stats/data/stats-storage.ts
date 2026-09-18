@@ -46,6 +46,14 @@ export function getInitialStatsProfile(quests: Quest[] = []): UserStatsProfile {
       exercise: 0,
       sleep: 0,
     },
+    attributeAverages: {
+      discipline: 0,
+      intellect: 0,
+      love: 0,
+      social: 0,
+      exercise: 0,
+      sleep: 0,
+    },
   };
 }
 
@@ -191,20 +199,12 @@ export function simulateMonthlyReset(profile: UserStatsProfile): UserStatsProfil
 
 export function applyJournalRewards(
   userId: string | null | undefined,
-  statGains: Partial<Record<LifeAttribute, number>>,
+  _stat: LifeAttribute,
+  _score: number,
   earnedXP: number,
+  updatedAverages: Partial<Record<LifeAttribute, number>>,
 ): UserStatsProfile {
   const current = loadUserStats(userId);
-  const currentBonuses = current.attributeBonusPoints || {};
-
-  const updatedBonuses: Record<LifeAttribute, number> = {
-    discipline: (currentBonuses.discipline || 0) + (statGains.discipline || 0),
-    intellect: (currentBonuses.intellect || 0) + (statGains.intellect || 0),
-    love: (currentBonuses.love || 0) + (statGains.love || 0),
-    social: (currentBonuses.social || 0) + (statGains.social || 0),
-    exercise: (currentBonuses.exercise || 0) + (statGains.exercise || 0),
-    sleep: (currentBonuses.sleep || 0) + (statGains.sleep || 0),
-  };
 
   const newBonusXP = (current.bonusXP || 0) + earnedXP;
   const newBonusRR = (current.bonusRR || 0) + earnedXP;
@@ -217,7 +217,10 @@ export function applyJournalRewards(
     bonusRR: newBonusRR,
     lifetimeXP: newTotalXP,
     seasonCumulativeRR: newTotalRR,
-    attributeBonusPoints: updatedBonuses,
+    attributeAverages: {
+      ...(current.attributeAverages || {}),
+      ...updatedAverages,
+    },
     seasonPeakCumulativeRR: Math.max(current.seasonPeakCumulativeRR || 0, newTotalRR),
     lifetimePeakCumulativeRR: Math.max(current.lifetimePeakCumulativeRR || 0, newTotalXP),
   };

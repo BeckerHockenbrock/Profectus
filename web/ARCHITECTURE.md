@@ -24,6 +24,8 @@ web/
 │   ├── auth/
 │   │   ├── components/auth-shell.tsx
 │   │   └── hooks/use-auth-user.ts
+│   ├── construction/
+│   │   └── components/under-construction-view.tsx
 │   ├── focus/
 │   │   ├── components/focus-screen.tsx
 │   │   ├── components/sisyphus-frame-animation.tsx
@@ -90,11 +92,11 @@ web/
 `AppShell` owns only state that crosses feature boundaries:
 
 - authenticated user composition;
-- the controlled task subview, so the dock can switch between Today, All tasks, and Categories;
+- the active application tab (`tasks`, `school`, `construction`);
 - the active quest detail, quest form, and focus-session entry points;
 - focus completion coordination after the quest mutation layer commits successfully.
 
-`use-app-navigation.ts` preserves dock scrolling, sheet-closing, and reduced-motion behavior.
+`use-app-navigation.ts` preserves dock scrolling, sheet-closing, and reduced-motion behavior across primary tabs.
 
 ### Presentation versus persistence
 

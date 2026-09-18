@@ -2,12 +2,12 @@
 
 import { useCallback } from "react";
 import type React from "react";
-import type { QuestView } from "@/features/quests/types/quest";
+import type { AppTab } from "@/components/navigation/liquid-dock";
 
 type UseAppNavigationOptions = {
   sheetOpen: boolean;
   setSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setQuestView: React.Dispatch<React.SetStateAction<QuestView>>;
+  setActiveTab: React.Dispatch<React.SetStateAction<AppTab>>;
 };
 
 function prefersReducedMotion() {
@@ -17,17 +17,21 @@ function prefersReducedMotion() {
 export function useAppNavigation({
   sheetOpen,
   setSheetOpen,
-  setQuestView,
+  setActiveTab,
 }: UseAppNavigationOptions) {
-  const navigateToView = useCallback((view: QuestView) => {
+  const navigateToTab = useCallback((tab: AppTab) => {
     if (sheetOpen) {
       setSheetOpen(false);
     }
-    setQuestView(view);
+    setActiveTab(tab);
 
-    const taskHeading = document.getElementById("quest-heading") ?? document.getElementById("top");
-    if (taskHeading) {
-      taskHeading.scrollIntoView({
+    const targetHeading =
+      tab === "tasks"
+        ? (document.getElementById("quest-heading") ?? document.getElementById("top"))
+        : document.getElementById("top");
+
+    if (targetHeading) {
+      targetHeading.scrollIntoView({
         behavior: prefersReducedMotion() ? "auto" : "smooth",
         block: "start",
       });
@@ -37,11 +41,11 @@ export function useAppNavigation({
         behavior: prefersReducedMotion() ? "auto" : "smooth",
       });
     }
-  }, [setQuestView, setSheetOpen, sheetOpen]);
+  }, [setActiveTab, setSheetOpen, sheetOpen]);
 
   return {
-    handleDatesNavigation: () => navigateToView("dates"),
-    handleAllNavigation: () => navigateToView("all"),
-    handleCategoriesNavigation: () => navigateToView("categories"),
+    handleTasksNavigation: () => navigateToTab("tasks"),
+    handleSchoolNavigation: () => navigateToTab("school"),
+    handleConstructionNavigation: () => navigateToTab("construction"),
   };
 }
