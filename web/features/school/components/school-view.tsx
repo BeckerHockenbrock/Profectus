@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { type FormEvent, useMemo, useState } from "react";
 import type { Period } from "../types/school";
 import { formatTime12Hour } from "../domain/period-clock";
@@ -59,6 +60,10 @@ export function SchoolView({ userId }: SchoolViewProps) {
     return getStatus(selectedPeriod);
   }, [selectedPeriod, getStatus]);
 
+  const todayPeriodsCount = useMemo(() => {
+    return periods.filter((p) => p.days?.includes(todayDay)).length;
+  }, [periods, todayDay]);
+
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     const error = validate();
@@ -84,37 +89,19 @@ export function SchoolView({ userId }: SchoolViewProps) {
   };
 
   return (
-    <div className="schoolContent">
-      {/* Header section */}
-      <section className="schoolHeader" aria-label="School Schedule Header">
-        <div className="schoolHeaderTop">
-          <div>
-            <span className="schoolSubhead">Schedule</span>
-            <h1 className="schoolHeading">School</h1>
-          </div>
-          <button
-            type="button"
-            className="schoolAddButton"
-            onClick={() => openAdd(periods)}
-            aria-label="Add new period"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            <span>Add period</span>
-          </button>
-        </div>
+    <>
+      {/* Hero section */}
+      <section className="hero schoolHero" aria-label="School schedule overview">
+        <Image
+          className="heroLogo"
+          src="/school.png"
+          alt="Classical scholar reading a scroll"
+          width={1024}
+          height={1365}
+          sizes="(max-width: 48rem) 70vw, 18rem"
+          preload
+          unoptimized
+        />
 
         {/* Live Day & Period Status Banner */}
         {currentPeriod ? (
@@ -157,16 +144,60 @@ export function SchoolView({ userId }: SchoolViewProps) {
               </span>
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="schoolLiveBanner isOffHours">
+            <div className="offHoursDot" aria-hidden="true" />
+            <div className="liveBannerInfo">
+              <span className="offHoursBannerTag">{todayDay} SCHEDULE</span>
+              <strong className="liveBannerTitle">
+                {periods.length === 0 ? "No Schedule Yet" : "No Active Classes"}
+              </strong>
+              <span className="liveBannerMeta">
+                {todayPeriodsCount > 0
+                  ? `${todayPeriodsCount} ${todayPeriodsCount === 1 ? "period" : "periods"} scheduled for ${todayDay}`
+                  : periods.length > 0
+                    ? `No periods scheduled for ${todayDay}`
+                    : "Add your periods to get started"}
+              </span>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Main Period Schedule List */}
       <section className="schoolPeriodSection" aria-label="Periods List">
         <div className="schoolSectionTitleRow">
-          <h2>Daily Periods</h2>
-          {periods.length > 0 ? (
-            <span className="periodCountBadge">{periods.length} {periods.length === 1 ? "period" : "periods"}</span>
-          ) : null}
+          <div>
+            <span className="schoolSubhead">Schedule</span>
+            <h2 className="schoolHeading">School</h2>
+          </div>
+          <div className="schoolTitleActions">
+            {periods.length > 0 ? (
+              <span className="periodCountBadge">{periods.length} {periods.length === 1 ? "period" : "periods"}</span>
+            ) : null}
+            <button
+              type="button"
+              className="schoolAddButton"
+              onClick={() => openAdd(periods)}
+              aria-label="Add new period"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>Add period</span>
+            </button>
+          </div>
         </div>
 
         {!isLoaded ? (
@@ -241,6 +272,6 @@ export function SchoolView({ userId }: SchoolViewProps) {
         onSelectWeekdays={selectWeekdays}
         onDelete={handleDelete}
       />
-    </div>
+    </>
   );
 }
