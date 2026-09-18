@@ -296,3 +296,25 @@ export function getNextStoicQuote(currentId?: string): StoicQuote {
   const nextIndex = Math.floor(Math.random() * pool.length);
   return pool[nextIndex] || STOIC_QUOTES[0];
 }
+
+/**
+ * Creates a freshly shuffled array of all stoic quotes using Fisher-Yates.
+ * If prevLastId is provided, guarantees the first item of the new deck
+ * does not match prevLastId.
+ */
+export function createShuffledDeck(prevLastId?: string): StoicQuote[] {
+  const deck = [...STOIC_QUOTES];
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = deck[i];
+    deck[i] = deck[j];
+    deck[j] = temp;
+  }
+  if (prevLastId && deck.length > 1 && deck[0].id === prevLastId) {
+    const swapIdx = 1 + Math.floor(Math.random() * (deck.length - 1));
+    const temp = deck[0];
+    deck[0] = deck[swapIdx];
+    deck[swapIdx] = temp;
+  }
+  return deck;
+}
