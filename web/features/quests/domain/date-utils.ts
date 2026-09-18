@@ -44,7 +44,7 @@ export function formatDueDate(dueDate: string, today: string) {
   return dayInfo ? `${dayInfo.full}, ${formattedDate}` : formattedDate;
 }
 
-export function formatDueDateDetail(dueDate: string, today: string) {
+export function formatDueDateDetail(dueDate: string, today: string, completed = false) {
   if (!dueDate) return "No due date";
   const dayInfo = getDayOfWeekFromISO(dueDate);
   const daySuffix = dayInfo ? ` (${dayInfo.full})` : "";
@@ -56,7 +56,7 @@ export function formatDueDateDetail(dueDate: string, today: string) {
   const currentYear = today.slice(0, 4);
   const formattedDate = year === currentYear ? `${month}/${day}` : `${month}/${day}/${year}`;
 
-  if (today && dueDate < today) {
+  if (today && dueDate < today && !completed) {
     return dayInfo ? `Past due (${dayInfo.full}, ${formattedDate})` : `Past due (${formattedDate})`;
   }
 
@@ -94,10 +94,17 @@ export function groupQuestsByDate(quests: Quest[], today: string): DateQuestGrou
   const hasNoDate = rawDates.includes("");
   const sortedDateKeys = hasNoDate ? [...dated, ""] : dated;
 
-  return sortedDateKeys.map((dateKey) => ({
-    dateKey,
-    title: formatDateGroupHeading(dateKey, today),
-    quests: quests.filter((quest) => quest.dueDate === dateKey),
-  }));
+  return sortedDateKeys
+    .filter((dateKey) => {
+      if (today && dateKey && dateKey < today) {
+        return quests.some((quest) => quest.dueDate === dateKey && !quest.completed);
+      }
+      return true;
+    })
+    .map((dateKey) => ({
+      dateKey,
+      title: formatDateGroupHeading(dateKey, today),
+      quests: quests.filter((quest) => quest.dueDate === dateKey),
+    }));
 }
 
