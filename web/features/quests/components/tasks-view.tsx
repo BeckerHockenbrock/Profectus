@@ -8,6 +8,7 @@ import { groupQuestsByDate } from "../domain/date-utils";
 import { CategoryList } from "./category-list";
 import { DateList } from "./date-list";
 import { QuestList } from "./quest-list";
+import { StoicQuote } from "./stoic-quote";
 
 type TasksViewProps = {
   today: string;
@@ -60,7 +61,7 @@ export function TasksView({
 
   return (
     <>
-      <section className="hero" aria-label="Todo Quest">
+      <section className="hero" aria-label="Stoic quote">
         <Image
           className="heroLogo"
           src="/sisyphus.png"
@@ -71,7 +72,7 @@ export function TasksView({
           preload
           unoptimized
         />
-        <p className="heroTitle">Todo Quest</p>
+        <StoicQuote today={today} />
       </section>
 
       <section className="questSection" aria-labelledby="quest-heading">

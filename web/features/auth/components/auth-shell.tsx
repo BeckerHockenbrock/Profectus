@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { HomeScreenHint } from "@/components/shared/home-screen-hint";
+import { StoicQuote } from "@/features/quests/components/stoic-quote";
 
 type AuthShellProps = {
   isLoading?: boolean;
@@ -24,7 +25,7 @@ export function AuthShell({
     <main className="authShell">
       <section className="authCard" aria-labelledby="sign-in-heading">
         <Image src="/sisyphus.png" alt="Sisyphus carrying a boulder" width={120} height={142} priority unoptimized />
-        <p className="heroTitle">Todo Quest</p>
+        <StoicQuote />
         <h1 id="sign-in-heading">Your quests, wherever you are.</h1>
         <p>Sign in with Google to keep this account&apos;s quests synced across your devices.</p>
         {authError ? <p className="formError" role="alert">{authError}</p> : null}
