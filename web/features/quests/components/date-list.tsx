@@ -12,6 +12,7 @@ type DateListProps = {
   suppressClickRef: React.MutableRefObject<boolean>;
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;
+  onToggleSubtask?: (questId: string, subtaskId: string) => void;
 };
 
 export function DateList({
@@ -23,6 +24,7 @@ export function DateList({
   suppressClickRef,
   onToggleQuest,
   onSelectQuest,
+  onToggleSubtask,
 }: DateListProps) {
   const selectQuest = (quest: Quest) => {
     if (suppressClickRef.current) return;
@@ -69,6 +71,7 @@ export function DateList({
                     isUpdating={savingQuestId === quest.id}
                     isDragging={false}
                     transformY={0}
+                    onToggleSubtask={onToggleSubtask}
                   />
                 ))
               )}
@@ -111,6 +114,7 @@ export function DateList({
                         isUpdating={savingQuestId === quest.id}
                         isDragging={false}
                         transformY={0}
+                        onToggleSubtask={onToggleSubtask}
                       />
                     ))}
                   </div>

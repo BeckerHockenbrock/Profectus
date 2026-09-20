@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Quest } from "../types/quest";
 import { formatDueDateDetail } from "../domain/date-utils";
+import { GoogleTasksDateBadge } from "./google-date-badge";
 import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
 import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
 
@@ -14,7 +15,7 @@ type TaskDetailModalProps = {
   onDelete: () => void | Promise<void>;
   onToggleComplete: (id: string) => void;
   onToggleSubtask: (subtaskId: string) => void;
-  onAddSubtask: (title: string) => void | Promise<boolean>;
+  onAddSubtask: (title: string, dueDate?: string) => void | Promise<boolean>;
   onDeleteSubtask: (subtaskId: string) => void | Promise<boolean>;
   onStartFocus: (quest: Quest) => void;
   isUpdating: boolean;
@@ -34,6 +35,7 @@ export function TaskDetailModal({
   isUpdating,
 }: TaskDetailModalProps) {
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+  const [newSubtaskDueDate, setNewSubtaskDueDate] = useState("");
   const [isSubmittingSubtask, setIsSubmittingSubtask] = useState(false);
   const { sheetRef, scrimRef, dragHandleProps } = useSheetSwipe({ onClose });
   useBodyScrollLock(true);
@@ -58,8 +60,9 @@ export function TaskDetailModal({
 
     setIsSubmittingSubtask(true);
     try {
-      await onAddSubtask(title);
+      await onAddSubtask(title, newSubtaskDueDate || undefined);
       setNewSubtaskTitle("");
+      setNewSubtaskDueDate("");
     } finally {
       setIsSubmittingSubtask(false);
     }
@@ -218,12 +221,21 @@ export function TaskDetailModal({
                       </span>
                     </button>
 
-                    <span
-                      className="subtaskTitle"
-                      onClick={() => onToggleSubtask(subtask.id)}
-                    >
-                      {subtask.title}
-                    </span>
+                    <div className="subtaskTitleGroup">
+                      <span
+                        className="subtaskTitle"
+                        onClick={() => onToggleSubtask(subtask.id)}
+                      >
+                        {subtask.title}
+                      </span>
+                      {subtask.dueDate ? (
+                        <GoogleTasksDateBadge
+                          dueDate={subtask.dueDate}
+                          today={today}
+                          completed={subtask.completed}
+                        />
+                      ) : null}
+                    </div>
 
                     <button
                       type="button"
@@ -250,6 +262,14 @@ export function TaskDetailModal({
                 value={newSubtaskTitle}
                 onChange={(e) => setNewSubtaskTitle(e.target.value)}
                 maxLength={160}
+              />
+              <input
+                type="date"
+                className="detailAddSubtaskDate"
+                value={newSubtaskDueDate}
+                onChange={(e) => setNewSubtaskDueDate(e.target.value)}
+                title="Subtask due date (optional)"
+                aria-label="Subtask due date"
               />
               <button
                 type="submit"

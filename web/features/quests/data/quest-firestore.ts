@@ -44,6 +44,7 @@ export function subscribeQuests(
                 id: String(s.id ?? ""),
                 title: String(s.title ?? ""),
                 completed: Boolean(s.completed),
+                dueDate: s.dueDate ? String(s.dueDate) : undefined,
               }))
             : [],
         };
@@ -53,6 +54,21 @@ export function subscribeQuests(
     },
     onError,
   );
+}
+
+function sanitizeSubtasks(subtasks?: Subtask[]): Record<string, unknown>[] {
+  if (!Array.isArray(subtasks)) return [];
+  return subtasks.map((s) => {
+    const item: Record<string, unknown> = {
+      id: s.id,
+      title: s.title,
+      completed: Boolean(s.completed),
+    };
+    if (s.dueDate) {
+      item.dueDate = s.dueDate;
+    }
+    return item;
+  });
 }
 
 export async function toggleQuestInFirestore(
@@ -79,7 +95,7 @@ export async function createQuestInFirestore(
     focusMinutes: 0,
     order: minOrder - 1,
     createdAt: Date.now(),
-    subtasks: form.subtasks ?? [],
+    subtasks: sanitizeSubtasks(form.subtasks),
   });
   return docRef.id;
 }
@@ -95,7 +111,7 @@ export async function updateQuestInFirestore(
     description: form.description.trim(),
     category: form.category.trim(),
     dueDate: form.dueDate,
-    subtasks: form.subtasks ?? [],
+    subtasks: sanitizeSubtasks(form.subtasks),
   });
 }
 
@@ -106,7 +122,7 @@ export async function updateSubtasksInFirestore(
 ): Promise<void> {
   const database = getFirebaseDb();
   await updateDoc(doc(database, "users", userId, "quests", questId), {
-    subtasks,
+    subtasks: sanitizeSubtasks(subtasks),
   });
 }
 

@@ -63,6 +63,33 @@ export function formatDueDateDetail(dueDate: string, today: string, completed = 
   return dayInfo ? `Due ${dayInfo.full}, ${formattedDate}` : `Due ${formattedDate}`;
 }
 
+export function formatGoogleTaskDueDate(dueDate: string, today: string): string {
+  if (!dueDate) return "";
+  if (dueDate === today) return "Due today";
+  if (dueDate === addDays(today, 1)) return "Due tomorrow";
+  if (dueDate === addDays(today, -1)) return "Due yesterday";
+
+  const [year, month, day] = dueDate.split("-");
+  const currentYear = today ? today.slice(0, 4) : new Date().getFullYear().toString();
+  const dayInfo = getDayOfWeekFromISO(dueDate);
+  const dayPrefix = dayInfo ? `${dayInfo.short}, ` : "";
+  const formattedDate = year === currentYear ? `${Number(month)}/${Number(day)}` : `${Number(month)}/${Number(day)}/${year}`;
+
+  return `Due ${dayPrefix}${formattedDate}`;
+}
+
+export type DueDateStatus = "overdue" | "today" | "tomorrow" | "future" | "none";
+
+export function getDueDateStatus(dueDate: string, today: string, completed = false): DueDateStatus {
+  if (!dueDate) return "none";
+  if (completed) return "future";
+  if (today && dueDate < today) return "overdue";
+  if (dueDate === today) return "today";
+  if (today && dueDate === addDays(today, 1)) return "tomorrow";
+  return "future";
+}
+
+
 export type DateQuestGroup = {
   dateKey: string;
   title: string;

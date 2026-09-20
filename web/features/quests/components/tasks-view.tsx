@@ -26,6 +26,7 @@ type TasksViewProps = {
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;
   onOpenNewQuest: () => void;
+  onToggleSubtask?: (questId: string, subtaskId: string) => void;
 };
 
 export function TasksView({
@@ -44,6 +45,7 @@ export function TasksView({
   onToggleQuest,
   onSelectQuest,
   onOpenNewQuest,
+  onToggleSubtask,
 }: TasksViewProps) {
   const [showCompleted, setShowCompleted] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
@@ -135,6 +137,7 @@ export function TasksView({
             suppressClickRef={suppressClickRef}
             onToggleQuest={onToggleQuest}
             onSelectQuest={onSelectQuest}
+            onToggleSubtask={onToggleSubtask}
           />
         ) : view === "categories" ? (
           <CategoryList
@@ -151,6 +154,7 @@ export function TasksView({
             suppressClickRef={suppressClickRef}
             onToggleQuest={onToggleQuest}
             onSelectQuest={onSelectQuest}
+            onToggleSubtask={onToggleSubtask}
           />
         ) : (
           <DateList
@@ -167,6 +171,7 @@ export function TasksView({
             suppressClickRef={suppressClickRef}
             onToggleQuest={onToggleQuest}
             onSelectQuest={onSelectQuest}
+            onToggleSubtask={onToggleSubtask}
           />
         )}
       </section>

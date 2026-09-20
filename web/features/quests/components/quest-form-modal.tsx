@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import type { QuestForm, Subtask } from "../types/quest";
+import { getLocalTodayString } from "../domain/date-utils";
+import { GoogleTasksDateBadge } from "./google-date-badge";
 import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
 import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
 
@@ -30,11 +32,15 @@ export function QuestFormModal({
 }: QuestFormModalProps) {
   const [isCreatingNewCategory, setIsCreatingNewCategory] = useState(false);
   const [newSubtaskInput, setNewSubtaskInput] = useState("");
+  const [newSubtaskDueDate, setNewSubtaskDueDate] = useState("");
   useBodyScrollLock(sheetOpen);
+
+  const today = getLocalTodayString();
 
   const handleClose = () => {
     setIsCreatingNewCategory(false);
     setNewSubtaskInput("");
+    setNewSubtaskDueDate("");
     onClose();
   };
 
@@ -50,6 +56,7 @@ export function QuestFormModal({
           : `st_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       title,
       completed: false,
+      ...(newSubtaskDueDate ? { dueDate: newSubtaskDueDate } : {}),
     };
 
     setForm((prev) => ({
@@ -57,6 +64,7 @@ export function QuestFormModal({
       subtasks: [...(prev.subtasks ?? []), newSubtask],
     }));
     setNewSubtaskInput("");
+    setNewSubtaskDueDate("");
   };
 
   const handleRemoveSubtaskFromForm = (subtaskId: string) => {
@@ -194,8 +202,13 @@ export function QuestFormModal({
               <ul className="formSubtaskList" role="list">
                 {form.subtasks.map((subtask) => (
                   <li key={subtask.id} className="formSubtaskItem">
-                    <span className="formSubtaskBullet" aria-hidden="true">•</span>
-                    <span className="formSubtaskTitle">{subtask.title}</span>
+                    <div className="formSubtaskItemLeft">
+                      <span className="formSubtaskBullet" aria-hidden="true">•</span>
+                      <span className="formSubtaskTitle">{subtask.title}</span>
+                      {subtask.dueDate ? (
+                        <GoogleTasksDateBadge dueDate={subtask.dueDate} today={today} />
+                      ) : null}
+                    </div>
                     <button
                       type="button"
                       className="formSubtaskRemoveButton"
@@ -223,6 +236,14 @@ export function QuestFormModal({
                 }}
                 placeholder="Add a subtask…"
                 maxLength={160}
+              />
+              <input
+                type="date"
+                className="formSubtaskDateInput"
+                value={newSubtaskDueDate}
+                onChange={(e) => setNewSubtaskDueDate(e.target.value)}
+                title="Subtask due date (optional)"
+                aria-label="Subtask due date"
               />
               <button
                 type="button"

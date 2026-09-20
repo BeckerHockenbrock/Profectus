@@ -547,10 +547,10 @@ h2 {
 
 /* Compact Google Tasks-styled Bubble */
 .questCard {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
   padding: 0.65rem 0.85rem;
   border: 1px solid var(--line);
   border-radius: 1rem;
@@ -562,6 +562,14 @@ h2 {
   touch-action: pan-y;
   position: relative;
   transition: background-color 150ms ease, border-color 150ms ease, transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 160ms ease, opacity 200ms ease;
+}
+
+.questCardHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 .questCard[data-dragging="true"] {
@@ -718,6 +726,152 @@ h2 {
   color: #72e098;
   background: rgba(80, 200, 120, 0.12);
   border-color: rgba(80, 200, 120, 0.28);
+}
+
+/* Google Tasks Due Date Badge */
+.googleDateBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 1.45rem;
+  padding: 0.12rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 550;
+  letter-spacing: 0.015em;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--secondary);
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 140ms ease;
+}
+
+.googleDateBadge .googleDateIcon {
+  flex-shrink: 0;
+}
+
+/* Overdue - red/salmon like Google Tasks dark mode (#f28b82) */
+.googleDateBadge.is-overdue {
+  color: #f28b82;
+  border-color: rgba(242, 139, 130, 0.38);
+  background: rgba(242, 139, 130, 0.08);
+}
+
+.googleDateBadge.is-overdue .googleDateIcon {
+  color: #f28b82;
+  stroke: #f28b82;
+}
+
+/* Due Today - Google blue/accent (#8ab4f8 / #c2d7fe) */
+.googleDateBadge.is-today {
+  color: #c2d7fe;
+  border-color: rgba(138, 180, 248, 0.36);
+  background: rgba(138, 180, 248, 0.09);
+}
+
+.googleDateBadge.is-today .googleDateIcon {
+  color: #8ab4f8;
+  stroke: #8ab4f8;
+}
+
+/* Due Tomorrow / Future - Muted slate (#bdc1c6 / #9aa0a6) */
+.googleDateBadge.is-tomorrow,
+.googleDateBadge.is-future {
+  color: #bdc1c6;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.googleDateBadge.is-tomorrow .googleDateIcon,
+.googleDateBadge.is-future .googleDateIcon {
+  color: #9aa0a6;
+  stroke: #9aa0a6;
+}
+
+/* Google Tasks Subtasks Nested In-List Container */
+.questSubtasksContainer {
+  margin-top: 0.55rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-left: 2.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.googleSubtaskItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.25rem 0.35rem;
+  border-radius: 0.6rem;
+  transition: background-color 120ms ease, opacity 140ms ease;
+}
+
+.googleSubtaskItem:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.googleSubtaskItem.isComplete {
+  opacity: 0.52;
+}
+
+.googleSubtaskCheckbox {
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.8px solid rgba(255, 255, 255, 0.42);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: #000;
+  margin-top: 0.12rem;
+  transition: transform 100ms ease-out, background-color 160ms ease, border-color 160ms ease;
+}
+
+.googleSubtaskCheckbox:hover {
+  border-color: rgba(255, 255, 255, 0.85);
+  transform: scale(1.08);
+}
+
+.googleSubtaskCheckbox.isChecked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.googleSubtaskCheckMark {
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  display: block;
+}
+
+.googleSubtaskContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.googleSubtaskTitle {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.35;
+  word-break: break-word;
+  transition: color 140ms ease, text-decoration 140ms ease;
+}
+
+.googleSubtaskItem.isComplete .googleSubtaskTitle {
+  text-decoration: line-through;
+  color: var(--muted);
 }
 
 .questCardActionsRow {
@@ -1130,12 +1284,22 @@ select:focus {
 .formSubtaskItem {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   padding: 0.45rem 0.75rem;
   border-radius: 0.75rem;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--line);
   font-size: 0.88rem;
+}
+
+.formSubtaskItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .formSubtaskBullet {
@@ -1175,11 +1339,23 @@ select:focus {
   display: flex;
   gap: 0.45rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
-.formAddSubtaskRow input {
+.formAddSubtaskRow input[type="text"] {
   flex: 1;
   min-height: 2.85rem;
+}
+
+.formSubtaskDateInput {
+  min-height: 2.85rem;
+  padding: 0 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 0.82rem;
+  outline: none;
 }
 
 .formAddSubtaskButton {
@@ -1538,30 +1714,40 @@ select:focus {
   width: 1.45rem;
   height: 1.45rem;
   padding: 0;
-  border-radius: 0.45rem;
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  border: 1.8px solid rgba(255, 255, 255, 0.38);
   background: transparent;
   cursor: pointer;
   flex-shrink: 0;
-  color: #fff;
+  color: #000;
   font-size: 0.82rem;
   line-height: 1;
-  transition: background-color 140ms ease, border-color 140ms ease;
+  transition: transform 100ms ease-out, background-color 140ms ease, border-color 140ms ease;
 }
 
 .subtaskCheckbox:hover {
-  border-color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.85);
+  transform: scale(1.08);
 }
 
 .subtaskCheckbox.isChecked {
-  background: #50c878;
-  border-color: #50c878;
-  color: #050505;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
   font-weight: 900;
 }
 
-.subtaskTitle {
+.subtaskTitleGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
   flex: 1;
+  min-width: 0;
+}
+
+.subtaskTitle {
+  width: 100%;
   font-size: 0.88rem;
   color: var(--text);
   line-height: 1.4;
@@ -1603,6 +1789,18 @@ select:focus {
   gap: 0.45rem;
   align-items: center;
   margin-top: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.detailAddSubtaskDate {
+  min-height: 2.65rem;
+  padding: 0 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 0.82rem;
+  outline: none;
 }
 
 .detailAddSubtaskInput {

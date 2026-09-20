@@ -255,6 +255,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
                 onToggleQuest={toggleQuest}
                 onSelectQuest={(targetQuest) => setSelectedQuestId(targetQuest.id)}
                 onOpenNewQuest={openNewQuest}
+                onToggleSubtask={toggleSubtask}
               />
             </div>
           )}
@@ -280,7 +281,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
               onDelete={() => handleDeleteQuest(selectedQuest.id)}
               onToggleComplete={toggleQuest}
               onToggleSubtask={(subtaskId) => toggleSubtask(selectedQuest.id, subtaskId)}
-              onAddSubtask={(title) => addSubtask(selectedQuest.id, title)}
+              onAddSubtask={(title, dueDate) => addSubtask(selectedQuest.id, title, dueDate)}
               onDeleteSubtask={(subtaskId) => deleteSubtask(selectedQuest.id, subtaskId)}
               onStartFocus={(targetQuest) => {
                 setSelectedQuestId(null);

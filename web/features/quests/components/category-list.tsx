@@ -16,6 +16,7 @@ type CategoryListProps = {
   suppressClickRef: React.MutableRefObject<boolean>;
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;
+  onToggleSubtask?: (questId: string, subtaskId: string) => void;
 };
 
 export function CategoryList({
@@ -27,6 +28,7 @@ export function CategoryList({
   suppressClickRef,
   onToggleQuest,
   onSelectQuest,
+  onToggleSubtask,
 }: CategoryListProps) {
   const selectQuest = (quest: Quest) => {
     if (suppressClickRef.current) return;
@@ -73,6 +75,7 @@ export function CategoryList({
                     isUpdating={savingQuestId === quest.id}
                     isDragging={false}
                     transformY={0}
+                    onToggleSubtask={onToggleSubtask}
                   />
                 ))
               )}
@@ -115,6 +118,7 @@ export function CategoryList({
                         isUpdating={savingQuestId === quest.id}
                         isDragging={false}
                         transformY={0}
+                        onToggleSubtask={onToggleSubtask}
                       />
                     ))}
                   </div>

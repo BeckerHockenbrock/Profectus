@@ -15,6 +15,7 @@ type QuestListProps = {
   suppressClickRef: React.MutableRefObject<boolean>;
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;
+  onToggleSubtask?: (questId: string, subtaskId: string) => void;
 };
 
 export function QuestList({
@@ -30,6 +31,7 @@ export function QuestList({
   suppressClickRef,
   onToggleQuest,
   onSelectQuest,
+  onToggleSubtask,
 }: QuestListProps) {
   const selectQuest = (quest: Quest) => {
     if (suppressClickRef.current) return;
@@ -55,6 +57,7 @@ export function QuestList({
               isDragging={draggedId === quest.id}
               transformY={getCardTransformY(quest.id)}
               onPointerDown={handleCardPointerDown}
+              onToggleSubtask={onToggleSubtask}
             />
           ))
         )}
@@ -97,6 +100,7 @@ export function QuestList({
                   isUpdating={savingQuestId === quest.id}
                   isDragging={false}
                   transformY={0}
+                  onToggleSubtask={onToggleSubtask}
                 />
               ))}
             </div>
