@@ -13,6 +13,9 @@ type CategoryListProps = {
   onToggleCategory: (category: string) => void;
   today: string;
   savingQuestId: string | null;
+  draggedId?: string | null;
+  getCardTransformY?: (id: string) => number;
+  handleCardPointerDown?: (event: React.PointerEvent, questId: string, isHandle?: boolean) => void;
   suppressClickRef: React.MutableRefObject<boolean>;
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;
@@ -25,6 +28,9 @@ export function CategoryList({
   onToggleCategory,
   today,
   savingQuestId,
+  draggedId,
+  getCardTransformY,
+  handleCardPointerDown,
   suppressClickRef,
   onToggleQuest,
   onSelectQuest,
@@ -73,8 +79,9 @@ export function CategoryList({
                     onToggle={onToggleQuest}
                     onSelect={selectQuest}
                     isUpdating={savingQuestId === quest.id}
-                    isDragging={false}
-                    transformY={0}
+                    isDragging={draggedId === quest.id}
+                    transformY={getCardTransformY ? getCardTransformY(quest.id) : 0}
+                    onPointerDown={handleCardPointerDown}
                     onToggleSubtask={onToggleSubtask}
                   />
                 ))

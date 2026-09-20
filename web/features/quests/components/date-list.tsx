@@ -9,6 +9,9 @@ type DateListProps = {
   onToggleDate: (dateKey: string) => void;
   today: string;
   savingQuestId: string | null;
+  draggedId?: string | null;
+  getCardTransformY?: (id: string) => number;
+  handleCardPointerDown?: (event: React.PointerEvent, questId: string, isHandle?: boolean) => void;
   suppressClickRef: React.MutableRefObject<boolean>;
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;
@@ -21,6 +24,9 @@ export function DateList({
   onToggleDate,
   today,
   savingQuestId,
+  draggedId,
+  getCardTransformY,
+  handleCardPointerDown,
   suppressClickRef,
   onToggleQuest,
   onSelectQuest,
@@ -69,8 +75,9 @@ export function DateList({
                     onToggle={onToggleQuest}
                     onSelect={selectQuest}
                     isUpdating={savingQuestId === quest.id}
-                    isDragging={false}
-                    transformY={0}
+                    isDragging={draggedId === quest.id}
+                    transformY={getCardTransformY ? getCardTransformY(quest.id) : 0}
+                    onPointerDown={handleCardPointerDown}
                     onToggleSubtask={onToggleSubtask}
                   />
                 ))

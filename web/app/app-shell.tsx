@@ -98,6 +98,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     quests,
     openQuests,
     setQuests,
+    view: questView,
   });
 
   const {

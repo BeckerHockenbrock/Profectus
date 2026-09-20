@@ -151,6 +151,9 @@ export function TasksView({
             }
             today={today}
             savingQuestId={savingQuestId}
+            draggedId={draggedId}
+            getCardTransformY={getCardTransformY}
+            handleCardPointerDown={handleCardPointerDown}
             suppressClickRef={suppressClickRef}
             onToggleQuest={onToggleQuest}
             onSelectQuest={onSelectQuest}
@@ -168,6 +171,9 @@ export function TasksView({
             }
             today={today}
             savingQuestId={savingQuestId}
+            draggedId={draggedId}
+            getCardTransformY={getCardTransformY}
+            handleCardPointerDown={handleCardPointerDown}
             suppressClickRef={suppressClickRef}
             onToggleQuest={onToggleQuest}
             onSelectQuest={onSelectQuest}

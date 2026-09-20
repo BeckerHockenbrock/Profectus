@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { Quest } from "../types/quest";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Quest, QuestView } from "../types/quest";
 import { saveQuestOrderToFirestore } from "../data/quest-firestore";
 
 type UseQuestReorderProps = {
@@ -9,6 +9,7 @@ type UseQuestReorderProps = {
   quests: Quest[];
   openQuests: Quest[];
   setQuests: React.Dispatch<React.SetStateAction<Quest[]>>;
+  view?: QuestView;
 };
 
 export function useQuestReorder({
@@ -16,6 +17,7 @@ export function useQuestReorder({
   quests,
   openQuests,
   setQuests,
+  view = "all",
 }: UseQuestReorderProps) {
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragStartIndex, setDragStartIndex] = useState<number>(-1);
@@ -29,11 +31,28 @@ export function useQuestReorder({
   const suppressClickRef = useRef<boolean>(false);
   const questsRef = useRef(quests);
   const openQuestsRef = useRef(openQuests);
+  const viewRef = useRef(view);
+  const activeQuestsRef = useRef<Quest[]>([]);
 
   useEffect(() => {
     questsRef.current = quests;
     openQuestsRef.current = openQuests;
-  }, [quests, openQuests]);
+    viewRef.current = view;
+  }, [quests, openQuests, view]);
+
+  const activeQuests = useMemo(() => {
+    if (!draggedId) return [];
+    const draggedQuest = quests.find((q) => q.id === draggedId);
+    if (!draggedQuest) return [];
+
+    if (view === "dates") {
+      return quests.filter((q) => !q.completed && q.dueDate === draggedQuest.dueDate);
+    }
+    if (view === "categories") {
+      return quests.filter((q) => !q.completed && q.category === draggedQuest.category);
+    }
+    return openQuests;
+  }, [draggedId, quests, view, openQuests]);
 
   const saveQuestOrder = useCallback(
     async (reorderedQuests: Quest[]) => {
@@ -44,8 +63,22 @@ export function useQuestReorder({
   );
 
   const startDrag = useCallback((questId: string, clientY: number) => {
-    const index = openQuestsRef.current.findIndex((q) => q.id === questId);
+    const draggedQuest = questsRef.current.find((q) => q.id === questId);
+    if (!draggedQuest) return;
+
+    let activeList: Quest[];
+    if (viewRef.current === "dates") {
+      activeList = questsRef.current.filter((q) => !q.completed && q.dueDate === draggedQuest.dueDate);
+    } else if (viewRef.current === "categories") {
+      activeList = questsRef.current.filter((q) => !q.completed && q.category === draggedQuest.category);
+    } else {
+      activeList = openQuestsRef.current;
+    }
+
+    const index = activeList.findIndex((q) => q.id === questId);
     if (index === -1) return;
+
+    activeQuestsRef.current = activeList;
 
     const cardEl = document.querySelector(`[data-quest-id="${questId}"]`) as HTMLElement;
     if (cardEl) {
@@ -134,7 +167,8 @@ export function useQuestReorder({
 
       const h = dragItemHeight || 62;
       const slotsMoved = Math.round(deltaY / h);
-      const newTarget = Math.max(0, Math.min(openQuestsRef.current.length - 1, dragStartIndex + slotsMoved));
+      const activeList = activeQuestsRef.current;
+      const newTarget = Math.max(0, Math.min(activeList.length - 1, dragStartIndex + slotsMoved));
 
       setTargetDropIndex((prev) => {
         if (prev !== newTarget && typeof navigator !== "undefined" && navigator.vibrate) {
@@ -148,18 +182,36 @@ export function useQuestReorder({
       if (isDraggingRef.current) {
         const from = dragStartIndex;
         const to = targetDropIndex;
+        const activeList = activeQuestsRef.current;
 
-        if (from !== -1 && to !== -1 && from !== to) {
-          const nextOpen = [...openQuestsRef.current];
-          const [moved] = nextOpen.splice(from, 1);
-          nextOpen.splice(to, 0, moved);
-          const completedPart = questsRef.current.filter((q) => q.completed);
-          const next = [...nextOpen, ...completedPart];
-          setQuests(next);
-          saveQuestOrder(next);
+        if (from !== -1 && to !== -1 && from !== to && activeList.length > 0) {
+          const nextActive = [...activeList];
+          const [moved] = nextActive.splice(from, 1);
+          nextActive.splice(to, 0, moved);
+
+          if (viewRef.current === "all") {
+            const completedPart = questsRef.current.filter((q) => q.completed);
+            const next = [...nextActive, ...completedPart];
+            setQuests(next);
+            saveQuestOrder(next);
+          } else {
+            const activeIdSet = new Set(nextActive.map((q) => q.id));
+            let nextActiveIdx = 0;
+            const next = questsRef.current.map((q) => {
+              if (activeIdSet.has(q.id)) {
+                const replacement = nextActive[nextActiveIdx];
+                nextActiveIdx++;
+                return replacement;
+              }
+              return q;
+            });
+            setQuests(next);
+            saveQuestOrder(next);
+          }
         }
 
         isDraggingRef.current = false;
+        activeQuestsRef.current = [];
         setDraggedId(null);
         setDragStartIndex(-1);
         setTargetDropIndex(-1);
@@ -188,7 +240,7 @@ export function useQuestReorder({
     if (!draggedId) return 0;
     if (draggedId === questId) return dragDeltaY;
 
-    const index = openQuests.findIndex((q) => q.id === questId);
+    const index = activeQuests.findIndex((q) => q.id === questId);
     if (index === -1) return 0;
 
     const h = dragItemHeight || 62;
