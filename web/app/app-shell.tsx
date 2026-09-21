@@ -12,6 +12,7 @@ import { UnderConstructionView } from "@/features/construction/components/under-
 import { QuestFormModal } from "@/features/quests/components/quest-form-modal";
 import { TaskDetailModal } from "@/features/quests/components/task-detail-modal";
 import { TasksView } from "@/features/quests/components/tasks-view";
+import { IosDatePickerPopover } from "@/features/quests/components/ios-date-picker";
 import { SchoolView } from "@/features/school/components/school-view";
 import { useQuestMutations } from "@/features/quests/hooks/use-quest-mutations";
 import { useQuestReorder } from "@/features/quests/hooks/use-quest-reorder";
@@ -70,6 +71,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     toggleQuest,
     createQuest,
     updateQuest,
+    updateQuestDueDate,
     deleteQuest,
     toggleSubtask,
     addSubtask,
@@ -81,6 +83,45 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     quests,
     setQuests,
   });
+
+  const [listDatePickerTarget, setListDatePickerTarget] = useState<{
+    questId: string;
+    subtaskId?: string;
+    currentDueDate: string;
+    anchorRect: DOMRect;
+  } | null>(null);
+
+  const handleOpenListDatePicker = (questId: string, currentDate: string, anchorRect: DOMRect) => {
+    setListDatePickerTarget({
+      questId,
+      currentDueDate: currentDate,
+      anchorRect,
+    });
+  };
+
+  const handleOpenListSubtaskDatePicker = (
+    questId: string,
+    subtaskId: string,
+    currentDate: string,
+    anchorRect: DOMRect,
+  ) => {
+    setListDatePickerTarget({
+      questId,
+      subtaskId,
+      currentDueDate: currentDate,
+      anchorRect,
+    });
+  };
+
+  const handleSelectListDate = async (newDate: string) => {
+    if (!listDatePickerTarget) return;
+    const { questId, subtaskId } = listDatePickerTarget;
+    if (subtaskId) {
+      await updateSubtask(questId, subtaskId, { dueDate: newDate || undefined });
+    } else {
+      await updateQuestDueDate(questId, newDate);
+    }
+  };
 
   const openQuests = useMemo(() => quests.filter((quest) => !quest.completed), [quests]);
   const completedQuests = useMemo(() => quests.filter((quest) => quest.completed), [quests]);
@@ -258,6 +299,8 @@ export function AppShell({ today: initialToday }: AppShellProps) {
                 onSelectQuest={(targetQuest) => setSelectedQuestId(targetQuest.id)}
                 onOpenNewQuest={openNewQuest}
                 onToggleSubtask={toggleSubtask}
+                onOpenDatePicker={handleOpenListDatePicker}
+                onOpenSubtaskDatePicker={handleOpenListSubtaskDatePicker}
               />
             </div>
           )}
@@ -290,7 +333,20 @@ export function AppShell({ today: initialToday }: AppShellProps) {
                 setSelectedQuestId(null);
                 setFocusQuest(targetQuest);
               }}
+              onUpdateDueDate={(newDate) => updateQuestDueDate(selectedQuest.id, newDate)}
               isUpdating={savingQuestId === selectedQuest.id}
+            />
+          ) : null}
+
+          {listDatePickerTarget ? (
+            <IosDatePickerPopover
+              isOpen={Boolean(listDatePickerTarget)}
+              currentDate={listDatePickerTarget.currentDueDate}
+              today={today}
+              anchorRect={listDatePickerTarget.anchorRect}
+              onSelectDate={handleSelectListDate}
+              onClose={() => setListDatePickerTarget(null)}
+              title={listDatePickerTarget.subtaskId ? "Subtask Due Date" : "Quest Due Date"}
             />
           ) : null}
 

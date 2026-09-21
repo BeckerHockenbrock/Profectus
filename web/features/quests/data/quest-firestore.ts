@@ -115,6 +115,17 @@ export async function updateQuestInFirestore(
   });
 }
 
+export async function updateQuestDueDateInFirestore(
+  userId: string,
+  questId: string,
+  dueDate: string,
+): Promise<void> {
+  const database = getFirebaseDb();
+  await updateDoc(doc(database, "users", userId, "quests", questId), {
+    dueDate,
+  });
+}
+
 export async function updateSubtasksInFirestore(
   userId: string,
   questId: string,

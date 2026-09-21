@@ -27,6 +27,8 @@ type TasksViewProps = {
   onSelectQuest: (quest: Quest) => void;
   onOpenNewQuest: () => void;
   onToggleSubtask?: (questId: string, subtaskId: string) => void;
+  onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
+  onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
 };
 
 export function TasksView({
@@ -46,6 +48,8 @@ export function TasksView({
   onSelectQuest,
   onOpenNewQuest,
   onToggleSubtask,
+  onOpenDatePicker,
+  onOpenSubtaskDatePicker,
 }: TasksViewProps) {
   const [showCompleted, setShowCompleted] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
@@ -138,6 +142,8 @@ export function TasksView({
             onToggleQuest={onToggleQuest}
             onSelectQuest={onSelectQuest}
             onToggleSubtask={onToggleSubtask}
+            onOpenDatePicker={onOpenDatePicker}
+            onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
           />
         ) : view === "categories" ? (
           <CategoryList
@@ -158,6 +164,8 @@ export function TasksView({
             onToggleQuest={onToggleQuest}
             onSelectQuest={onSelectQuest}
             onToggleSubtask={onToggleSubtask}
+            onOpenDatePicker={onOpenDatePicker}
+            onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
           />
         ) : (
           <DateList
@@ -178,6 +186,8 @@ export function TasksView({
             onToggleQuest={onToggleQuest}
             onSelectQuest={onSelectQuest}
             onToggleSubtask={onToggleSubtask}
+            onOpenDatePicker={onOpenDatePicker}
+            onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
           />
         )}
       </section>

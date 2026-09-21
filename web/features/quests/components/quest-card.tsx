@@ -14,6 +14,8 @@ type QuestCardProps = {
   transformY?: number;
   onPointerDown?: (event: React.PointerEvent, questId: string, isHandle?: boolean) => void;
   onToggleSubtask?: (questId: string, subtaskId: string) => void;
+  onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
+  onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
 };
 
 export function QuestCard({
@@ -26,6 +28,8 @@ export function QuestCard({
   transformY,
   onPointerDown,
   onToggleSubtask,
+  onOpenDatePicker,
+  onOpenSubtaskDatePicker,
 }: QuestCardProps) {
   const subtasks = quest.subtasks ?? [];
 
@@ -83,6 +87,14 @@ export function QuestCard({
                 dueDate={quest.dueDate}
                 today={today}
                 completed={quest.completed}
+                onClick={
+                  onOpenDatePicker
+                    ? (event) => {
+                        const rect = event.currentTarget.getBoundingClientRect();
+                        onOpenDatePicker(quest.id, quest.dueDate, rect);
+                      }
+                    : undefined
+                }
               />
             ) : null}
             <span className="categoryPill">{quest.category}</span>
@@ -167,6 +179,14 @@ export function QuestCard({
                     dueDate={subtask.dueDate}
                     today={today}
                     completed={subtask.completed}
+                    onClick={
+                      onOpenSubtaskDatePicker
+                        ? (event) => {
+                            const rect = event.currentTarget.getBoundingClientRect();
+                            onOpenSubtaskDatePicker(quest.id, subtask.id, subtask.dueDate ?? "", rect);
+                          }
+                        : undefined
+                    }
                   />
                 ) : null}
               </div>

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import type { Quest, Subtask } from "../types/quest";
-import { formatDueDateDetail } from "../domain/date-utils";
+import { formatDueDateDetail, formatGoogleTaskDueDate } from "../domain/date-utils";
 import { GoogleTasksDateBadge } from "./google-date-badge";
+import { IosDatePickerPopover } from "./ios-date-picker";
 import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
 import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
 
@@ -19,6 +20,7 @@ type TaskDetailModalProps = {
   onAddSubtask: (title: string, dueDate?: string) => void | Promise<boolean>;
   onDeleteSubtask: (subtaskId: string) => void | Promise<boolean>;
   onStartFocus: (quest: Quest) => void;
+  onUpdateDueDate?: (dueDate: string) => void | Promise<boolean>;
   isUpdating: boolean;
 };
 
@@ -34,11 +36,18 @@ export function TaskDetailModal({
   onAddSubtask,
   onDeleteSubtask,
   onStartFocus,
+  onUpdateDueDate,
   isUpdating,
 }: TaskDetailModalProps) {
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [newSubtaskDueDate, setNewSubtaskDueDate] = useState("");
   const [isSubmittingSubtask, setIsSubmittingSubtask] = useState(false);
+  const [datePickerTarget, setDatePickerTarget] = useState<{
+    type: "quest" | "subtask" | "newSubtask";
+    subtaskId?: string;
+    currentDate: string;
+    anchorRect: DOMRect;
+  } | null>(null);
   const { sheetRef, scrimRef, dragHandleProps } = useSheetSwipe({ onClose });
   useBodyScrollLock(true);
 
@@ -67,6 +76,17 @@ export function TaskDetailModal({
       setNewSubtaskDueDate("");
     } finally {
       setIsSubmittingSubtask(false);
+    }
+  };
+
+  const handleSelectDate = (newDate: string) => {
+    if (!datePickerTarget) return;
+    if (datePickerTarget.type === "quest") {
+      onUpdateDueDate?.(newDate);
+    } else if (datePickerTarget.type === "subtask" && datePickerTarget.subtaskId) {
+      onUpdateSubtask?.(datePickerTarget.subtaskId, { dueDate: newDate || undefined });
+    } else if (datePickerTarget.type === "newSubtask") {
+      setNewSubtaskDueDate(newDate);
     }
   };
 
@@ -145,7 +165,20 @@ export function TaskDetailModal({
           </h2>
 
           <div className="detailMetaRow">
-            <span className={`dueLabel${isDueToday ? " isToday" : ""}`}>
+            <button
+              type="button"
+              className={`dueLabel isClickable${isDueToday ? " isToday" : ""}`}
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setDatePickerTarget({
+                  type: "quest",
+                  currentDate: quest.dueDate,
+                  anchorRect: rect,
+                });
+              }}
+              title={quest.dueDate ? `Due ${quest.dueDate} (click to change)` : "Set due date"}
+              aria-label={`Due date: ${formatDueDateDetail(quest.dueDate, today, quest.completed)}. Click to change`}
+            >
               <svg
                 width="13"
                 height="13"
@@ -163,7 +196,7 @@ export function TaskDetailModal({
                 <line x1="3" y1="10" x2="21" y2="10" />
               </svg>
               <span>{formatDueDateDetail(quest.dueDate, today, quest.completed)}</span>
-            </span>
+            </button>
 
             {quest.completed ? (
               <span className="detailStatusPill isCompleted">Completed</span>
@@ -230,16 +263,18 @@ export function TaskDetailModal({
                       >
                         {subtask.title}
                       </span>
-                      <label
-                        className="subtaskDateLabel"
+                      <button
+                        type="button"
+                        className="subtaskDateLabelBtn"
                         title={subtask.dueDate ? `Due ${subtask.dueDate} (click to change)` : "Set subtask due date"}
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          position: "relative",
-                          cursor: "pointer",
-                          marginInlineStart: "0.25rem",
-                          flexShrink: 0,
+                        onClick={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setDatePickerTarget({
+                            type: "subtask",
+                            subtaskId: subtask.id,
+                            currentDate: subtask.dueDate ?? "",
+                            anchorRect: rect,
+                          });
                         }}
                       >
                         {subtask.dueDate ? (
@@ -249,22 +284,7 @@ export function TaskDetailModal({
                             completed={subtask.completed}
                           />
                         ) : (
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "0.25rem",
-                              padding: "0.15rem 0.45rem",
-                              borderRadius: "0.45rem",
-                              fontSize: "0.72rem",
-                              fontWeight: 500,
-                              color: "var(--muted)",
-                              border: "1px dashed rgba(255, 255, 255, 0.16)",
-                              background: "rgba(255, 255, 255, 0.03)",
-                              cursor: "pointer",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
+                          <span className="subtaskDatePlaceholder">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                               <line x1="16" y1="2" x2="16" y2="6" />
@@ -274,25 +294,7 @@ export function TaskDetailModal({
                             <span>+ Date</span>
                           </span>
                         )}
-                        <input
-                          type="date"
-                          value={subtask.dueDate ?? ""}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            onUpdateSubtask?.(subtask.id, { dueDate: val || undefined });
-                          }}
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            opacity: 0,
-                            cursor: "pointer",
-                          }}
-                          aria-label={`Due date for ${subtask.title}`}
-                        />
-                      </label>
+                      </button>
                     </div>
 
                     <button
@@ -321,14 +323,28 @@ export function TaskDetailModal({
                 onChange={(e) => setNewSubtaskTitle(e.target.value)}
                 maxLength={160}
               />
-              <input
-                type="date"
-                className="detailAddSubtaskDate"
-                value={newSubtaskDueDate}
-                onChange={(e) => setNewSubtaskDueDate(e.target.value)}
+              <button
+                type="button"
+                className={`detailAddSubtaskDateBtn${newSubtaskDueDate ? " hasDate" : ""}`}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setDatePickerTarget({
+                    type: "newSubtask",
+                    currentDate: newSubtaskDueDate,
+                    anchorRect: rect,
+                  });
+                }}
                 title="Subtask due date (optional)"
                 aria-label="Subtask due date"
-              />
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <span>{newSubtaskDueDate ? formatGoogleTaskDueDate(newSubtaskDueDate, today) : "+ Date"}</span>
+              </button>
               <button
                 type="submit"
                 className="detailAddSubtaskButton"
@@ -375,6 +391,24 @@ export function TaskDetailModal({
           </button>
         </footer>
       </section>
+
+      {datePickerTarget ? (
+        <IosDatePickerPopover
+          isOpen={Boolean(datePickerTarget)}
+          currentDate={datePickerTarget.currentDate}
+          today={today}
+          anchorRect={datePickerTarget.anchorRect}
+          onSelectDate={handleSelectDate}
+          onClose={() => setDatePickerTarget(null)}
+          title={
+            datePickerTarget.type === "quest"
+              ? "Quest Due Date"
+              : datePickerTarget.type === "subtask"
+                ? "Subtask Due Date"
+                : "Add Subtask Date"
+          }
+        />
+      ) : null}
     </div>
   );
 }

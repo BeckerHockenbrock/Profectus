@@ -7,6 +7,7 @@ import {
   createQuestInFirestore,
   deleteQuestInFirestore,
   toggleQuestInFirestore,
+  updateQuestDueDateInFirestore,
   updateQuestInFirestore,
   updateSubtasksInFirestore,
 } from "../data/quest-firestore";
@@ -102,6 +103,29 @@ export function useQuestMutations({
     } catch {
       setQuests((current) => current.map((item) => (item.id === id ? quest : item)));
       setMutationError("That quest did not save. Try again.");
+      return false;
+    } finally {
+      setSavingQuestId(null);
+    }
+  };
+
+  const updateQuestDueDate = async (id: string, dueDate: string) => {
+    const quest = quests.find((current) => current.id === id);
+    if (!quest || !userId || savingQuestId !== null) return false;
+
+    const previousDueDate = quest.dueDate;
+    const updatedQuest = { ...quest, dueDate };
+
+    setMutationError("");
+    setSavingQuestId(id);
+    setQuests((current) => current.map((item) => (item.id === id ? updatedQuest : item)));
+
+    try {
+      await updateQuestDueDateInFirestore(userId, id, dueDate);
+      return true;
+    } catch {
+      setQuests((current) => current.map((item) => (item.id === id ? { ...item, dueDate: previousDueDate } : item)));
+      setMutationError("Could not update due date. Try again.");
       return false;
     } finally {
       setSavingQuestId(null);
@@ -270,6 +294,7 @@ export function useQuestMutations({
     toggleQuest,
     createQuest,
     updateQuest,
+    updateQuestDueDate,
     deleteQuest,
     toggleSubtask,
     addSubtask,

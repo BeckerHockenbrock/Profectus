@@ -196,3 +196,101 @@ export function groupQuestsByDate(quests: Quest[], today: string): DateQuestGrou
     }));
 }
 
+export type CalendarDay = {
+  dateString: string;
+  dayNumber: number;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  isSelected: boolean;
+};
+
+export function getCalendarDays(
+  year: number,
+  month: number, // 0-indexed (0 = Jan, 11 = Dec)
+  selectedDate = "",
+  today = "",
+): CalendarDay[] {
+  const firstDay = new Date(Date.UTC(year, month, 1));
+  const firstDayOfWeek = firstDay.getUTCDay(); // 0 (Sun) to 6 (Sat)
+  const daysInCurrentMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const daysInPrevMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+
+  const days: CalendarDay[] = [];
+
+  // Previous month trailing days
+  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    const dayNum = daysInPrevMonth - i;
+    const prevDate = new Date(Date.UTC(year, month - 1, dayNum));
+    const y = prevDate.getUTCFullYear();
+    const m = String(prevDate.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(prevDate.getUTCDate()).padStart(2, "0");
+    const dateString = `${y}-${m}-${d}`;
+
+    days.push({
+      dateString,
+      dayNumber: dayNum,
+      isCurrentMonth: false,
+      isToday: dateString === today,
+      isSelected: dateString === selectedDate,
+    });
+  }
+
+  // Current month days
+  for (let d = 1; d <= daysInCurrentMonth; d++) {
+    const m = String(month + 1).padStart(2, "0");
+    const dayStr = String(d).padStart(2, "0");
+    const dateString = `${year}-${m}-${dayStr}`;
+
+    days.push({
+      dateString,
+      dayNumber: d,
+      isCurrentMonth: true,
+      isToday: dateString === today,
+      isSelected: dateString === selectedDate,
+    });
+  }
+
+  // Next month leading days to complete full weeks (always 35 or 42 cells)
+  const totalCells = days.length <= 35 ? 35 : 42;
+  const remainingDays = totalCells - days.length;
+  for (let d = 1; d <= remainingDays; d++) {
+    const nextDate = new Date(Date.UTC(year, month + 1, d));
+    const y = nextDate.getUTCFullYear();
+    const m = String(nextDate.getUTCMonth() + 1).padStart(2, "0");
+    const dayStr = String(nextDate.getUTCDate()).padStart(2, "0");
+    const dateString = `${y}-${m}-${dayStr}`;
+
+    days.push({
+      dateString,
+      dayNumber: d,
+      isCurrentMonth: false,
+      isToday: dateString === today,
+      isSelected: dateString === selectedDate,
+    });
+  }
+
+  return days;
+}
+
+export function getNextWeekMonday(todayISO: string): string {
+  if (!todayISO) return "";
+  const [year, month, day] = todayISO.split("-").map(Number);
+  if (!year || !month || !day) return "";
+  const date = new Date(Date.UTC(year, month - 1, day, 12));
+  const dayOfWeek = date.getUTCDay(); // 0 = Sun, 1 = Mon ... 6 = Sat
+  const daysUntilNextMonday = ((8 - dayOfWeek) % 7) || 7;
+  return addDays(todayISO, daysUntilNextMonday);
+}
+
+export function getThisWeekend(todayISO: string): string {
+  if (!todayISO) return "";
+  const [year, month, day] = todayISO.split("-").map(Number);
+  if (!year || !month || !day) return "";
+  const date = new Date(Date.UTC(year, month - 1, day, 12));
+  const dayOfWeek = date.getUTCDay(); // 0 = Sun, 6 = Sat
+  if (dayOfWeek === 6) return todayISO; // already Saturday
+  if (dayOfWeek === 0) return addDays(todayISO, 6); // next Saturday
+  const daysUntilSaturday = 6 - dayOfWeek;
+  return addDays(todayISO, daysUntilSaturday);
+}
+

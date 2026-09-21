@@ -16,6 +16,8 @@ type QuestListProps = {
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;
   onToggleSubtask?: (questId: string, subtaskId: string) => void;
+  onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
+  onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
 };
 
 export function QuestList({
@@ -32,6 +34,8 @@ export function QuestList({
   onToggleQuest,
   onSelectQuest,
   onToggleSubtask,
+  onOpenDatePicker,
+  onOpenSubtaskDatePicker,
 }: QuestListProps) {
   const selectQuest = (quest: Quest) => {
     if (suppressClickRef.current) return;
@@ -58,6 +62,8 @@ export function QuestList({
               transformY={getCardTransformY(quest.id)}
               onPointerDown={handleCardPointerDown}
               onToggleSubtask={onToggleSubtask}
+              onOpenDatePicker={onOpenDatePicker}
+              onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
             />
           ))
         )}
@@ -101,6 +107,8 @@ export function QuestList({
                   isDragging={false}
                   transformY={0}
                   onToggleSubtask={onToggleSubtask}
+                  onOpenDatePicker={onOpenDatePicker}
+                  onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
                 />
               ))}
             </div>
