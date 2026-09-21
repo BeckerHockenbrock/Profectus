@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Quest } from "../types/quest";
+import type { Quest, Subtask } from "../types/quest";
 import { formatDueDateDetail } from "../domain/date-utils";
 import { GoogleTasksDateBadge } from "./google-date-badge";
 import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
@@ -15,6 +15,7 @@ type TaskDetailModalProps = {
   onDelete: () => void | Promise<void>;
   onToggleComplete: (id: string) => void;
   onToggleSubtask: (subtaskId: string) => void;
+  onUpdateSubtask?: (subtaskId: string, updates: Partial<Subtask>) => void | Promise<boolean>;
   onAddSubtask: (title: string, dueDate?: string) => void | Promise<boolean>;
   onDeleteSubtask: (subtaskId: string) => void | Promise<boolean>;
   onStartFocus: (quest: Quest) => void;
@@ -29,6 +30,7 @@ export function TaskDetailModal({
   onDelete,
   onToggleComplete,
   onToggleSubtask,
+  onUpdateSubtask,
   onAddSubtask,
   onDeleteSubtask,
   onStartFocus,
@@ -228,13 +230,69 @@ export function TaskDetailModal({
                       >
                         {subtask.title}
                       </span>
-                      {subtask.dueDate ? (
-                        <GoogleTasksDateBadge
-                          dueDate={subtask.dueDate}
-                          today={today}
-                          completed={subtask.completed}
+                      <label
+                        className="subtaskDateLabel"
+                        title={subtask.dueDate ? `Due ${subtask.dueDate} (click to change)` : "Set subtask due date"}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          position: "relative",
+                          cursor: "pointer",
+                          marginInlineStart: "0.25rem",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {subtask.dueDate ? (
+                          <GoogleTasksDateBadge
+                            dueDate={subtask.dueDate}
+                            today={today}
+                            completed={subtask.completed}
+                          />
+                        ) : (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.25rem",
+                              padding: "0.15rem 0.45rem",
+                              borderRadius: "0.45rem",
+                              fontSize: "0.72rem",
+                              fontWeight: 500,
+                              color: "var(--muted)",
+                              border: "1px dashed rgba(255, 255, 255, 0.16)",
+                              background: "rgba(255, 255, 255, 0.03)",
+                              cursor: "pointer",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                              <line x1="16" y1="2" x2="16" y2="6" />
+                              <line x1="8" y1="2" x2="8" y2="6" />
+                              <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            <span>+ Date</span>
+                          </span>
+                        )}
+                        <input
+                          type="date"
+                          value={subtask.dueDate ?? ""}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            onUpdateSubtask?.(subtask.id, { dueDate: val || undefined });
+                          }}
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            opacity: 0,
+                            cursor: "pointer",
+                          }}
+                          aria-label={`Due date for ${subtask.title}`}
                         />
-                      ) : null}
+                      </label>
                     </div>
 
                     <button

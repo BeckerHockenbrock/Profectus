@@ -96,6 +96,37 @@ export type DateQuestGroup = {
   quests: Quest[];
 };
 
+export function isQuestInDateGroup(quest: Quest, dateKey: string): boolean {
+  if (dateKey === "") {
+    if (quest.dueDate) return false;
+    const subtasks = quest.subtasks ?? [];
+    return subtasks.length === 0 || subtasks.some((st) => !st.dueDate);
+  }
+  if (quest.dueDate === dateKey) {
+    return true;
+  }
+  const subtasks = quest.subtasks ?? [];
+  return subtasks.some((st) => st.dueDate === dateKey);
+}
+
+export function getQuestSubtasksForDate(quest: Quest, dateKey: string): Quest["subtasks"] {
+  const subtasks = quest.subtasks ?? [];
+  if (dateKey === "") {
+    return subtasks.filter((st) => !st.dueDate);
+  }
+  if (quest.dueDate === dateKey) {
+    return subtasks.filter((st) => st.dueDate === dateKey || !st.dueDate);
+  }
+  return subtasks.filter((st) => st.dueDate === dateKey);
+}
+
+export function isQuestCompletedForDate(quest: Quest, dateKey: string): boolean {
+  if (quest.completed) return true;
+  if (quest.dueDate === dateKey) return false;
+  const subtasksForDate = getQuestSubtasksForDate(quest, dateKey) ?? [];
+  return subtasksForDate.length > 0 && subtasksForDate.every((st) => st.completed);
+}
+
 export function formatDateGroupHeading(dueDate: string, today: string): string {
   if (!dueDate) return "No Date";
   const dayInfo = getDayOfWeekFromISO(dueDate);
@@ -116,7 +147,24 @@ export function formatDateGroupHeading(dueDate: string, today: string): string {
 }
 
 export function groupQuestsByDate(quests: Quest[], today: string): DateQuestGroup[] {
-  const rawDates = Array.from(new Set(quests.map((quest) => quest.dueDate)));
+  const dateSet = new Set<string>();
+
+  for (const quest of quests) {
+    if (quest.dueDate) {
+      dateSet.add(quest.dueDate);
+    }
+    const subtasks = quest.subtasks ?? [];
+    for (const st of subtasks) {
+      if (st.dueDate) {
+        dateSet.add(st.dueDate);
+      }
+    }
+    if (!quest.dueDate && (subtasks.length === 0 || subtasks.some((st) => !st.dueDate))) {
+      dateSet.add("");
+    }
+  }
+
+  const rawDates = Array.from(dateSet);
   const dated = rawDates.filter(Boolean).sort((a, b) => a.localeCompare(b));
   const hasNoDate = rawDates.includes("");
   const sortedDateKeys = hasNoDate ? [...dated, ""] : dated;
@@ -124,14 +172,27 @@ export function groupQuestsByDate(quests: Quest[], today: string): DateQuestGrou
   return sortedDateKeys
     .filter((dateKey) => {
       if (today && dateKey && dateKey < today) {
-        return quests.some((quest) => quest.dueDate === dateKey && !quest.completed);
+        return quests.some((quest) => {
+          if (!isQuestInDateGroup(quest, dateKey)) return false;
+          if (quest.completed) return false;
+          if (quest.dueDate === dateKey) return true;
+          const dateSubtasks = getQuestSubtasksForDate(quest, dateKey) ?? [];
+          return dateSubtasks.some((st) => !st.completed);
+        });
       }
       return true;
     })
     .map((dateKey) => ({
       dateKey,
       title: formatDateGroupHeading(dateKey, today),
-      quests: quests.filter((quest) => quest.dueDate === dateKey),
+      quests: quests
+        .filter((quest) => isQuestInDateGroup(quest, dateKey))
+        .map((quest) => ({
+          ...quest,
+          dueDate: quest.dueDate === dateKey ? quest.dueDate : "",
+          completed: isQuestCompletedForDate(quest, dateKey),
+          subtasks: getQuestSubtasksForDate(quest, dateKey),
+        })),
     }));
 }
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Quest, QuestView } from "../types/quest";
 import { saveQuestOrderToFirestore } from "../data/quest-firestore";
+import { getQuestSubtasksForDate, isQuestInDateGroup } from "../domain/date-utils";
 
 type UseQuestReorderProps = {
   userId: string | null | undefined;
@@ -33,26 +34,13 @@ export function useQuestReorder({
   const openQuestsRef = useRef(openQuests);
   const viewRef = useRef(view);
   const activeQuestsRef = useRef<Quest[]>([]);
+  const draggedGroupKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     questsRef.current = quests;
     openQuestsRef.current = openQuests;
     viewRef.current = view;
   }, [quests, openQuests, view]);
-
-  const activeQuests = useMemo(() => {
-    if (!draggedId) return [];
-    const draggedQuest = quests.find((q) => q.id === draggedId);
-    if (!draggedQuest) return [];
-
-    if (view === "dates") {
-      return quests.filter((q) => !q.completed && q.dueDate === draggedQuest.dueDate);
-    }
-    if (view === "categories") {
-      return quests.filter((q) => !q.completed && q.category === draggedQuest.category);
-    }
-    return openQuests;
-  }, [draggedId, quests, view, openQuests]);
 
   const saveQuestOrder = useCallback(
     async (reorderedQuests: Quest[]) => {
@@ -62,58 +50,72 @@ export function useQuestReorder({
     [userId],
   );
 
-  const startDrag = useCallback((questId: string, clientY: number) => {
-    const draggedQuest = questsRef.current.find((q) => q.id === questId);
-    if (!draggedQuest) return;
+  const startDrag = useCallback(
+    (questId: string, clientY: number, groupKey?: string, targetCard?: HTMLElement) => {
+      const draggedQuest = questsRef.current.find((q) => q.id === questId);
+      if (!draggedQuest) return;
 
-    let activeList: Quest[];
-    if (viewRef.current === "dates") {
-      activeList = questsRef.current.filter((q) => !q.completed && q.dueDate === draggedQuest.dueDate);
-    } else if (viewRef.current === "categories") {
-      activeList = questsRef.current.filter((q) => !q.completed && q.category === draggedQuest.category);
-    } else {
-      activeList = openQuestsRef.current;
-    }
+      let activeList: Quest[];
+      if (viewRef.current === "dates") {
+        const activeDateKey = groupKey ?? draggedGroupKeyRef.current ?? draggedQuest.dueDate;
+        activeList = questsRef.current.filter((q) => {
+          if (!isQuestInDateGroup(q, activeDateKey)) return false;
+          if (q.completed) return false;
+          if (q.dueDate === activeDateKey) return true;
+          const dateSubtasks = getQuestSubtasksForDate(q, activeDateKey) ?? [];
+          return dateSubtasks.some((st) => !st.completed);
+        });
+      } else if (viewRef.current === "categories") {
+        const activeCat = groupKey ?? draggedGroupKeyRef.current ?? draggedQuest.category;
+        activeList = questsRef.current.filter((q) => !q.completed && q.category === activeCat);
+      } else {
+        activeList = openQuestsRef.current;
+      }
 
-    const index = activeList.findIndex((q) => q.id === questId);
-    if (index === -1) return;
+      const index = activeList.findIndex((q) => q.id === questId);
+      if (index === -1) return;
 
-    activeQuestsRef.current = activeList;
+      activeQuestsRef.current = activeList;
 
-    const cardEl = document.querySelector(`[data-quest-id="${questId}"]`) as HTMLElement;
-    if (cardEl) {
-      const rect = cardEl.getBoundingClientRect();
-      const parentEl = cardEl.parentElement;
-      const rowGap = parentEl ? parseFloat(window.getComputedStyle(parentEl).rowGap || "7") || 7 : 7;
-      setDragItemHeight(rect.height + rowGap);
-    }
+      const cardEl = targetCard ?? (document.querySelector(`[data-quest-id="${questId}"]`) as HTMLElement);
+      if (cardEl) {
+        const rect = cardEl.getBoundingClientRect();
+        const parentEl = cardEl.parentElement;
+        const rowGap = parentEl ? parseFloat(window.getComputedStyle(parentEl).rowGap || "7") || 7 : 7;
+        setDragItemHeight(rect.height + rowGap);
+      }
 
-    startPointerYRef.current = clientY;
-    isDraggingRef.current = true;
-    setDraggedId(questId);
-    setDragStartIndex(index);
-    setTargetDropIndex(index);
-    setDragDeltaY(0);
-    suppressClickRef.current = true;
+      startPointerYRef.current = clientY;
+      isDraggingRef.current = true;
+      setDraggedId(questId);
+      setDragStartIndex(index);
+      setTargetDropIndex(index);
+      setDragDeltaY(0);
+      suppressClickRef.current = true;
 
-    if (typeof navigator !== "undefined" && navigator.vibrate) {
-      navigator.vibrate(18);
-    }
-    document.body.style.userSelect = "none";
-    document.body.style.touchAction = "none";
-  }, []);
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(18);
+      }
+      document.body.style.userSelect = "none";
+      document.body.style.touchAction = "none";
+    },
+    [],
+  );
 
   const handleCardPointerDown = useCallback(
-    (event: React.PointerEvent, questId: string, isHandle?: boolean) => {
+    (event: React.PointerEvent, questId: string, isHandle?: boolean, groupKey?: string) => {
       if (event.button !== 0) return;
       if ((event.target as HTMLElement).closest(".completeButton")) return;
 
       const clientY = event.clientY;
       const clientX = event.clientX;
+      const targetCard = (event.currentTarget as HTMLElement).closest(".questCard") as HTMLElement;
+
+      draggedGroupKeyRef.current = groupKey ?? null;
 
       if (isHandle) {
         event.preventDefault();
-        startDrag(questId, clientY);
+        startDrag(questId, clientY, groupKey, targetCard);
         return;
       }
 
@@ -122,7 +124,7 @@ export function useQuestReorder({
       }
 
       holdTimerRef.current = setTimeout(() => {
-        startDrag(questId, clientY);
+        startDrag(questId, clientY, groupKey, targetCard);
       }, 200);
 
       const onCancelCheck = () => {
@@ -212,6 +214,7 @@ export function useQuestReorder({
 
         isDraggingRef.current = false;
         activeQuestsRef.current = [];
+        draggedGroupKeyRef.current = null;
         setDraggedId(null);
         setDragStartIndex(-1);
         setTargetDropIndex(-1);
@@ -236,11 +239,36 @@ export function useQuestReorder({
     };
   }, [draggedId, dragStartIndex, targetDropIndex, dragItemHeight, saveQuestOrder, setQuests]);
 
-  function getCardTransformY(questId: string): number {
+  function getCardTransformY(questId: string, groupKey?: string): number {
     if (!draggedId) return 0;
     if (draggedId === questId) return dragDeltaY;
 
-    const index = activeQuests.findIndex((q) => q.id === questId);
+    let activeList: Quest[];
+    if (view === "dates") {
+      const activeDateKey = groupKey ?? "";
+      const draggedQuest = quests.find((q) => q.id === draggedId);
+      if (!draggedQuest || !isQuestInDateGroup(draggedQuest, activeDateKey)) {
+        return 0;
+      }
+      activeList = quests.filter((q) => {
+        if (!isQuestInDateGroup(q, activeDateKey)) return false;
+        if (q.completed) return false;
+        if (q.dueDate === activeDateKey) return true;
+        const dateSubtasks = getQuestSubtasksForDate(q, activeDateKey) ?? [];
+        return dateSubtasks.some((st) => !st.completed);
+      });
+    } else if (view === "categories") {
+      const activeCat = groupKey ?? "";
+      const draggedQuest = quests.find((q) => q.id === draggedId);
+      if (!draggedQuest || draggedQuest.category !== activeCat) {
+        return 0;
+      }
+      activeList = quests.filter((q) => !q.completed && q.category === activeCat);
+    } else {
+      activeList = openQuests;
+    }
+
+    const index = activeList.findIndex((q) => q.id === questId);
     if (index === -1) return 0;
 
     const h = dragItemHeight || 62;

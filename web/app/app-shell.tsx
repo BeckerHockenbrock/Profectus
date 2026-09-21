@@ -73,6 +73,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     deleteQuest,
     toggleSubtask,
     addSubtask,
+    updateSubtask,
     deleteSubtask,
     finishFocusSession,
   } = useQuestMutations({
@@ -282,6 +283,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
               onDelete={() => handleDeleteQuest(selectedQuest.id)}
               onToggleComplete={toggleQuest}
               onToggleSubtask={(subtaskId) => toggleSubtask(selectedQuest.id, subtaskId)}
+              onUpdateSubtask={(subtaskId, updates) => updateSubtask(selectedQuest.id, subtaskId, updates)}
               onAddSubtask={(title, dueDate) => addSubtask(selectedQuest.id, title, dueDate)}
               onDeleteSubtask={(subtaskId) => deleteSubtask(selectedQuest.id, subtaskId)}
               onStartFocus={(targetQuest) => {
