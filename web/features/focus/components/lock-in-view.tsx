@@ -74,7 +74,7 @@ export function LockInView({
   const todaySessions = sessions.filter((s) => s.date === today);
 
   return (
-    <div className="lockInContainer" aria-label="General study timer and focus hub">
+    <>
       {/* Hero section with custom Spartan Scholar artwork and dynamic embedded info banner */}
       <section className="hero lockInHero" aria-label="Lock in overview">
         <Image
@@ -128,9 +128,11 @@ export function LockInView({
         </div>
       </section>
 
-      {/* Main Lock In Controls — Clean, unboxed native flow */}
-      <section className="lockInFlowSection" aria-label="Study session builder">
-        <header className="lockInSectionHeader">
+      {/* Main Lock In Workspace (Session builder & Today's Study Log) */}
+      <section className="lockInWorkspace" aria-label="Study session workspace">
+        {/* Main Lock In Controls — Clean, unboxed native flow */}
+        <div className="lockInFlowSection" aria-label="Study session builder">
+          <header className="lockInSectionHeader">
           <div className="lockInHeaderTitles">
             <span className="lockInSubhead">General Study Timer</span>
             <h2 className="lockInHeading">Lock In.</h2>
@@ -313,7 +315,7 @@ export function LockInView({
             </span>
           </div>
         </button>
-      </section>
+      </div>
 
       {/* Today's Study Log */}
       <section className="todayStudyLogSection" aria-label="Today's completed focus sessions">
@@ -360,6 +362,7 @@ export function LockInView({
           </ul>
         )}
       </section>
-    </div>
-  );
+    </section>
+  </>
+);
 }
