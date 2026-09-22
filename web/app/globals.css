@@ -2453,6 +2453,313 @@ select:focus {
   opacity: 0.6;
 }
 
+/* =========================================================================
+   ORBITAL CELESTIAL STUDY CLOCK
+   ========================================================================= */
+
+.focusVisualToggleRow {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 0.35rem;
+  z-index: 10;
+}
+
+.focusVisualModeSwitch {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.visualModeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.72rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 160ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.visualModeBtn:hover {
+  color: var(--text);
+}
+
+.visualModeBtn.isActive {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.orbitalClockRoot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 25rem;
+  margin: 0 auto;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.orbitalHudHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5rem;
+  margin-bottom: 0.15rem;
+  padding: 0 0.25rem;
+}
+
+.orbitalHudPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  font-size: 0.7rem;
+  font-family: ui-monospace, "SF Mono", monospace;
+  color: var(--secondary);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.orbitalPillIcon {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.orbitalPillLabel {
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.orbitalHudCenterBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--secondary);
+}
+
+.orbitalPulseBeacon {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+  animation: beaconPulse 2.4s ease-in-out infinite;
+}
+
+.orbitalSvgContainer {
+  position: relative;
+  width: min(84vw, 44vh, 23.5rem);
+  width: min(84vw, 44dvh, 23.5rem);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  margin: 0.25rem 0;
+}
+
+.orbitalSvgCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.orbitalAuraDisk {
+  transform-origin: 220px 220px;
+  animation: orbitalAuraBreath 4.2s ease-in-out infinite alternate;
+}
+
+.orbitalClockRoot.isPausedState .orbitalAuraDisk {
+  animation-play-state: paused;
+  opacity: 0.35;
+}
+
+.orbitalChronoCenterContent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+  text-align: center;
+}
+
+.orbitalCenterTag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: -0.1rem;
+}
+
+.orbitalTimeDigits {
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", monospace;
+  font-size: clamp(2.4rem, 10vw, 3.4rem);
+  font-weight: 340;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.4), 0 0 24px rgba(255, 255, 255, 0.08);
+  margin: 0.25rem 0;
+  transition: color 200ms ease, opacity 200ms ease;
+}
+
+.orbitalClockRoot.isPausedState .orbitalTimeDigits {
+  opacity: 0.72;
+}
+
+.orbitalCycleBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.16rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--secondary);
+}
+
+.orbitalDot {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.orbitalHudFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  padding: 0 0.5rem;
+}
+
+.orbitalHudStatItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+
+.orbitalHudStatItem:last-child {
+  align-items: flex-end;
+}
+
+.orbitalStatKey {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.orbitalStatVal {
+  font-size: 0.78rem;
+  font-family: ui-monospace, monospace;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.orbitalHudTaskPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 11.5rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  font-size: 0.68rem;
+  color: var(--secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.orbitalTaskDot {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+
+.orbitalTaskTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes orbitalAuraBreath {
+  0% {
+    transform: scale(0.93);
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes beaconPulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes waypointPulseRing {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbitalAuraDisk,
+  .orbitalPulseBeacon,
+  .waypointActivePulse {
+    animation: none !important;
+  }
+}
+
 .focusControls {
   display: flex;
   flex-direction: column;

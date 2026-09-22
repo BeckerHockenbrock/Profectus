@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatTimerDigits } from "../domain/timer-format";
+import { OrbitalStudyClock } from "./orbital-study-clock";
 
 type BreakScreenProps = {
   durationMinutes: number;
@@ -105,35 +106,15 @@ export function BreakScreen({ durationMinutes, onFinish, onSkip }: BreakScreenPr
         </header>
 
         <div className="breakVisualSection">
-          <div className="breakIconCircle" aria-hidden="true">
-            <span className="breakHeroIcon">☕</span>
-          </div>
-
-          <div
-            className="breakTimerBox"
-            role="timer"
-            aria-live="off"
-            aria-label={`Remaining break time: ${Math.ceil(displayMs / 60000)} minutes`}
-          >
-            <div className="breakProgressBarWrapper" aria-hidden="true">
-              <div
-                className="breakProgressBarFill"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-
-            <div className="breakTimerNumerals" aria-hidden="true">
-              {formatTimerDigits(displayMs)}
-            </div>
-
-            <div className="breakStatusBadge">
-              <span
-                className={`breakStatusDot ${isDone ? "isCompleted" : ""}`}
-                aria-hidden="true"
-              />
-              <span>{isDone ? "Refreshed" : isPaused ? "Paused" : "Resting"}</span>
-            </div>
-          </div>
+          <OrbitalStudyClock
+            displayMs={displayMs}
+            targetMs={targetMs}
+            isPaused={isPaused}
+            isCountdown={true}
+            isGoalReached={isDone}
+            mode="break"
+            taskTitle="Rest & Recovery"
+          />
 
           <div className="breakStoicQuote">
             <p className="breakQuoteText">“{quote.text}”</p>

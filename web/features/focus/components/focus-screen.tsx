@@ -4,7 +4,9 @@ import { useMemo, useRef, useState } from "react";
 import type { BreakAction, FocusScreenProps } from "../types/focus";
 import { formatTimerDigits } from "../domain/timer-format";
 import { useFocusTimer } from "../hooks/use-focus-timer";
+import { useLockInStats } from "../hooks/use-lock-in-stats";
 import { SisyphusFrameAnimation } from "./sisyphus-frame-animation";
+import { OrbitalStudyClock } from "./orbital-study-clock";
 import { getDailyStoicQuote } from "@/features/quests/data/stoic-quotes";
 
 export function FocusScreen({
@@ -14,6 +16,7 @@ export function FocusScreen({
   onQuit,
   onFinish,
 }: FocusScreenProps) {
+  const [visualMode, setVisualMode] = useState<"orbital" | "sisyphus">("orbital");
   const [isFinishing, setIsFinishing] = useState(false);
   const [finishError, setFinishError] = useState<string | null>(null);
   const [showBreakModal, setShowBreakModal] = useState(false);
@@ -22,6 +25,8 @@ export function FocusScreen({
     blocksCompleted: number;
     earnedBreakMinutes: number;
   } | null>(null);
+
+  const { todayStats, streak } = useLockInStats();
 
   const isFinishingRef = useRef(false);
   const quote = useMemo(() => getDailyStoicQuote(), []);
@@ -112,6 +117,16 @@ export function FocusScreen({
       ? `Pushing the boulder for a ${targetMinutes}-minute focus block`
       : "Open-ended study session";
 
+  const totalBlocksCount =
+    initialBlocks || (targetMinutes ? Math.max(1, Math.round(targetMinutes / 25)) : 4);
+  const currentBlockIndex =
+    targetMs && targetMs > 0 && totalBlocksCount > 1
+      ? Math.min(
+          totalBlocksCount,
+          Math.floor(elapsedMs / (targetMs / totalBlocksCount)) + 1,
+        )
+      : 1;
+
   return (
     <section
       className="focusScreen"
@@ -126,45 +141,85 @@ export function FocusScreen({
         </header>
 
         <div className="focusVisualSection">
-          <div className="sisyphusAnimationWrapper">
-            <SisyphusFrameAnimation isPaused={isPaused} />
+          {/* Subtle Visual Mode Switcher */}
+          <div className="focusVisualToggleRow">
+            <div className="focusVisualModeSwitch" role="group" aria-label="Clock visual style">
+              <button
+                type="button"
+                className={`visualModeBtn ${visualMode === "orbital" ? "isActive" : ""}`}
+                onClick={() => setVisualMode("orbital")}
+                title="Orbital Celestial Clock"
+              >
+                <span>🪐</span> Orbital
+              </button>
+              <button
+                type="button"
+                className={`visualModeBtn ${visualMode === "sisyphus" ? "isActive" : ""}`}
+                onClick={() => setVisualMode("sisyphus")}
+                title="Sisyphus Classic"
+              >
+                <span>🪨</span> Sisyphus
+              </button>
+            </div>
           </div>
 
-          <div
-            className="focusTimerBox"
-            role="timer"
-            aria-live="off"
-            aria-label={`Focus time: ${minutesFocused} minutes elapsed`}
-          >
-            {progressPercent !== null ? (
-              <div className="focusProgressBarWrapper" aria-hidden="true">
-                <div
-                  className="focusProgressBarFill"
-                  style={{ width: `${progressPercent}%` }}
-                />
+          {visualMode === "orbital" ? (
+            <OrbitalStudyClock
+              displayMs={displayMs}
+              targetMs={targetMs}
+              isPaused={isPaused}
+              isCountdown={isCountdown}
+              isGoalReached={isGoalReached}
+              currentBlock={currentBlockIndex}
+              totalBlocks={totalBlocksCount}
+              todayFocusMinutes={todayStats.totalMinutes}
+              taskTitle={headerTitle !== "Lock In" ? headerTitle : undefined}
+              streakDays={streak}
+              mode="focus"
+            />
+          ) : (
+            <>
+              <div className="sisyphusAnimationWrapper">
+                <SisyphusFrameAnimation isPaused={isPaused} />
               </div>
-            ) : null}
 
-            <div className="focusTimerNumerals" aria-hidden="true">
-              {formatTimerDigits(displayMs)}
-            </div>
+              <div
+                className="focusTimerBox"
+                role="timer"
+                aria-live="off"
+                aria-label={`Focus time: ${minutesFocused} minutes elapsed`}
+              >
+                {progressPercent !== null ? (
+                  <div className="focusProgressBarWrapper" aria-hidden="true">
+                    <div
+                      className="focusProgressBarFill"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                ) : null}
 
-            <div className="focusStatusBadge">
-              <span
-                className={`focusStatusDot ${isGoalReached ? "isCompleted" : ""}`}
-                aria-hidden="true"
-              />
-              <span>
-                {isGoalReached
-                  ? "Summit Reached! 🪨"
-                  : isPaused
-                    ? "Paused"
-                    : isCountdown
-                      ? "Focusing"
-                      : "Locking In"}
-              </span>
-            </div>
-          </div>
+                <div className="focusTimerNumerals" aria-hidden="true">
+                  {formatTimerDigits(displayMs)}
+                </div>
+
+                <div className="focusStatusBadge">
+                  <span
+                    className={`focusStatusDot ${isGoalReached ? "isCompleted" : ""}`}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    {isGoalReached
+                      ? "Summit Reached! 🪨"
+                      : isPaused
+                        ? "Paused"
+                        : isCountdown
+                          ? "Focusing"
+                          : "Locking In"}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Stoic Motivation Under Timer */}
           <div className="focusStoicQuote" aria-label="Stoic quote">
