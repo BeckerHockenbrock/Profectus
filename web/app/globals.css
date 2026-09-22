@@ -5479,8 +5479,8 @@ select:focus {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.12rem;
-  padding: 0.45rem 0.2rem;
+  gap: 0.32rem;
+  padding: 0.52rem 0.25rem;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -5502,12 +5502,11 @@ select:focus {
 }
 
 .iosPresetIconWrapper {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
-  margin-bottom: 0.1rem;
 }
 
 .isTodayPreset .iosPresetIconWrapper {
@@ -5531,15 +5530,10 @@ select:focus {
 }
 
 .iosPresetLabel {
-  font-size: 0.68rem;
-  font-weight: 650;
-  line-height: 1.15;
-}
-
-.iosPresetSub {
-  font-size: 0.6rem;
-  color: var(--muted);
-  line-height: 1.1;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
 .iosDatePresetBtn.isSelected {

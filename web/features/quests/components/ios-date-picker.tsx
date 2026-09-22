@@ -5,9 +5,7 @@ import { createPortal } from "react-dom";
 import {
   addDays,
   getCalendarDays,
-  getDayOfWeekFromISO,
   getNextWeekMonday,
-  getThisWeekend,
 } from "../domain/date-utils";
 
 type IosDatePickerPopoverProps = {
@@ -153,13 +151,10 @@ function IosDatePickerDialog({
   const tomorrow = addDays(today, 1);
   const nextWeek = getNextWeekMonday(today);
 
-  const todayDayInfo = getDayOfWeekFromISO(today);
-  const tomorrowDayInfo = getDayOfWeekFromISO(tomorrow);
-  const nextWeekDayInfo = getDayOfWeekFromISO(nextWeek);
-
   const isTodaySelected = currentDate === today;
   const isTomorrowSelected = currentDate === tomorrow;
   const isNextWeekSelected = currentDate === nextWeek;
+  const todayDayNum = today ? Number(today.slice(8, 10)) : null;
 
   return (
     <div
@@ -210,17 +205,41 @@ function IosDatePickerDialog({
             }}
           >
             <div className="iosPresetIconWrapper">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="4" width="18" height="17" rx="3.5" />
+                <line x1="16" y1="2.5" x2="16" y2="5.5" />
+                <line x1="8" y1="2.5" x2="8" y2="5.5" />
+                <line x1="3" y1="9.5" x2="21" y2="9.5" />
+                {todayDayNum ? (
+                  <text
+                    x="12"
+                    y="17.8"
+                    textAnchor="middle"
+                    fontSize="8"
+                    fontWeight="700"
+                    fill="currentColor"
+                    stroke="none"
+                    letterSpacing="-0.02em"
+                    fontFamily="inherit"
+                  >
+                    {todayDayNum}
+                  </text>
+                ) : (
+                  <circle cx="12" cy="15" r="1.75" fill="currentColor" stroke="none" />
+                )}
               </svg>
             </div>
-            <div className="iosPresetText">
-              <span className="iosPresetLabel">Today</span>
-              <span className="iosPresetSub">{todayDayInfo?.short ?? ""}</span>
-            </div>
+            <span className="iosPresetLabel">Today</span>
           </button>
 
           <button
@@ -232,20 +251,29 @@ function IosDatePickerDialog({
             }}
           >
             <div className="iosPresetIconWrapper">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="5" />
-                <line x1="12" y1="1" x2="12" y2="3" />
-                <line x1="12" y1="21" x2="12" y2="23" />
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                <line x1="1" y1="12" x2="3" y2="12" />
-                <line x1="21" y1="12" x2="23" y2="12" />
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="4.5" />
+                <line x1="12" y1="2.5" x2="12" y2="4.5" />
+                <line x1="12" y1="19.5" x2="12" y2="21.5" />
+                <line x1="2.5" y1="12" x2="4.5" y2="12" />
+                <line x1="19.5" y1="12" x2="21.5" y2="12" />
+                <line x1="5.28" y1="5.28" x2="6.7" y2="6.7" />
+                <line x1="17.3" y1="17.3" x2="18.72" y2="18.72" />
+                <line x1="5.28" y1="18.72" x2="6.7" y2="17.3" />
+                <line x1="17.3" y1="6.7" x2="18.72" y2="5.28" />
               </svg>
             </div>
-            <div className="iosPresetText">
-              <span className="iosPresetLabel">Tomorrow</span>
-              <span className="iosPresetSub">{tomorrowDayInfo?.short ?? ""}</span>
-            </div>
+            <span className="iosPresetLabel">Tomorrow</span>
           </button>
 
           <button
@@ -257,15 +285,26 @@ function IosDatePickerDialog({
             }}
           >
             <div className="iosPresetIconWrapper">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <polyline points="13 17 18 12 13 7" />
-                <polyline points="6 17 11 12 6 7" />
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="4" width="18" height="17" rx="3.5" />
+                <line x1="16" y1="2.5" x2="16" y2="5.5" />
+                <line x1="8" y1="2.5" x2="8" y2="5.5" />
+                <line x1="3" y1="9.5" x2="21" y2="9.5" />
+                <path d="M8.5 15.5h7" />
+                <path d="m12.5 12.5 3 3-3 3" />
               </svg>
             </div>
-            <div className="iosPresetText">
-              <span className="iosPresetLabel">Next Week</span>
-              <span className="iosPresetSub">{nextWeekDayInfo?.short ?? ""}</span>
-            </div>
+            <span className="iosPresetLabel">Next Week</span>
           </button>
 
           {currentDate ? (
@@ -279,15 +318,26 @@ function IosDatePickerDialog({
               title="Remove due date"
             >
               <div className="iosPresetIconWrapper">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="4" width="18" height="17" rx="3.5" />
+                  <line x1="16" y1="2.5" x2="16" y2="5.5" />
+                  <line x1="8" y1="2.5" x2="8" y2="5.5" />
+                  <line x1="3" y1="9.5" x2="21" y2="9.5" />
+                  <line x1="9.5" y1="13" x2="14.5" y2="18" />
+                  <line x1="14.5" y1="13" x2="9.5" y2="18" />
                 </svg>
               </div>
-              <div className="iosPresetText">
-                <span className="iosPresetLabel">No Date</span>
-                <span className="iosPresetSub">Clear</span>
-              </div>
+              <span className="iosPresetLabel">No Date</span>
             </button>
           ) : null}
         </div>
