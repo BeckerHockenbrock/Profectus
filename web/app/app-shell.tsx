@@ -8,7 +8,8 @@ import { HomeScreenHint } from "@/components/shared/home-screen-hint";
 import { AuthShell } from "@/features/auth/components/auth-shell";
 import { useAuthUser } from "@/features/auth/hooks/use-auth-user";
 import { FocusScreen } from "@/features/focus/components/focus-screen";
-import { UnderConstructionView } from "@/features/construction/components/under-construction-view";
+import { LockInView } from "@/features/focus/components/lock-in-view";
+import { useLockInStats } from "@/features/focus/hooks/use-lock-in-stats";
 import { QuestFormModal } from "@/features/quests/components/quest-form-modal";
 import { TaskDetailModal } from "@/features/quests/components/task-detail-modal";
 import { TasksView } from "@/features/quests/components/tasks-view";
@@ -58,7 +59,11 @@ export function AppShell({ today: initialToday }: AppShellProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingQuestId, setEditingQuestId] = useState<string | null>(null);
   const [form, setForm] = useState<QuestForm>(emptyForm);
-  const [focusQuest, setFocusQuest] = useState<Quest | null>(null);
+  const [focusConfig, setFocusConfig] = useState<{
+    quest: Quest | null;
+    targetMinutes: number | null;
+    initialBlocks?: number;
+  } | null>(null);
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
   const [showHomeScreenHint, setShowHomeScreenHint] = useState(false);
 
@@ -83,6 +88,8 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     quests,
     setQuests,
   });
+
+  const { logSession } = useLockInStats(user?.uid, today);
 
   const [listDatePickerTarget, setListDatePickerTarget] = useState<{
     questId: string;
@@ -146,7 +153,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
   const {
     handleTasksNavigation,
     handleSchoolNavigation,
-    handleConstructionNavigation,
+    handleFocusNavigation,
   } = useAppNavigation({
     sheetOpen,
     setSheetOpen,
@@ -170,10 +177,35 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     setShowHomeScreenHint(false);
   }
 
-  const handleFocusFinished = async (questId: string, addedMinutes: number) => {
-    await finishFocusSession(questId, addedMinutes);
-    setFocusQuest(null);
+  const handleFocusFinished = async (
+    addedMinutes: number,
+    blocksCompleted: number,
+    questId?: string,
+  ) => {
+    if (questId && addedMinutes > 0) {
+      await finishFocusSession(questId, addedMinutes);
+    }
+    const targetQuest = questId ? quests.find((q) => q.id === questId) : null;
+    await logSession(
+      addedMinutes,
+      blocksCompleted,
+      focusConfig?.targetMinutes ?? null,
+      questId,
+      targetQuest?.title,
+    );
+    setFocusConfig(null);
     setSelectedQuestId(null);
+  };
+
+  const handleStartGeneralFocus = (options: {
+    targetMinutes: number | null;
+    initialBlocks?: number;
+  }) => {
+    setFocusConfig({
+      quest: null,
+      targetMinutes: options.targetMinutes,
+      initialBlocks: options.initialBlocks,
+    });
   };
 
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -237,8 +269,8 @@ export function AppShell({ today: initialToday }: AppShellProps) {
   const selectedQuest = selectedQuestId
     ? quests.find((quest) => quest.id === selectedQuestId) ?? null
     : null;
-  const activeFocusQuest = focusQuest
-    ? quests.find((quest) => quest.id === focusQuest.id) ?? focusQuest
+  const activeFocusQuest = focusConfig?.quest
+    ? quests.find((quest) => quest.id === focusConfig.quest?.id) ?? focusConfig.quest
     : null;
   const displayError = mutationError || loadError;
   const userInitial = (user.displayName ?? user.email ?? "U").slice(0, 1).toUpperCase();
@@ -254,10 +286,12 @@ export function AppShell({ today: initialToday }: AppShellProps) {
         </defs>
       </svg>
 
-      {activeFocusQuest ? (
+      {focusConfig ? (
         <FocusScreen
           quest={activeFocusQuest}
-          onQuit={() => setFocusQuest(null)}
+          targetMinutes={focusConfig.targetMinutes}
+          initialBlocks={focusConfig.initialBlocks}
+          onQuit={() => setFocusConfig(null)}
           onFinish={handleFocusFinished}
         />
       ) : (
@@ -275,9 +309,13 @@ export function AppShell({ today: initialToday }: AppShellProps) {
             <div className="content" id="top">
               <SchoolView userId={user.uid} />
             </div>
-          ) : activeTab === "construction" ? (
+          ) : activeTab === "focus" ? (
             <div className="content" id="top">
-              <UnderConstructionView onBackToTasks={handleTasksNavigation} />
+              <LockInView
+                userId={user.uid}
+                today={today}
+                onStartFocus={handleStartGeneralFocus}
+              />
             </div>
           ) : (
             <div className="content" id="top">
@@ -331,7 +369,10 @@ export function AppShell({ today: initialToday }: AppShellProps) {
               onDeleteSubtask={(subtaskId) => deleteSubtask(selectedQuest.id, subtaskId)}
               onStartFocus={(targetQuest) => {
                 setSelectedQuestId(null);
-                setFocusQuest(targetQuest);
+                setFocusConfig({
+                  quest: targetQuest,
+                  targetMinutes: null,
+                });
               }}
               onUpdateDueDate={(newDate) => updateQuestDueDate(selectedQuest.id, newDate)}
               isUpdating={savingQuestId === selectedQuest.id}
@@ -354,7 +395,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
             activeTab={activeTab}
             onNavigateTasks={handleTasksNavigation}
             onNavigateSchool={handleSchoolNavigation}
-            onNavigateConstruction={handleConstructionNavigation}
+            onNavigateFocus={handleFocusNavigation}
             onOpenNewQuest={openNewQuest}
           />
         </main>

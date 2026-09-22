@@ -28,9 +28,13 @@ web/
 │   │   └── components/under-construction-view.tsx
 │   ├── focus/
 │   │   ├── components/focus-screen.tsx
+│   │   ├── components/lock-in-view.tsx
 │   │   ├── components/sisyphus-frame-animation.tsx
+│   │   ├── data/focus-firestore.ts
+│   │   ├── data/focus-storage.ts
 │   │   ├── domain/timer-format.ts
 │   │   ├── hooks/use-focus-timer.ts
+│   │   ├── hooks/use-lock-in-stats.ts
 │   │   └── types/focus.ts
 │   ├── journal/
 │   │   ├── components/journal-entry-card.tsx
@@ -92,7 +96,7 @@ web/
 `AppShell` owns only state that crosses feature boundaries:
 
 - authenticated user composition;
-- the active application tab (`tasks`, `school`, `construction`);
+- the active application tab (`tasks`, `school`, `focus`);
 - the active quest detail, quest form, and focus-session entry points;
 - focus completion coordination after the quest mutation layer commits successfully.
 

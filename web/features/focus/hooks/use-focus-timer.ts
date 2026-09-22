@@ -6,11 +6,21 @@ import type React from "react";
 type UseFocusTimerOptions = {
   onQuit: () => void;
   isFinishingRef: React.MutableRefObject<boolean>;
+  targetMinutes?: number | null;
 };
 
-export function useFocusTimer({ onQuit, isFinishingRef }: UseFocusTimerOptions) {
+export function useFocusTimer({
+  onQuit,
+  isFinishingRef,
+  targetMinutes,
+}: UseFocusTimerOptions) {
+  const isCountdown = Boolean(targetMinutes && targetMinutes > 0);
+  const targetMs = isCountdown ? (targetMinutes as number) * 60 * 1000 : null;
+
   const [isPaused, setIsPaused] = useState(false);
-  const [displayMs, setDisplayMs] = useState(0);
+  const [displayMs, setDisplayMs] = useState(() => (targetMs !== null ? targetMs : 0));
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const [isGoalReached, setIsGoalReached] = useState(false);
   const [showQuitConfirm, setShowQuitConfirm] = useState(false);
 
   const accumulatedMsRef = useRef(0);
@@ -50,7 +60,18 @@ export function useFocusTimer({ onQuit, isFinishingRef }: UseFocusTimerOptions) 
   // Timer ticker and visibility/focus handlers to prevent background drift
   useEffect(() => {
     const updateDisplay = () => {
-      setDisplayMs(getElapsedMs());
+      const elapsed = getElapsedMs();
+      setElapsedMs(elapsed);
+
+      if (targetMs !== null) {
+        const remaining = Math.max(0, targetMs - elapsed);
+        setDisplayMs(remaining);
+        if (elapsed >= targetMs) {
+          setIsGoalReached(true);
+        }
+      } else {
+        setDisplayMs(elapsed);
+      }
     };
 
     const intervalId = setInterval(updateDisplay, 200);
@@ -67,7 +88,7 @@ export function useFocusTimer({ onQuit, isFinishingRef }: UseFocusTimerOptions) 
       document.removeEventListener("visibilitychange", handleSync);
       window.removeEventListener("focus", handleSync);
     };
-  }, [getElapsedMs]);
+  }, [getElapsedMs, targetMs]);
 
   const handleTogglePause = useCallback(() => {
     if (isFinishingRef.current) return;
@@ -77,7 +98,13 @@ export function useFocusTimer({ onQuit, isFinishingRef }: UseFocusTimerOptions) 
       segmentStartRef.current = Date.now();
       isPausedRef.current = false;
       setIsPaused(false);
-      setDisplayMs(accumulatedMsRef.current);
+      const elapsed = accumulatedMsRef.current;
+      setElapsedMs(elapsed);
+      if (targetMs !== null) {
+        setDisplayMs(Math.max(0, targetMs - elapsed));
+      } else {
+        setDisplayMs(elapsed);
+      }
     } else {
       // Pause
       const now = Date.now();
@@ -87,9 +114,15 @@ export function useFocusTimer({ onQuit, isFinishingRef }: UseFocusTimerOptions) 
       segmentStartRef.current = null;
       isPausedRef.current = true;
       setIsPaused(true);
-      setDisplayMs(accumulatedMsRef.current);
+      const elapsed = accumulatedMsRef.current;
+      setElapsedMs(elapsed);
+      if (targetMs !== null) {
+        setDisplayMs(Math.max(0, targetMs - elapsed));
+      } else {
+        setDisplayMs(elapsed);
+      }
     }
-  }, [isFinishingRef]);
+  }, [isFinishingRef, targetMs]);
 
   const handleQuitClick = useCallback(() => {
     if (isFinishingRef.current) return;
@@ -130,10 +163,15 @@ export function useFocusTimer({ onQuit, isFinishingRef }: UseFocusTimerOptions) 
       accumulatedMsRef.current = finalElapsedMs;
       isPausedRef.current = true;
       setIsPaused(true);
-      setDisplayMs(finalElapsedMs);
+      setElapsedMs(finalElapsedMs);
+      if (targetMs !== null) {
+        setDisplayMs(Math.max(0, targetMs - finalElapsedMs));
+      } else {
+        setDisplayMs(finalElapsedMs);
+      }
     }
     return finalElapsedMs;
-  }, [getElapsedMs]);
+  }, [getElapsedMs, targetMs]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -159,6 +197,10 @@ export function useFocusTimer({ onQuit, isFinishingRef }: UseFocusTimerOptions) 
   return {
     isPaused,
     displayMs,
+    elapsedMs,
+    isGoalReached,
+    isCountdown,
+    targetMs,
     showQuitConfirm,
     pauseButtonRef,
     handleTogglePause,

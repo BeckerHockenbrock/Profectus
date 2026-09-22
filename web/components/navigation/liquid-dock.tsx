@@ -1,12 +1,12 @@
 "use client";
 
-export type AppTab = "tasks" | "school" | "construction";
+export type AppTab = "tasks" | "school" | "focus";
 
 type LiquidDockProps = {
   activeTab: AppTab;
   onNavigateTasks: () => void;
   onNavigateSchool: () => void;
-  onNavigateConstruction: () => void;
+  onNavigateFocus: () => void;
   onOpenNewQuest: () => void;
 };
 
@@ -14,7 +14,7 @@ export function LiquidDock({
   activeTab,
   onNavigateTasks,
   onNavigateSchool,
-  onNavigateConstruction,
+  onNavigateFocus,
   onOpenNewQuest,
 }: LiquidDockProps) {
   return (
@@ -66,14 +66,14 @@ export function LiquidDock({
         <span>School</span>
       </button>
 
-      {/* 3. Traffic Cone - Under construction */}
+      {/* 3. Lock In - Study timer */}
       <button
         type="button"
-        className={`dockItem dockConeItem ${activeTab === "construction" ? "isActive" : ""}`}
-        aria-current={activeTab === "construction" ? "page" : undefined}
-        onClick={onNavigateConstruction}
-        aria-label="Under construction"
-        title="Under construction"
+        className={`dockItem dockLockInItem ${activeTab === "focus" ? "isActive" : ""}`}
+        aria-current={activeTab === "focus" ? "page" : undefined}
+        onClick={onNavigateFocus}
+        aria-label="Lock In study timer"
+        title="Lock In study timer"
       >
         <svg
           className="dockIcon"
@@ -85,12 +85,9 @@ export function LiquidDock({
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <path d="M3 20h18" />
-          <path d="m7.5 20 3.2-14.2a1 1 0 0 1 .98-.8h.64a1 1 0 0 1 .98.8L16.5 20" />
-          <path d="m9 15h6" />
-          <path d="m10 10h4" />
+          <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
         </svg>
-        <span>Construction</span>
+        <span>Lock In</span>
       </button>
 
       {/* 4. Add task button */}

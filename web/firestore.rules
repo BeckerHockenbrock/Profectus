@@ -68,5 +68,9 @@ service cloud.firestore {
     match /users/{accountId}/journal/{entryId} {
       allow read, write: if ownsAccount(accountId);
     }
+
+    match /users/{accountId}/focusSessions/{sessionId} {
+      allow read, write: if ownsAccount(accountId);
+    }
   }
 }

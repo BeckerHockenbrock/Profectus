@@ -46,6 +46,6 @@ export function useAppNavigation({
   return {
     handleTasksNavigation: () => navigateToTab("tasks"),
     handleSchoolNavigation: () => navigateToTab("school"),
-    handleConstructionNavigation: () => navigateToTab("construction"),
+    handleFocusNavigation: () => navigateToTab("focus"),
   };
 }

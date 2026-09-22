@@ -2006,6 +2006,15 @@ select:focus {
   color: #fde68a;
 }
 
+.dockLockInItem.isActive {
+  color: #ff6b4a;
+  text-shadow: 0 0 12px rgba(255, 107, 74, 0.45);
+}
+
+.dockLockInItem:hover {
+  color: #ff8e75;
+}
+
 /* Under Construction view */
 .constructionSection {
   display: flex;
@@ -5700,5 +5709,591 @@ select:focus {
 .iosDayCell.isSelected .iosDayInner {
   color: #fff !important;
   font-weight: 700;
+}
+
+/* ==========================================================================
+   LOCK IN / GENERAL STUDY TIMER & DISCIPLINE HUB
+   ========================================================================== */
+
+.lockInContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-bottom: 7rem;
+}
+
+.lockInHero {
+  margin-bottom: 0.5rem;
+}
+
+/* Daily Discipline Stats Overview */
+.lockInStatsRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.disciplineStatCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.1rem 0.6rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 180ms ease, border-color 180ms ease;
+}
+
+.disciplineStatCard:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+}
+
+.disciplineStatLabel {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.disciplineStatValue {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.disciplineStatSub {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-top: 0.3rem;
+  white-space: nowrap;
+}
+
+.boulderEmoji,
+.fireEmoji {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+/* Main Lock In Launcher Card */
+.lockInLauncherCard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  padding: 1.8rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.launcherHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.launcherTag {
+  align-self: flex-start;
+  font-size: 0.65rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 107, 74, 0.15);
+  color: #ff8e75;
+  border: 1px solid rgba(255, 107, 74, 0.3);
+}
+
+.launcherTitle {
+  font-size: 1.85rem;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.launcherDesc {
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Block Visualizer Section */
+.blockVisualizerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.blockVisualizerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.blockVisualizerCount {
+  font-size: 1.05rem;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.blockVisualizerCount strong {
+  font-weight: 800;
+  color: #ff8e75;
+}
+
+.blockVisualizerHint {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.stackedBlocksList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  min-height: 3.2rem;
+  align-items: center;
+}
+
+.stackedBlockItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 12px;
+  background: rgba(255, 107, 74, 0.14);
+  border: 1px solid rgba(255, 107, 74, 0.35);
+  box-shadow: 0 2px 10px rgba(255, 107, 74, 0.15);
+  animation: stackPopIn 200ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes stackPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.blockNumber {
+  font-size: 0.68rem;
+  font-weight: 800;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+}
+
+.blockDuration {
+  font-size: 0.82rem;
+  font-weight: 750;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.blockIcon {
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.openStopwatchBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.stopwatchIcon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.openStopwatchBanner p {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* Block Adjustment Controls (+ / -) */
+.blockStackControls {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+}
+
+.blockAdjustButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.blockAdjustButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.blockAdjustButton:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.blockAdjustButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.blockAdjustButton.isPrimary {
+  background: rgba(255, 107, 74, 0.16);
+  border-color: rgba(255, 107, 74, 0.38);
+  color: #ff9d85;
+}
+
+.blockAdjustButton.isPrimary:hover:not(:disabled) {
+  background: rgba(255, 107, 74, 0.26);
+  border-color: rgba(255, 107, 74, 0.55);
+}
+
+/* Quick Presets Row */
+.presetRow {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.presetPill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.55rem 0.25rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.presetPill strong {
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.presetPill span {
+  font-size: 0.63rem;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.presetPill:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.presetPill.isSelected {
+  background: rgba(255, 107, 74, 0.2);
+  border-color: #ff6b4a;
+  box-shadow: 0 0 16px rgba(255, 107, 74, 0.3);
+}
+
+.presetPill.isSelected strong {
+  color: #ff8e75;
+}
+
+.presetPill.isSelected span {
+  color: #ffc2b3;
+}
+
+/* Big Glowing Lock In Button */
+.lockInLaunchButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1.15rem 1.5rem;
+  border: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ff5722 0%, #ff7043 50%, #f4511e 100%);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(255, 87, 34, 0.38), 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+  overflow: hidden;
+  font-family: inherit;
+  margin-top: 0.4rem;
+}
+
+.lockInLaunchButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(255, 87, 34, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  filter: brightness(1.05);
+}
+
+.lockInLaunchButton:active {
+  transform: scale(0.98);
+}
+
+.launchButtonContent {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.launchIcon {
+  width: 1.45rem;
+  height: 1.45rem;
+}
+
+.launchTitle {
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* Today's Study Log */
+.todayStudyLogSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.studyLogHeader {
+  display: flex;
+  flex-direction: column;
+}
+
+.studyLogSubhead {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.studyLogTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin: 0;
+}
+
+.studyLogEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+}
+
+.emptyLogIcon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.studyLogEmptyState p {
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--text);
+  margin: 0 0 0.25rem 0;
+}
+
+.studyLogEmptyState span {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.studyLogList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.studyLogItem {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.studyLogIconWrapper {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  background: rgba(255, 107, 74, 0.12);
+  border: 1px solid rgba(255, 107, 74, 0.25);
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+}
+
+.studyLogInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.studyLogTitleText {
+  font-size: 0.9rem;
+  font-weight: 750;
+  color: #ffffff;
+}
+
+.studyLogMeta {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.studyLogXPBadge {
+  font-size: 0.75rem;
+  font-weight: 750;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(52, 199, 89, 0.14);
+  color: #34c759;
+  border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+/* Focus Screen Additions (Progress bar, stoic quote, summit badge) */
+.focusProgressBarWrapper {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+}
+
+.focusProgressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b4a 0%, #ff8e75 100%);
+  border-radius: 999px;
+  transition: width 300ms cubic-bezier(0.2, 0.8, 0.4, 1);
+  box-shadow: 0 0 10px rgba(255, 107, 74, 0.6);
+}
+
+.focusStatusDot.isCompleted {
+  background: #34c759 !important;
+  box-shadow: 0 0 10px #34c759 !important;
+}
+
+.focusFinishButton.isReadyFinish {
+  background: #34c759 !important;
+  box-shadow: 0 4px 20px rgba(52, 199, 89, 0.4) !important;
+}
+
+.focusStoicQuote {
+  margin-top: 1.4rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  text-align: center;
+  max-width: 26rem;
+  width: 100%;
+}
+
+.focusQuoteText {
+  font-size: 0.84rem;
+  font-style: italic;
+  color: #e5e5e5;
+  line-height: 1.45;
+  margin: 0 0 0.35rem 0;
+}
+
+.focusQuoteAuthor {
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ff8e75;
+}
+
+@media (max-width: 480px) {
+  .lockInStatsRow {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+  .presetRow {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .blockStackControls {
+    grid-template-columns: 1fr;
+  }
 }
 
