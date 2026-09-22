@@ -8,8 +8,10 @@ import { HomeScreenHint } from "@/components/shared/home-screen-hint";
 import { AuthShell } from "@/features/auth/components/auth-shell";
 import { useAuthUser } from "@/features/auth/hooks/use-auth-user";
 import { FocusScreen } from "@/features/focus/components/focus-screen";
+import { BreakScreen } from "@/features/focus/components/break-screen";
 import { LockInView } from "@/features/focus/components/lock-in-view";
 import { useLockInStats } from "@/features/focus/hooks/use-lock-in-stats";
+import type { BreakAction } from "@/features/focus/types/focus";
 import { QuestFormModal } from "@/features/quests/components/quest-form-modal";
 import { TaskDetailModal } from "@/features/quests/components/task-detail-modal";
 import { TasksView } from "@/features/quests/components/tasks-view";
@@ -64,6 +66,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     targetMinutes: number | null;
     initialBlocks?: number;
   } | null>(null);
+  const [activeBreakMinutes, setActiveBreakMinutes] = useState<number | null>(null);
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
   const [showHomeScreenHint, setShowHomeScreenHint] = useState(false);
 
@@ -89,7 +92,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     setQuests,
   });
 
-  const { logSession } = useLockInStats(user?.uid, today);
+  const { logSession, addBreak, consumeBreak } = useLockInStats(user?.uid, today);
 
   const [listDatePickerTarget, setListDatePickerTarget] = useState<{
     questId: string;
@@ -181,6 +184,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     addedMinutes: number,
     blocksCompleted: number,
     questId?: string,
+    breakAction?: BreakAction,
   ) => {
     if (questId && addedMinutes > 0) {
       await finishFocusSession(questId, addedMinutes);
@@ -195,6 +199,15 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     );
     setFocusConfig(null);
     setSelectedQuestId(null);
+
+    // Handle post-session break action (take now vs delay)
+    if (breakAction) {
+      if (breakAction.type === "take_now") {
+        setActiveBreakMinutes(breakAction.breakMinutes);
+      } else if (breakAction.type === "delay") {
+        addBreak(breakAction.breakMinutes);
+      }
+    }
   };
 
   const handleStartGeneralFocus = (options: {
@@ -286,7 +299,16 @@ export function AppShell({ today: initialToday }: AppShellProps) {
         </defs>
       </svg>
 
-      {focusConfig ? (
+      {activeBreakMinutes ? (
+        <BreakScreen
+          durationMinutes={activeBreakMinutes}
+          onFinish={() => {
+            setActiveBreakMinutes(null);
+            setActiveTab("focus");
+          }}
+          onSkip={() => setActiveBreakMinutes(null)}
+        />
+      ) : focusConfig ? (
         <FocusScreen
           quest={activeFocusQuest}
           targetMinutes={focusConfig.targetMinutes}
@@ -315,6 +337,10 @@ export function AppShell({ today: initialToday }: AppShellProps) {
                 userId={user.uid}
                 today={today}
                 onStartFocus={handleStartGeneralFocus}
+                onStartBreak={(durationMinutes) => {
+                  consumeBreak(durationMinutes);
+                  setActiveBreakMinutes(durationMinutes);
+                }}
               />
             </div>
           ) : (

@@ -27,6 +27,7 @@ web/
 │   ├── construction/
 │   │   └── components/under-construction-view.tsx
 │   ├── focus/
+│   │   ├── components/break-screen.tsx
 │   │   ├── components/focus-screen.tsx
 │   │   ├── components/lock-in-view.tsx
 │   │   ├── components/sisyphus-frame-animation.tsx

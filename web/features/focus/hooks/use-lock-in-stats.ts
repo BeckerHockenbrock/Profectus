@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FocusSessionRecord } from "../types/focus";
 import {
+  addBankedBreak,
   calculateGrindStreak,
+  consumeBankedBreak,
   getTodayStats,
+  loadBankedBreak,
   loadFocusSessions,
 } from "../data/focus-storage";
 import {
@@ -15,6 +18,7 @@ import { getLocalTodayString } from "@/features/quests/domain/date-utils";
 
 export function useLockInStats(userId?: string | null, today: string = getLocalTodayString()) {
   const [sessions, setSessions] = useState<FocusSessionRecord[]>(() => loadFocusSessions(userId));
+  const [bankedBreakMinutes, setBankedBreakMinutes] = useState<number>(() => loadBankedBreak(userId));
 
   useEffect(() => {
     if (!userId) return;
@@ -60,10 +64,31 @@ export function useLockInStats(userId?: string | null, today: string = getLocalT
     [today, userId],
   );
 
+  const addBreak = useCallback(
+    (minutes: number) => {
+      const updated = addBankedBreak(minutes, userId);
+      setBankedBreakMinutes(updated);
+      return updated;
+    },
+    [userId],
+  );
+
+  const consumeBreak = useCallback(
+    (minutes: number) => {
+      const updated = consumeBankedBreak(minutes, userId);
+      setBankedBreakMinutes(updated);
+      return updated;
+    },
+    [userId],
+  );
+
   return {
     sessions,
     todayStats,
     streak,
+    bankedBreakMinutes,
     logSession,
+    addBreak,
+    consumeBreak,
   };
 }

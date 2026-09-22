@@ -100,3 +100,43 @@ export function calculateGrindStreak(
 
   return streak;
 }
+
+const BREAK_BANK_KEY_PREFIX = "todo-quest-break-bank";
+
+function getBreakBankKey(userId?: string | null): string {
+  return `${BREAK_BANK_KEY_PREFIX}-${userId || "default"}`;
+}
+
+export function loadBankedBreak(userId?: string | null): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const raw = localStorage.getItem(getBreakBankKey(userId));
+    if (!raw) return 0;
+    const num = Number(raw);
+    return isNaN(num) ? 0 : Math.max(0, num);
+  } catch {
+    return 0;
+  }
+}
+
+export function saveBankedBreak(minutes: number, userId?: string | null): number {
+  if (typeof window === "undefined") return minutes;
+  try {
+    const clamped = Math.max(0, Math.floor(minutes));
+    localStorage.setItem(getBreakBankKey(userId), String(clamped));
+    return clamped;
+  } catch {
+    return minutes;
+  }
+}
+
+export function addBankedBreak(minutes: number, userId?: string | null): number {
+  const current = loadBankedBreak(userId);
+  return saveBankedBreak(current + minutes, userId);
+}
+
+export function consumeBankedBreak(minutes: number, userId?: string | null): number {
+  const current = loadBankedBreak(userId);
+  const remaining = Math.max(0, current - minutes);
+  return saveBankedBreak(remaining, userId);
+}

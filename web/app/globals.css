@@ -5718,199 +5718,300 @@ select:focus {
 .lockInContainer {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
   padding-bottom: 7rem;
 }
 
 .lockInHero {
-  margin-bottom: 0.5rem;
-}
-
-/* Daily Discipline Stats Overview */
-.lockInStatsRow {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
   width: 100%;
 }
 
-.disciplineStatCard {
+/* Dynamic Interactive Lock In HUD Banner inside Hero */
+.lockInLiveBanner {
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 1.1rem 0.6rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 32rem;
+  box-sizing: border-box;
+  padding: 0.95rem 1.15rem;
+  border-radius: 1.15rem;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  transition: transform 180ms ease, border-color 180ms ease;
+  transition: transform 150ms ease, border-color 150ms ease;
 }
 
-.disciplineStatCard:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  transform: translateY(-2px);
+.lockInLiveBanner.isLockedIn {
+  border: 1px solid rgba(255, 107, 74, 0.38);
+  background: linear-gradient(135deg, rgba(255, 107, 74, 0.16), rgba(180, 50, 20, 0.22));
+  box-shadow: 0 8px 24px rgba(255, 107, 74, 0.14);
 }
 
-.disciplineStatLabel {
+.lockInLiveBanner.isReady {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.liveFirePulse {
+  display: grid;
+  place-items: center;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.firePulseDot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: #ff6b4a;
+  box-shadow: 0 0 10px #ff6b4a;
+  animation: pulseFire 2s infinite ease-in-out;
+}
+
+@keyframes pulseFire {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 1;
+    box-shadow: 0 0 14px #ff8e75;
+  }
+}
+
+.lockInBannerTag {
+  display: block;
   font-size: 0.64rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.35rem;
-}
-
-.disciplineStatValue {
-  font-size: 1.45rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--text);
-  line-height: 1.15;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-}
-
-.disciplineStatSub {
-  font-size: 0.68rem;
-  color: var(--muted);
-  margin-top: 0.3rem;
-  white-space: nowrap;
-}
-
-.boulderEmoji,
-.fireEmoji {
-  font-size: 1.15rem;
-  line-height: 1;
-}
-
-/* Main Lock In Launcher Card */
-.lockInLauncherCard {
-  display: flex;
-  flex-direction: column;
-  gap: 1.4rem;
-  padding: 1.8rem;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  position: relative;
-  overflow: hidden;
-}
-
-.launcherHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.launcherTag {
-  align-self: flex-start;
-  font-size: 0.65rem;
   font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  background: rgba(255, 107, 74, 0.15);
-  color: #ff8e75;
-  border: 1px solid rgba(255, 107, 74, 0.3);
+  color: #ff9d85;
 }
 
-.launcherTitle {
-  font-size: 1.85rem;
-  font-weight: 850;
-  letter-spacing: -0.03em;
+.lockInBannerTitle {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
   color: #ffffff;
-  line-height: 1.1;
-  margin: 0;
+  margin: 0.12rem 0;
 }
 
-.launcherDesc {
-  font-size: 0.88rem;
+.lockInBannerMeta {
+  display: block;
+  font-size: 0.73rem;
   color: var(--muted);
-  line-height: 1.45;
-  margin: 0;
 }
 
-/* Block Visualizer Section */
-.blockVisualizerSection {
+.bannerTakeBreakBtn {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 140ms ease;
+  font-family: inherit;
+}
+
+.bannerTakeBreakBtn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+/* Native unboxed section flow */
+.lockInFlowSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.lockInSectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.lockInHeaderTitles {
+  display: flex;
+  flex-direction: column;
+}
+
+.lockInSubhead {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lockInHeading {
+  margin: 0.15rem 0 0;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.lockInSubtitle {
+  font-size: 0.86rem;
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 0.15rem 0 0 0;
+}
+
+/* Banked Break Alert Card */
+.bankedBreakAlertCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.15rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(52, 199, 89, 0.12), rgba(16, 185, 129, 0.08));
+  border: 1px solid rgba(52, 199, 89, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.bankedBreakLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bankedBreakIcon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.bankedBreakLeft strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #34c759;
+}
+
+.bankedBreakLeft p {
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin: 0.12rem 0 0;
+}
+
+.bankedBreakActionBtn {
+  flex-shrink: 0;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 0;
+  background: #34c759;
+  color: #000000;
+  font-size: 0.76rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease;
+  font-family: inherit;
+}
+
+.bankedBreakActionBtn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+/* Block Stack Builder */
+.blockStackBuilder {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1.25rem;
   border-radius: 18px;
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-.blockVisualizerHeader {
+.stackSummaryRow {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: baseline;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.blockVisualizerCount {
+.stackMetrics {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
   font-size: 1.05rem;
   color: #ffffff;
-  letter-spacing: -0.01em;
 }
 
-.blockVisualizerCount strong {
+.stackMetrics strong {
   font-weight: 800;
   color: #ff8e75;
 }
 
-.blockVisualizerHint {
-  font-size: 0.76rem;
+.stackTitle {
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: #ffffff;
+}
+
+.stackSeparator {
   color: var(--muted);
 }
 
-.stackedBlocksList {
+.stackBreakEarnedBadge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(52, 199, 89, 0.12);
+  border: 1px solid rgba(52, 199, 89, 0.28);
+  color: #34c759;
+}
+
+/* Visual Block Queue */
+.visualBlockQueue {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
-  min-height: 3.2rem;
+  gap: 0.45rem;
+  min-height: 2.8rem;
   align-items: center;
 }
 
-.stackedBlockItem {
+.queueBlockPill {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.8rem;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
   border-radius: 12px;
   background: rgba(255, 107, 74, 0.14);
   border: 1px solid rgba(255, 107, 74, 0.35);
-  box-shadow: 0 2px 10px rgba(255, 107, 74, 0.15);
-  animation: stackPopIn 200ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(255, 107, 74, 0.12);
+  animation: stackPopIn 180ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-@keyframes stackPopIn {
-  from {
-    opacity: 0;
-    transform: scale(0.7) translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.blockNumber {
-  font-size: 0.68rem;
+.queueBlockIndex {
+  font-size: 0.65rem;
   font-weight: 800;
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.1rem;
+  height: 1.1rem;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   display: grid;
@@ -5918,150 +6019,147 @@ select:focus {
   color: #ffffff;
 }
 
-.blockDuration {
+.queueBlockDuration {
   font-size: 0.82rem;
   font-weight: 750;
   color: #ffffff;
-  letter-spacing: -0.01em;
 }
 
-.blockIcon {
-  font-size: 0.82rem;
+.queueBlockIcon {
+  font-size: 0.78rem;
   line-height: 1;
 }
 
-.openStopwatchBanner {
+.openTimerNotice {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
+  gap: 0.65rem;
+  padding: 0.75rem 0.95rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px dashed rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
 }
 
-.stopwatchIcon {
-  font-size: 1.3rem;
+.openTimerIcon {
+  font-size: 1.2rem;
   line-height: 1;
 }
 
-.openStopwatchBanner p {
-  font-size: 0.82rem;
+.openTimerNotice p {
+  font-size: 0.8rem;
   color: var(--muted);
   margin: 0;
-  line-height: 1.35;
 }
 
-/* Block Adjustment Controls (+ / -) */
-.blockStackControls {
-  display: grid;
-  grid-template-columns: 1fr 1.35fr;
-  gap: 0.65rem;
-  margin-top: 0.25rem;
-}
-
-.blockAdjustButton {
-  display: inline-flex;
+/* Stacking Buttons Bar */
+.blockAddButtonBar {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  padding: 0.65rem 0.9rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  font-size: 0.82rem;
-  font-weight: 650;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.blockAddLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-right: 0.2rem;
+}
+
+.blockAddGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.addBlockButton {
+  padding: 0.42rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(255, 107, 74, 0.15);
+  border: 1px solid rgba(255, 107, 74, 0.35);
+  color: #ff9d85;
+  font-size: 0.78rem;
+  font-weight: 750;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all 120ms ease;
   font-family: inherit;
 }
 
-.blockAdjustButton:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+.addBlockButton:hover {
+  background: rgba(255, 107, 74, 0.26);
+  border-color: rgba(255, 107, 74, 0.55);
   transform: translateY(-1px);
 }
 
-.blockAdjustButton:active:not(:disabled) {
-  transform: scale(0.97);
+.addBlockButton:active {
+  transform: scale(0.95);
 }
 
-.blockAdjustButton:disabled {
+.removeBlockButton,
+.clearStackButton {
+  padding: 0.42rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 120ms ease;
+  font-family: inherit;
+}
+
+.removeBlockButton:hover:not(:disabled),
+.clearStackButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.removeBlockButton:disabled,
+.clearStackButton:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
-.blockAdjustButton.isPrimary {
-  background: rgba(255, 107, 74, 0.16);
-  border-color: rgba(255, 107, 74, 0.38);
-  color: #ff9d85;
-}
-
-.blockAdjustButton.isPrimary:hover:not(:disabled) {
-  background: rgba(255, 107, 74, 0.26);
-  border-color: rgba(255, 107, 74, 0.55);
-}
-
-/* Quick Presets Row */
-.presetRow {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-
-.presetPill {
+/* Presets Row */
+.presetsRow {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.2rem;
-  padding: 0.55rem 0.25rem;
-  border-radius: 14px;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding-top: 0.4rem;
+}
+
+.presetChip {
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 650;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all 120ms ease;
   font-family: inherit;
 }
 
-.presetPill strong {
-  font-size: 0.88rem;
-  font-weight: 750;
-  color: #ffffff;
-  line-height: 1;
-}
-
-.presetPill span {
-  font-size: 0.63rem;
-  font-weight: 600;
-  color: var(--muted);
-  line-height: 1;
-}
-
-.presetPill:hover {
+.presetChip:hover {
   background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.18);
-  transform: translateY(-1px);
+  color: #ffffff;
 }
 
-.presetPill.isSelected {
-  background: rgba(255, 107, 74, 0.2);
+.presetChip.isActive {
+  background: rgba(255, 107, 74, 0.18);
   border-color: #ff6b4a;
-  box-shadow: 0 0 16px rgba(255, 107, 74, 0.3);
-}
-
-.presetPill.isSelected strong {
   color: #ff8e75;
 }
 
-.presetPill.isSelected span {
-  color: #ffc2b3;
-}
-
-/* Big Glowing Lock In Button */
-.lockInLaunchButton {
+/* Big Glowing Lock In Hero Launch Button */
+.lockInHeroLaunchButton {
   position: relative;
   display: flex;
   align-items: center;
@@ -6077,160 +6175,118 @@ select:focus {
   transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
   overflow: hidden;
   font-family: inherit;
-  margin-top: 0.4rem;
 }
 
-.lockInLaunchButton:hover {
+.lockInHeroLaunchButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 36px rgba(255, 87, 34, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
   filter: brightness(1.05);
 }
 
-.lockInLaunchButton:active {
+.lockInHeroLaunchButton:active {
   transform: scale(0.98);
 }
 
-.launchButtonContent {
-  position: relative;
-  z-index: 2;
-  display: inline-flex;
+/* ==========================================================================
+   BREAK SCREEN (REST & RECOVERY)
+   ========================================================================== */
+
+.breakScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
+  background: #080d0a;
+  padding: 1.5rem;
+  overflow-y: auto;
 }
 
-.launchIcon {
-  width: 1.45rem;
-  height: 1.45rem;
-}
-
-.launchTitle {
-  font-size: 1.12rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-/* Today's Study Log */
-.todayStudyLogSection {
+.breakContainer {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  align-items: center;
+  text-align: center;
+  max-width: 28rem;
+  width: 100%;
+  gap: 1.5rem;
 }
 
-.studyLogHeader {
+.breakHeader {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.studyLogSubhead {
-  font-size: 0.68rem;
-  font-weight: 700;
+.breakCategoryPill {
+  font-size: 0.65rem;
+  font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted);
-}
-
-.studyLogTitle {
-  font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #ffffff;
-  margin: 0;
-}
-
-.studyLogEmptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 2.5rem 1.5rem;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  color: var(--muted);
-}
-
-.emptyLogIcon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  line-height: 1;
-}
-
-.studyLogEmptyState p {
-  font-size: 0.92rem;
-  font-weight: 650;
-  color: var(--text);
-  margin: 0 0 0.25rem 0;
-}
-
-.studyLogEmptyState span {
-  font-size: 0.78rem;
-  color: var(--muted);
-}
-
-.studyLogList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-}
-
-.studyLogItem {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 0.9rem 1.1rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.studyLogIconWrapper {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 10px;
-  background: rgba(255, 107, 74, 0.12);
-  border: 1px solid rgba(255, 107, 74, 0.25);
-  display: grid;
-  place-items: center;
-  font-size: 1rem;
-}
-
-.studyLogInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.studyLogTitleText {
-  font-size: 0.9rem;
-  font-weight: 750;
-  color: #ffffff;
-}
-
-.studyLogMeta {
-  font-size: 0.74rem;
-  color: var(--muted);
-}
-
-.studyLogXPBadge {
-  font-size: 0.75rem;
-  font-weight: 750;
-  padding: 0.25rem 0.6rem;
-  border-radius: 8px;
-  background: rgba(52, 199, 89, 0.14);
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(52, 199, 89, 0.15);
   color: #34c759;
   border: 1px solid rgba(52, 199, 89, 0.3);
 }
 
-/* Focus Screen Additions (Progress bar, stoic quote, summit badge) */
-.focusProgressBarWrapper {
+.breakTitle {
+  font-size: 2rem;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  margin: 0.1rem 0 0;
+}
+
+.breakDesc {
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.breakVisualSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 1.25rem;
+}
+
+.breakIconCircle {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  background: rgba(52, 199, 89, 0.12);
+  border: 1px solid rgba(52, 199, 89, 0.35);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 28px rgba(52, 199, 89, 0.2);
+}
+
+.breakHeroIcon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.breakTimerBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 20rem;
+  padding: 1.25rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.breakProgressBarWrapper {
   width: 100%;
   height: 4px;
   background: rgba(255, 255, 255, 0.08);
@@ -6239,61 +6295,221 @@ select:focus {
   margin-bottom: 0.85rem;
 }
 
-.focusProgressBarFill {
+.breakProgressBarFill {
   height: 100%;
-  background: linear-gradient(90deg, #ff6b4a 0%, #ff8e75 100%);
+  background: linear-gradient(90deg, #34c759 0%, #30d158 100%);
   border-radius: 999px;
   transition: width 300ms cubic-bezier(0.2, 0.8, 0.4, 1);
-  box-shadow: 0 0 10px rgba(255, 107, 74, 0.6);
+  box-shadow: 0 0 10px rgba(52, 199, 89, 0.6);
 }
 
-.focusStatusDot.isCompleted {
-  background: #34c759 !important;
-  box-shadow: 0 0 10px #34c759 !important;
+.breakTimerNumerals {
+  font-size: 3.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+  line-height: 1;
 }
 
-.focusFinishButton.isReadyFinish {
-  background: #34c759 !important;
-  box-shadow: 0 4px 20px rgba(52, 199, 89, 0.4) !important;
+.breakStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: #a7a7a7;
 }
 
-.focusStoicQuote {
-  margin-top: 1.4rem;
-  padding: 1rem 1.25rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  text-align: center;
-  max-width: 26rem;
-  width: 100%;
+.breakStatusDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #34c759;
+  box-shadow: 0 0 8px #34c759;
 }
 
-.focusQuoteText {
-  font-size: 0.84rem;
+.breakStoicQuote {
+  padding: 0.85rem 1.15rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  max-width: 24rem;
+}
+
+.breakQuoteText {
+  font-size: 0.82rem;
   font-style: italic;
-  color: #e5e5e5;
-  line-height: 1.45;
+  color: #d1d1d1;
+  line-height: 1.4;
+  margin: 0 0 0.25rem 0;
+}
+
+.breakQuoteAuthor {
+  font-size: 0.7rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #34c759;
+}
+
+/* Break Controls */
+.breakControls {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 20rem;
+  gap: 0.65rem;
+}
+
+.breakPrimaryRow {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 0.55rem;
+}
+
+.breakPrimaryButton {
+  width: 100%;
+  padding: 0.95rem;
+  border-radius: 16px;
+  border: 0;
+  background: linear-gradient(135deg, #ff5722, #ff7043);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255, 87, 34, 0.4);
+  transition: transform 120ms ease;
+  font-family: inherit;
+}
+
+.breakPauseButton,
+.breakFinishEarlyButton {
+  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 120ms ease;
+  font-family: inherit;
+}
+
+.breakPauseButton {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.breakFinishEarlyButton {
+  background: rgba(52, 199, 89, 0.18);
+  border: 1px solid rgba(52, 199, 89, 0.35);
+  color: #34c759;
+}
+
+.breakSkipButton {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+
+.breakSkipButton:hover {
+  color: #ffffff;
+}
+
+/* Break Option Modal inside FocusScreen */
+.breakModalCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 22rem;
+  padding: 2rem 1.5rem;
+}
+
+.breakModalBadge {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.breakModalCard h2 {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.4rem 0;
+}
+
+.breakModalStats {
+  font-size: 0.88rem;
+  color: var(--text);
   margin: 0 0 0.35rem 0;
 }
 
-.focusQuoteAuthor {
-  font-size: 0.72rem;
-  font-weight: 650;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.breakModalStats strong {
   color: #ff8e75;
 }
 
-@media (max-width: 480px) {
-  .lockInStatsRow {
-    grid-template-columns: 1fr;
-    gap: 0.55rem;
-  }
-  .presetRow {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .blockStackControls {
-    grid-template-columns: 1fr;
-  }
+.breakModalPrompt {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 0 0 1.25rem 0;
+}
+
+.breakModalActions {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0.55rem;
+}
+
+.takeBreakNowBtn {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 0;
+  background: #34c759;
+  color: #000000;
+  font-size: 0.88rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 120ms ease;
+  font-family: inherit;
+}
+
+.delayBreakBtn {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 120ms ease;
+  font-family: inherit;
+}
+
+.delayBreakBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.skipBreakBtn {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  padding: 0.4rem;
+  cursor: pointer;
+}
+
+.skipBreakBtn:hover {
+  color: #ffffff;
 }
 

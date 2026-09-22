@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import type { FocusScreenProps } from "../types/focus";
+import type { BreakAction, FocusScreenProps } from "../types/focus";
 import { formatTimerDigits } from "../domain/timer-format";
 import { useFocusTimer } from "../hooks/use-focus-timer";
 import { SisyphusFrameAnimation } from "./sisyphus-frame-animation";
@@ -16,8 +16,14 @@ export function FocusScreen({
 }: FocusScreenProps) {
   const [isFinishing, setIsFinishing] = useState(false);
   const [finishError, setFinishError] = useState<string | null>(null);
-  const isFinishingRef = useRef(false);
+  const [showBreakModal, setShowBreakModal] = useState(false);
+  const [sessionSummary, setSessionSummary] = useState<{
+    addedMinutes: number;
+    blocksCompleted: number;
+    earnedBreakMinutes: number;
+  } | null>(null);
 
+  const isFinishingRef = useRef(false);
   const quote = useMemo(() => getDailyStoicQuote(), []);
 
   const {
@@ -36,24 +42,45 @@ export function FocusScreen({
     freezeTimer,
   } = useFocusTimer({ onQuit, isFinishingRef, targetMinutes });
 
-  const handleFinish = async () => {
+  const handleFinishClick = () => {
+    if (isFinishingRef.current) return;
+    const finalElapsedMs = freezeTimer();
+    const elapsedSeconds = Math.floor(finalElapsedMs / 1000);
+    const addedMinutes = Math.floor(elapsedSeconds / 60);
+
+    const calculatedBlocks = initialBlocks
+      ? initialBlocks
+      : Math.max(1, Math.floor(addedMinutes / 5));
+    const earnedBreakMinutes = calculatedBlocks * 5;
+
+    if (addedMinutes >= 1) {
+      setSessionSummary({
+        addedMinutes,
+        blocksCompleted: calculatedBlocks,
+        earnedBreakMinutes,
+      });
+      setShowBreakModal(true);
+    } else {
+      executeFinish(addedMinutes, calculatedBlocks, undefined);
+    }
+  };
+
+  const executeFinish = async (
+    addedMinutes: number,
+    blocksCompleted: number,
+    breakAction?: BreakAction,
+  ) => {
     if (isFinishingRef.current) return;
     isFinishingRef.current = true;
     setIsFinishing(true);
     setFinishError(null);
 
-    const finalElapsedMs = freezeTimer();
-    const elapsedSeconds = Math.floor(finalElapsedMs / 1000);
-    // Full completed minutes
-    const addedMinutes = Math.floor(elapsedSeconds / 60);
-    const blocksCompleted = Math.floor(addedMinutes / 25);
-
     try {
-      await onFinish(addedMinutes, blocksCompleted, quest?.id);
+      await onFinish(addedMinutes, blocksCompleted, quest?.id, breakAction);
     } catch (err) {
-      // Retain the focus screen on failure so progress is not lost, and allow retry
       isFinishingRef.current = false;
       setIsFinishing(false);
+      setShowBreakModal(false);
       const message =
         err instanceof Error && err.message
           ? err.message
@@ -153,7 +180,7 @@ export function FocusScreen({
               <button
                 type="button"
                 className="focusErrorRetryButton"
-                onClick={handleFinish}
+                onClick={handleFinishClick}
                 disabled={isFinishing}
               >
                 Retry
@@ -190,7 +217,7 @@ export function FocusScreen({
             <button
               type="button"
               className={`focusFinishButton ${isGoalReached ? "isReadyFinish" : ""}`}
-              onClick={handleFinish}
+              onClick={handleFinishClick}
               disabled={isFinishing}
               aria-label="Finished focus session. Save progress"
             >
@@ -218,6 +245,72 @@ export function FocusScreen({
           </button>
         </div>
       </div>
+
+      {/* Break Option Modal: Take Break Now or Delay & Stack */}
+      {showBreakModal && sessionSummary ? (
+        <div
+          className="focusModalScrim"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="break-modal-title"
+        >
+          <div className="focusModalCard breakModalCard">
+            <div className="breakModalBadge" aria-hidden="true">
+              <span>☕</span>
+            </div>
+            <h2 id="break-modal-title">Block Conquered!</h2>
+            <p className="breakModalStats">
+              You focused for <strong>{sessionSummary.addedMinutes} minutes</strong> across{" "}
+              <strong>{sessionSummary.blocksCompleted} {sessionSummary.blocksCompleted === 1 ? "block" : "blocks"}</strong>.
+            </p>
+            <p className="breakModalPrompt">
+              You earned a <strong>{sessionSummary.earnedBreakMinutes}-minute break</strong> (5m per block).
+              Take it now or delay and stack it in your Break Bank.
+            </p>
+
+            <div className="breakModalActions">
+              <button
+                type="button"
+                className="takeBreakNowBtn"
+                onClick={() =>
+                  executeFinish(sessionSummary.addedMinutes, sessionSummary.blocksCompleted, {
+                    type: "take_now",
+                    breakMinutes: sessionSummary.earnedBreakMinutes,
+                  })
+                }
+                disabled={isFinishing}
+              >
+                ☕ Take {sessionSummary.earnedBreakMinutes}m Break Now
+              </button>
+
+              <button
+                type="button"
+                className="delayBreakBtn"
+                onClick={() =>
+                  executeFinish(sessionSummary.addedMinutes, sessionSummary.blocksCompleted, {
+                    type: "delay",
+                    breakMinutes: sessionSummary.earnedBreakMinutes,
+                  })
+                }
+                disabled={isFinishing}
+              >
+                ⏳ Delay & Stack Break (+{sessionSummary.earnedBreakMinutes}m)
+              </button>
+
+              <button
+                type="button"
+                className="skipBreakBtn"
+                onClick={() =>
+                  executeFinish(sessionSummary.addedMinutes, sessionSummary.blocksCompleted, undefined)
+                }
+                disabled={isFinishing}
+              >
+                Skip break
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {showQuitConfirm ? (
         <div
