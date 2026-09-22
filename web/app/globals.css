@@ -2228,7 +2228,8 @@ select:focus {
   }
 
   .schoolHero .schoolLiveBanner,
-  .lockInHero .lockInLiveBanner {
+  .lockInHero .lockInLiveBanner,
+  .lockInHero .lockInStatusStrip {
     width: 100%;
     max-width: 100%;
   }
@@ -6029,7 +6030,7 @@ select:focus {
 }
 
 /* ==========================================================================
-   LOCK IN / GENERAL STUDY TIMER & DISCIPLINE HUB
+   LOCK IN / STUDY TIMER & FOCUS HUB (MINIMAL)
    ========================================================================== */
 
 .lockInContainer,
@@ -6049,590 +6050,327 @@ select:focus {
   width: 100%;
 }
 
-/* Dynamic Interactive Lock In HUD Banner inside Hero */
-.lockInLiveBanner {
-  position: relative;
+/* Minimal Status Strip */
+.lockInStatusStrip {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  justify-content: space-between;
+  gap: 0.75rem;
   width: 100%;
-  max-width: 32rem;
-  box-sizing: border-box;
-  padding: 0.95rem 1.15rem;
-  border-radius: 1.15rem;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition: transform 150ms ease, border-color 150ms ease;
-}
-
-.lockInLiveBanner.isLockedIn {
-  border: 1px solid rgba(255, 107, 74, 0.38);
-  background: linear-gradient(135deg, rgba(255, 107, 74, 0.16), rgba(180, 50, 20, 0.22));
-  box-shadow: 0 8px 24px rgba(255, 107, 74, 0.14);
-}
-
-.lockInLiveBanner.isReady {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-.liveFirePulse {
-  display: grid;
-  place-items: center;
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-}
-
-.firePulseDot {
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 50%;
-  background: #ff6b4a;
-  box-shadow: 0 0 10px #ff6b4a;
-  animation: pulseFire 2s infinite ease-in-out;
-}
-
-@keyframes pulseFire {
-  0%, 100% {
-    transform: scale(0.9);
-    opacity: 0.85;
-  }
-  50% {
-    transform: scale(1.25);
-    opacity: 1;
-    box-shadow: 0 0 14px #ff8e75;
-  }
-}
-
-.lockInBannerTag {
-  display: block;
-  font-size: 0.64rem;
-  font-weight: 750;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #ff9d85;
-}
-
-.lockInBannerTitle {
-  display: block;
-  font-size: 0.95rem;
-  font-weight: 750;
-  letter-spacing: -0.01em;
-  color: #ffffff;
-  margin: 0.12rem 0;
-}
-
-.lockInBannerMeta {
-  display: block;
-  font-size: 0.73rem;
+  max-width: 20rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-size: 0.78rem;
   color: var(--muted);
 }
 
-.bannerTakeBreakBtn {
+.statusStripStats {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.statusStatItem {
+  white-space: nowrap;
+}
+
+.statusStatItem strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.statusStripDivider {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.statusStripBreakBtn {
   margin-left: auto;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.75rem;
+  padding: 0.22rem 0.65rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  font-size: 0.74rem;
+  background: rgba(52, 199, 89, 0.14);
+  border: 1px solid rgba(52, 199, 89, 0.32);
+  color: #34c759;
+  font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 140ms ease;
+  transition: all 120ms ease;
   font-family: inherit;
 }
 
-.bannerTakeBreakBtn:hover {
-  background: rgba(255, 255, 255, 0.22);
+.statusStripBreakBtn:hover {
+  background: rgba(52, 199, 89, 0.24);
   transform: translateY(-1px);
 }
 
-/* Native unboxed section flow */
-.lockInFlowSection {
+/* Main Lock In Card */
+.lockInMainCard {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  width: 100%;
+  padding: 1.5rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-.lockInSectionHeader {
+.lockInHeader {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.lockInHeaderTitles {
-  display: flex;
-  flex-direction: column;
-}
-
-.lockInSubhead {
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  align-items: center;
+  justify-content: space-between;
 }
 
 .lockInHeading {
-  margin: 0.15rem 0 0;
-  font-size: 2.1rem;
+  margin: 0;
+  font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: var(--text);
 }
 
-.lockInSubtitle {
-  font-size: 0.86rem;
-  color: var(--muted);
-  line-height: 1.4;
-  margin: 0.15rem 0 0 0;
-}
-
-/* Banked Break Alert Card */
-.bankedBreakAlertCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem 1.15rem;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(52, 199, 89, 0.12), rgba(16, 185, 129, 0.08));
-  border: 1px solid rgba(52, 199, 89, 0.3);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-.bankedBreakLeft {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.bankedBreakIcon {
-  font-size: 1.35rem;
-  line-height: 1;
-}
-
-.bankedBreakLeft strong {
-  display: block;
-  font-size: 0.88rem;
-  color: #34c759;
-}
-
-.bankedBreakLeft p {
-  font-size: 0.74rem;
-  color: var(--muted);
-  margin: 0.12rem 0 0;
-}
-
-.bankedBreakActionBtn {
-  flex-shrink: 0;
-  padding: 0.45rem 0.85rem;
-  border-radius: 999px;
-  border: 0;
-  background: #34c759;
-  color: #000000;
-  font-size: 0.76rem;
-  font-weight: 750;
-  cursor: pointer;
-  transition: transform 120ms ease, opacity 120ms ease;
-  font-family: inherit;
-}
-
-.bankedBreakActionBtn:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
-}
-
-/* Block Stack Builder */
-.blockStackBuilder {
+/* Timer Selector with Stepper */
+.lockInTimerSelector {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.25rem;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 0;
 }
 
-.stackSummaryRow {
+.lockInTimeDisplayRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 1.75rem;
+  width: 100%;
 }
 
-.stackMetrics {
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  font-size: 1.05rem;
-  color: #ffffff;
-}
-
-.stackMetrics strong {
-  font-weight: 800;
-  color: #ff8e75;
-}
-
-.stackTitle {
-  font-size: 1.05rem;
-  font-weight: 750;
-  color: #ffffff;
-}
-
-.stackSeparator {
-  color: var(--muted);
-}
-
-.stackBreakEarnedBadge {
-  font-size: 0.74rem;
-  font-weight: 700;
-  padding: 0.22rem 0.65rem;
-  border-radius: 999px;
-  background: rgba(52, 199, 89, 0.12);
-  border: 1px solid rgba(52, 199, 89, 0.28);
-  color: #34c759;
-}
-
-/* Visual Block Queue */
-.visualBlockQueue {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  min-height: 2.8rem;
-  align-items: center;
-}
-
-.queueBlockPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 12px;
-  background: rgba(255, 107, 74, 0.14);
-  border: 1px solid rgba(255, 107, 74, 0.35);
-  box-shadow: 0 2px 8px rgba(255, 107, 74, 0.12);
-  animation: stackPopIn 180ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.queueBlockIndex {
-  font-size: 0.65rem;
-  font-weight: 800;
-  width: 1.1rem;
-  height: 1.1rem;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
+.lockInStepBtn {
   display: grid;
   place-items: center;
-  color: #ffffff;
-}
-
-.queueBlockDuration {
-  font-size: 0.82rem;
-  font-weight: 750;
-  color: #ffffff;
-}
-
-.queueBlockIcon {
-  font-size: 0.78rem;
-  line-height: 1;
-}
-
-.openTimerNotice {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.75rem 0.95rem;
-  border-radius: 12px;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
-  border: 1px dashed rgba(255, 255, 255, 0.12);
-}
-
-.openTimerIcon {
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
-.openTimerNotice p {
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin: 0;
-}
-
-/* Stacking Buttons Bar */
-.blockAddButtonBar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  padding-top: 0.3rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.blockAddLabel {
-  font-size: 0.74rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-  margin-right: 0.2rem;
-}
-
-.blockAddGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  flex: 1;
-}
-
-.addBlockButton {
-  padding: 0.42rem 0.75rem;
-  border-radius: 10px;
-  background: rgba(255, 107, 74, 0.15);
-  border: 1px solid rgba(255, 107, 74, 0.35);
-  color: #ff9d85;
-  font-size: 0.78rem;
-  font-weight: 750;
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 400;
   cursor: pointer;
   transition: all 120ms ease;
+  user-select: none;
   font-family: inherit;
 }
 
-.addBlockButton:hover {
-  background: rgba(255, 107, 74, 0.26);
-  border-color: rgba(255, 107, 74, 0.55);
-  transform: translateY(-1px);
+.lockInStepBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
-.addBlockButton:active {
+.lockInStepBtn:active:not(:disabled) {
   transform: scale(0.95);
 }
 
-.removeBlockButton,
-.clearStackButton {
-  padding: 0.42rem 0.7rem;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 650;
-  cursor: pointer;
-  transition: all 120ms ease;
-  font-family: inherit;
-}
-
-.removeBlockButton:hover:not(:disabled),
-.clearStackButton:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-
-.removeBlockButton:disabled,
-.clearStackButton:disabled {
-  opacity: 0.35;
+.lockInStepBtn:disabled {
+  opacity: 0.25;
   cursor: not-allowed;
 }
 
-/* Presets Row */
-.presetsRow {
+.lockInTimeContent {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  padding-top: 0.4rem;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 9rem;
 }
 
-.presetChip {
-  padding: 0.38rem 0.7rem;
+.lockInTimeMain {
+  font-size: 3.25rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.lockInTimeUnit {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-left: 0.1rem;
+}
+
+.lockInTimeSub {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin-top: 0.4rem;
+}
+
+/* Preset Pills */
+.lockInPresetsRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.lockInPresetPill {
+  padding: 0.4rem 0.85rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 650;
+  font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 120ms ease;
   font-family: inherit;
 }
 
-.presetChip:hover {
-  background: rgba(255, 255, 255, 0.09);
+.lockInPresetPill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.lockInPresetPill.isActive {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
   color: #ffffff;
+  font-weight: 700;
 }
 
-.presetChip.isActive {
-  background: rgba(255, 107, 74, 0.18);
-  border-color: #ff6b4a;
-  color: #ff8e75;
-}
-
-/* Big Glowing Lock In Hero Launch Button */
-.lockInHeroLaunchButton {
-  position: relative;
+/* Minimal Focus Launch CTA */
+.lockInLaunchBtn {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.55rem;
   width: 100%;
-  padding: 1.15rem 1.5rem;
-  border: 0;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #ff5722 0%, #ff7043 50%, #f4511e 100%);
-  color: #ffffff;
+  padding: 0.95rem 1.25rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: var(--accent-strong);
+  color: #050505;
+  font-size: 0.92rem;
+  font-weight: 750;
   cursor: pointer;
-  box-shadow: 0 10px 28px rgba(255, 87, 34, 0.38), 0 2px 6px rgba(0, 0, 0, 0.25);
-  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
-  overflow: hidden;
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
   font-family: inherit;
 }
 
-.lockInHeroLaunchButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 36px rgba(255, 87, 34, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
-  filter: brightness(1.05);
+.lockInLaunchBtn:hover {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.15);
 }
 
-.lockInHeroLaunchButton:active {
+.lockInLaunchBtn:active {
   transform: scale(0.98);
 }
 
-/* ==========================================================================
-   TODAY'S STUDY LOG
-   ========================================================================== */
-
-.todayStudyLogSection {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
+.lockInLaunchIcon {
+  width: 1rem;
+  height: 1rem;
 }
 
-.studyLogHeader {
+/* Today's Study Log (Minimal) */
+.lockInLogSection {
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
 }
 
-.studyLogSubhead {
-  font-size: 0.68rem;
+.lockInLogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lockInLogTitle {
+  margin: 0;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
-.studyLogTitle {
-  font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #ffffff;
+.lockInLogCount {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.lockInLogEmpty {
   margin: 0;
-}
-
-.studyLogEmptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  padding: 1.25rem 1rem;
+  font-size: 0.82rem;
+  color: var(--muted);
   text-align: center;
-  padding: 2.5rem 1.5rem;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  color: var(--muted);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.emptyLogIcon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  line-height: 1;
-}
-
-.studyLogEmptyState p {
-  font-size: 0.92rem;
-  font-weight: 650;
-  color: var(--text);
-  margin: 0 0 0.25rem 0;
-}
-
-.studyLogEmptyState span {
-  font-size: 0.78rem;
-  color: var(--muted);
-}
-
-.studyLogList {
+.lockInLogList {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
+  gap: 0.45rem;
+}
+
+.lockInLogItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 120ms ease;
+}
+
+.lockInLogItem:hover {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.lockInLogItemMain {
+  display: flex;
+  align-items: baseline;
   gap: 0.65rem;
 }
 
-.studyLogItem {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 0.9rem 1.1rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
-}
-
-.studyLogItem:hover {
-  background: rgba(255, 255, 255, 0.055);
-  border-color: rgba(255, 255, 255, 0.14);
-  transform: translateY(-1px);
-}
-
-.studyLogIconWrapper {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 10px;
-  background: rgba(255, 107, 74, 0.12);
-  border: 1px solid rgba(255, 107, 74, 0.25);
-  display: grid;
-  place-items: center;
-  font-size: 1rem;
-}
-
-.studyLogInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.studyLogTitleText {
-  font-size: 0.9rem;
+.lockInLogItemDuration {
+  font-size: 0.88rem;
   font-weight: 750;
-  color: #ffffff;
+  color: var(--text);
 }
 
-.studyLogMeta {
-  font-size: 0.74rem;
+.lockInLogItemMeta {
+  font-size: 0.75rem;
   color: var(--muted);
 }
 
-.studyLogXPBadge {
-  font-size: 0.75rem;
-  font-weight: 750;
-  padding: 0.25rem 0.6rem;
-  border-radius: 8px;
-  background: rgba(52, 199, 89, 0.14);
+.lockInLogItemXP {
+  font-size: 0.74rem;
+  font-weight: 700;
   color: #34c759;
-  border: 1px solid rgba(52, 199, 89, 0.3);
 }
 
 /* ==========================================================================
