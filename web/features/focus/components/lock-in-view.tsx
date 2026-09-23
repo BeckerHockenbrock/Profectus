@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
+import { createPortal } from "react-dom";
 import { useLockInStats } from "../hooks/use-lock-in-stats";
 
 type LockInViewProps = {
@@ -14,7 +16,12 @@ type LockInViewProps = {
   onStartBreak: (durationMinutes: number) => void;
 };
 
-const PRESET_MINUTES = [15, 25, 45, 60] as const;
+const STONE_MINUTES = [5, 10, 25] as const;
+const MAX_FOCUS_MINUTES = 180;
+const VISIBLE_STONES = 7;
+
+type FocusStone = { id: number; minutes: number };
+type StoneDrag = { minutes: number; pointerId: number; startX: number; startY: number; moved: boolean };
 
 export function LockInView({
   userId,
@@ -24,27 +31,76 @@ export function LockInView({
 }: LockInViewProps) {
   const { sessions, todayStats, streak, bankedBreakMinutes } = useLockInStats(userId, today);
 
-  const [selectedMinutes, setSelectedMinutes] = useState<number>(25);
+  const [stones, setStones] = useState<FocusStone[]>([{ id: 1, minutes: 25 }]);
   const [isOpenStopwatch, setIsOpenStopwatch] = useState<boolean>(false);
+  const [dragPreview, setDragPreview] = useState<{ minutes: number; x: number; y: number; overScene: boolean } | null>(null);
+  const nextStoneId = useRef(2);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const stackRef = useRef<HTMLDivElement>(null);
+  const firstChoiceRef = useRef<HTMLButtonElement>(null);
+  const focusAfterRemovalRef = useRef(false);
+  const dragRef = useRef<StoneDrag | null>(null);
+  const suppressClickRef = useRef<{ x: number; y: number; until: number } | null>(null);
+
+  const selectedMinutes = stones.reduce((total, stone) => total + stone.minutes, 0);
 
   const calculatedBlocks = Math.max(1, Math.round(selectedMinutes / 25));
   const earnedBreakMinutes = calculatedBlocks * 5;
 
-  const handleSelectPreset = (minutes: number) => {
+  useEffect(() => {
+    if (!focusAfterRemovalRef.current) return;
+    focusAfterRemovalRef.current = false;
+    (stackRef.current?.querySelector<HTMLButtonElement>(".lockInStackStone") ?? firstChoiceRef.current)?.focus();
+  }, [stones]);
+
+  const handleAddStone = (minutes: number) => {
+    if (selectedMinutes + minutes > MAX_FOCUS_MINUTES) return;
+    const id = nextStoneId.current++;
     setIsOpenStopwatch(false);
-    setSelectedMinutes(minutes);
+    setStones((current) => [...current, { id, minutes }]);
   };
 
-  const handleToggleStopwatch = () => {
-    setIsOpenStopwatch(true);
+  const isOverScene = (x: number, y: number) => {
+    const bounds = sceneRef.current?.getBoundingClientRect();
+    return Boolean(bounds && x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom);
   };
 
-  const handleStepMinutes = (delta: number) => {
-    setIsOpenStopwatch(false);
-    setSelectedMinutes((prev) => {
-      const next = prev + delta;
-      return Math.min(180, Math.max(5, next));
-    });
+  const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>, minutes: number) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    dragRef.current = { minutes, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, moved: false };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 8) return;
+    drag.moved = true;
+    setDragPreview({ minutes: drag.minutes, x: event.clientX, y: event.clientY, overScene: isOverScene(event.clientX, event.clientY) });
+  };
+
+  const handlePointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = dragRef.current;
+    dragRef.current = null;
+    setDragPreview(null);
+    if (!drag || drag.pointerId !== event.pointerId || !drag.moved) return;
+    if (isOverScene(event.clientX, event.clientY)) handleAddStone(drag.minutes);
+    suppressClickRef.current = { x: event.clientX, y: event.clientY, until: event.timeStamp + 500 };
+  };
+
+  const handlePointerCancel = () => {
+    dragRef.current = null;
+    setDragPreview(null);
+  };
+
+  const handleRemoveStone = (id: number) => {
+    focusAfterRemovalRef.current = true;
+    setStones((current) => current.filter((stone) => stone.id !== id));
+  };
+
+  const handleClearStones = () => {
+    focusAfterRemovalRef.current = true;
+    setStones([]);
   };
 
   const handleLaunchFocus = () => {
@@ -114,76 +170,114 @@ export function LockInView({
         <div className="lockInMainCard">
           {/* Header */}
           <header className="lockInHeader">
-            <h2 className="lockInHeading">Lock In</h2>
+            <div>
+              <span className="lockInEyebrow">THE FOCUS RITUAL</span>
+              <h2 className="lockInHeading">Build your session</h2>
+            </div>
+            <span className="lockInHeaderMark" aria-hidden="true">✦</span>
           </header>
 
-          {/* Minimal Duration Display with Stepper */}
+          {/* Add and remove stones to compose the session length. */}
           <div className="lockInTimerSelector">
-            <div className="lockInTimeDisplayRow">
-              <button
-                type="button"
-                className="lockInStepBtn"
-                onClick={() => handleStepMinutes(-5)}
-                disabled={isOpenStopwatch || selectedMinutes <= 5}
-                aria-label="Decrease focus time by 5 minutes"
-                title="Subtract 5 minutes"
-              >
-                −
-              </button>
+            <div className="lockInTimeContent" aria-live="polite" aria-atomic="true">
+              <span className="lockInTimeCaption">YOUR FOCUS TIME</span>
+              {isOpenStopwatch ? (
+                <span className="lockInTimeMain lockInTimeOpen">Open</span>
+              ) : (
+                <span className="lockInTimeMain">
+                  {selectedMinutes}<span className="lockInTimeUnit">min</span>
+                </span>
+              )}
+              <span className="lockInTimeSub">
+                {isOpenStopwatch
+                  ? "No finish line. Stop when you are ready."
+                  : selectedMinutes === 0
+                    ? "Choose a stone to begin."
+                    : `${calculatedBlocks} ${calculatedBlocks === 1 ? "block" : "blocks"} · ${earnedBreakMinutes}m break earned`}
+              </span>
+            </div>
 
-              <div className="lockInTimeContent">
+            <div
+              ref={sceneRef}
+              className={`lockInStoneScene ${isOpenStopwatch ? "isOpen" : ""} ${dragPreview?.overScene ? "isDropTarget" : ""}`}
+            >
+              <span className="lockInSceneHalo" aria-hidden="true" />
+              <div
+                ref={stackRef}
+                className="lockInStoneStack"
+                role="group"
+                aria-label={isOpenStopwatch ? "Open stopwatch" : stones.length === 0 ? "Empty focus stack" : "Stacked focus stones. Select a stone to remove it."}
+              >
                 {isOpenStopwatch ? (
-                  <>
-                    <span className="lockInTimeMain">Stopwatch</span>
-                    <span className="lockInTimeSub">Open-ended focus session</span>
-                  </>
+                  <span className="lockInOpenSymbol" aria-hidden="true">∞</span>
+                ) : stones.length === 0 ? (
+                  <span className="lockInEmptyStack">Your first stone goes here</span>
                 ) : (
                   <>
-                    <span className="lockInTimeMain">
-                      {selectedMinutes}
-                      <span className="lockInTimeUnit">m</span>
-                    </span>
-                    <span className="lockInTimeSub">
-                      {calculatedBlocks} {calculatedBlocks === 1 ? "block" : "blocks"} · {earnedBreakMinutes}m break
-                    </span>
+                    {stones.slice(-VISIBLE_STONES).reverse().map((stone) => (
+                      <button
+                        key={stone.id}
+                        type="button"
+                        className={`lockInStackStone lockInStone${stone.minutes}`}
+                        onClick={() => handleRemoveStone(stone.id)}
+                        aria-label={`Remove ${stone.minutes} minute stone`}
+                        title={`Remove ${stone.minutes} minutes`}
+                      >
+                        <span>{stone.minutes}</span>
+                      </button>
+                    ))}
+                    {stones.length > VISIBLE_STONES ? (
+                      <span className="lockInBuriedStones">+{stones.length - VISIBLE_STONES} below</span>
+                    ) : null}
                   </>
                 )}
               </div>
-
-              <button
-                type="button"
-                className="lockInStepBtn"
-                onClick={() => handleStepMinutes(5)}
-                disabled={isOpenStopwatch || selectedMinutes >= 180}
-                aria-label="Increase focus time by 5 minutes"
-                title="Add 5 minutes"
-              >
-                +
-              </button>
+              <span className="lockInStonePlinth" aria-hidden="true" />
             </div>
 
-            {/* Presets Segmented Row */}
-            <div className="lockInPresetsRow" role="group" aria-label="Duration presets">
-              {PRESET_MINUTES.map((mins) => {
-                const isActive = !isOpenStopwatch && selectedMinutes === mins;
-                return (
-                  <button
-                    key={mins}
-                    type="button"
-                    className={`lockInPresetPill ${isActive ? "isActive" : ""}`}
-                    onClick={() => handleSelectPreset(mins)}
-                  >
-                    {mins}m
-                  </button>
-                );
-              })}
-              <button
-                type="button"
-                className={`lockInPresetPill ${isOpenStopwatch ? "isActive" : ""}`}
-                onClick={handleToggleStopwatch}
-              >
-                Open
+            <div className="lockInStoneGuide">
+              <span>STACK YOUR TIME</span>
+              <span>{isOpenStopwatch ? "Open session" : `${selectedMinutes} / ${MAX_FOCUS_MINUTES} min`}</span>
+            </div>
+            <div className="lockInStoneMeter" aria-hidden="true">
+              <span style={{ width: `${(isOpenStopwatch ? 0 : selectedMinutes / MAX_FOCUS_MINUTES) * 100}%` }} />
+            </div>
+            <p className="lockInStoneHint">Tap or drag a stone to add time. Tap the stack to remove one.</p>
+            <div className="lockInStoneTray" role="group" aria-label="Add focus time">
+              {STONE_MINUTES.map((minutes) => (
+                <button
+                  key={minutes}
+                  ref={minutes === 5 ? firstChoiceRef : undefined}
+                  type="button"
+                  className={`lockInStoneChoice lockInStone${minutes}`}
+                  onClick={(event) => {
+                    const suppressed = suppressClickRef.current;
+                    suppressClickRef.current = null;
+                    if (suppressed && event.timeStamp < suppressed.until && Math.hypot(event.clientX - suppressed.x, event.clientY - suppressed.y) < 12) {
+                      return;
+                    }
+                    handleAddStone(minutes);
+                  }}
+                  onPointerDown={(event) => handlePointerDown(event, minutes)}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerCancel}
+                  disabled={selectedMinutes + minutes > MAX_FOCUS_MINUTES}
+                  aria-label={`Add ${minutes} minutes to the focus stack`}
+                >
+                  <span className="lockInChoicePebble" aria-hidden="true" />
+                  <strong>+{minutes}</strong>
+                  <small>MIN</small>
+                </button>
+              ))}
+            </div>
+            <div className="lockInStoneActions">
+              <button type="button" onClick={() => setIsOpenStopwatch((value) => !value)}>
+                {isOpenStopwatch ? "← Back to stones" : "∞ Open stopwatch"}
               </button>
+              {!isOpenStopwatch && stones.length > 0 ? (
+                <button type="button" onClick={handleClearStones}>Clear stack</button>
+              ) : null}
             </div>
           </div>
 
@@ -192,6 +286,7 @@ export function LockInView({
             type="button"
             className="lockInLaunchBtn"
             onClick={handleLaunchFocus}
+            disabled={!isOpenStopwatch && selectedMinutes === 0}
             aria-label={
               isOpenStopwatch
                 ? "Start open-ended study session"
@@ -251,6 +346,18 @@ export function LockInView({
           )}
         </section>
       </section>
+      {dragPreview && typeof document !== "undefined"
+        ? createPortal(
+            <span
+              className={`lockInDragStone lockInStone${dragPreview.minutes}`}
+              style={{ left: dragPreview.x, top: dragPreview.y }}
+              aria-hidden="true"
+            >
+              {dragPreview.minutes}
+            </span>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

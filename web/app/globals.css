@@ -6137,117 +6137,188 @@ select:focus {
   color: var(--text);
 }
 
-/* Timer Selector with Stepper */
-.lockInTimerSelector {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 1rem 0;
+/* Stone stack duration selector */
+.lockInTimerSelector { display: flex; flex-direction: column; align-items: stretch; gap: 0; width: 100%; padding: 0; }
+.lockInEyebrow, .lockInTimeCaption, .lockInStoneGuide {
+  color: #999995;
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.17em;
 }
-
-.lockInTimeDisplayRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.75rem;
-  width: 100%;
-}
-
-.lockInStepBtn {
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text);
-  font-size: 1.25rem;
-  font-weight: 400;
-  cursor: pointer;
-  transition: all 120ms ease;
-  user-select: none;
-  font-family: inherit;
-}
-
-.lockInStepBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
-}
-
-.lockInStepBtn:active:not(:disabled) {
-  transform: scale(0.95);
-}
-
-.lockInStepBtn:disabled {
-  opacity: 0.25;
-  cursor: not-allowed;
-}
-
-.lockInTimeContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  min-width: 9rem;
-}
-
+.lockInEyebrow { display: block; margin-bottom: 0.4rem; }
+.lockInHeaderMark { align-self: flex-start; color: #d8d8d1; font-size: 1.15rem; line-height: 1; }
+.lockInTimeContent { display: flex; flex-direction: column; align-items: center; min-width: 0; padding-top: 0.25rem; text-align: center; }
 .lockInTimeMain {
-  font-size: 3.25rem;
+  margin-top: 0.45rem;
+  font-size: clamp(3.4rem, 12vw, 4.8rem);
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.07em;
   line-height: 1;
   color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
-
-.lockInTimeUnit {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--muted);
-  margin-left: 0.1rem;
+.lockInTimeOpen { font-size: clamp(2.8rem, 10vw, 4.2rem); }
+.lockInTimeUnit { margin-left: 0.3rem; color: var(--muted); font-size: 1.15rem; font-weight: 600; letter-spacing: 0; }
+.lockInTimeSub { margin-top: 0.55rem; color: var(--muted); font-size: 0.78rem; font-weight: 500; }
+.lockInStoneScene {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 17rem;
+  margin-top: 0.85rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 1rem;
+  background: radial-gradient(ellipse at 50% 95%, rgba(210, 210, 200, 0.1), transparent 48%), linear-gradient(180deg, #0c0c0c, #151515);
 }
-
-.lockInTimeSub {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--muted);
-  margin-top: 0.4rem;
+.lockInStoneScene::before {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 24px, rgba(255, 255, 255, 0.018) 25px 26px);
+  content: "";
+  pointer-events: none;
 }
-
-/* Preset Pills */
-.lockInPresetsRow {
+.lockInSceneHalo {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  width: 12.5rem;
+  height: 12.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 2.5rem rgba(255, 255, 255, 0.016), 0 0 0 5rem rgba(255, 255, 255, 0.008);
+  pointer-events: none;
+}
+.lockInStoneStack {
+  position: absolute;
+  z-index: 1;
+  bottom: 1.3rem;
+  left: 0;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  min-height: 2rem;
+  max-height: calc(100% - 1.5rem);
+}
+.lockInStackStone {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  height: 2.15rem;
+  margin-top: -0.18rem;
+  padding: 0;
+  border: 0;
+  border-radius: 47% 53% 38% 40% / 48% 51% 35% 38%;
+  background: linear-gradient(165deg, #eeeae0, #aaa9a3 32%, #585957 75%, #30312f);
+  box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.6), inset 0 -4px 6px rgba(0, 0, 0, 0.4), 0 4px 7px rgba(0, 0, 0, 0.5);
+  color: #151515;
+  cursor: pointer;
+  animation: lockInStoneSettle 280ms cubic-bezier(0.15, 0.8, 0.2, 1.1) both;
+  transition: filter 140ms ease, margin 140ms ease;
+}
+.lockInStackStone::before, .lockInChoicePebble::before {
+  position: absolute;
+  inset: 15% 12% 24%;
+  border-radius: 50%;
+  background: repeating-linear-gradient(167deg, transparent 0 7px, rgba(20, 20, 20, 0.12) 8px 9px);
+  content: "";
+  pointer-events: none;
+}
+.lockInStackStone span { position: relative; font-size: 0.72rem; font-weight: 850; }
+.lockInStackStone.lockInStone5 { width: 4.1rem; }
+.lockInStackStone.lockInStone10 { width: 5.7rem; }
+.lockInStackStone.lockInStone25 { width: 7.4rem; }
+.lockInStackStone:nth-child(2n) { transform: rotate(-4deg); }
+.lockInStackStone:nth-child(3n) { transform: rotate(3deg); }
+.lockInStackStone:hover { filter: brightness(1.25); margin-bottom: 0.13rem; }
+.lockInStonePlinth {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  width: 10.5rem;
+  height: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.48);
+  border-radius: 50%;
+  background: linear-gradient(#474845, #1e1f1d);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.75);
+  transform: translateX(-50%);
+}
+.lockInEmptyStack, .lockInBuriedStones {
+  margin-bottom: 0.5rem;
+  color: #9d9d98;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+.lockInBuriedStones { margin: 0.1rem 0 0; }
+.lockInOpenSymbol { margin-bottom: 2.7rem; color: #deded8; font-family: Georgia, serif; font-size: 5rem; line-height: 1; }
+.lockInStoneGuide { display: flex; justify-content: space-between; margin-top: 1rem; }
+.lockInStoneMeter { height: 0.22rem; margin-top: 0.5rem; overflow: hidden; border-radius: 99px; background: rgba(255, 255, 255, 0.1); }
+.lockInStoneMeter span { display: block; height: 100%; border-radius: inherit; background: #deded8; transition: width 220ms ease; }
+.lockInStoneHint { margin: 1.1rem 0 0.75rem; color: #a6a6a0; font-size: 0.78rem; text-align: center; }
+.lockInStoneTray { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; width: 100%; }
+.lockInStoneChoice {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-}
-
-.lockInPresetPill {
-  padding: 0.4rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 120ms ease;
-  font-family: inherit;
-}
-
-.lockInPresetPill:hover {
-  background: rgba(255, 255, 255, 0.08);
+  min-width: 0;
+  min-height: 6.5rem;
+  padding: 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.8rem;
+  background: linear-gradient(155deg, #262625, #171717 70%);
   color: var(--text);
+  cursor: pointer;
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
 }
-
-.lockInPresetPill.isActive {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.35);
-  color: #ffffff;
-  font-weight: 700;
+.lockInStoneChoice:hover:not(:disabled) { transform: translateY(-3px); border-color: rgba(255, 255, 255, 0.42); background: linear-gradient(155deg, #343432, #1a1a1a 70%); }
+.lockInStoneChoice:active:not(:disabled) { transform: translateY(0); }
+.lockInStoneChoice:disabled { opacity: 0.35; cursor: not-allowed; }
+.lockInChoicePebble {
+  position: relative;
+  display: block;
+  width: 2.7rem;
+  height: 1.2rem;
+  margin-bottom: 0.45rem;
+  border-radius: 47% 53% 38% 40% / 48% 51% 35% 38%;
+  background: linear-gradient(160deg, #e5e2d9, #737571 75%, #333431);
+  box-shadow: inset 0 1px 2px #fff8, 0 4px 5px #0008;
+}
+.lockInStoneChoice.lockInStone5 .lockInChoicePebble { width: 1.9rem; }
+.lockInStoneChoice.lockInStone25 .lockInChoicePebble { width: 3.6rem; }
+.lockInStoneChoice strong { font-size: 1.12rem; font-weight: 800; line-height: 1; }
+.lockInStoneChoice small { margin-top: 0.16rem; color: #a7a7a0; font-size: 0.59rem; font-weight: 750; letter-spacing: 0.15em; }
+.lockInStoneActions { display: flex; justify-content: space-between; gap: 0.6rem; margin-top: 1rem; }
+.lockInStoneActions button { min-height: 2.5rem; padding: 0.35rem 0.25rem; border: 0; background: transparent; color: #c6c6bf; font-size: 0.75rem; font-weight: 650; cursor: pointer; }
+.lockInStoneActions button:hover { color: #fff; }
+.lockInStoneScene.isDropTarget { border-color: rgba(255, 255, 255, 0.5); box-shadow: inset 0 0 2.5rem rgba(255, 255, 255, 0.055); }
+.lockInStoneChoice { touch-action: none; }
+.lockInDragStone {
+  position: fixed;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  width: 5.7rem;
+  height: 2.15rem;
+  border-radius: 47% 53% 38% 40% / 48% 51% 35% 38%;
+  background: linear-gradient(165deg, #eeeae0, #aaa9a3 32%, #585957 75%, #30312f);
+  box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.6), inset 0 -4px 6px rgba(0, 0, 0, 0.4), 0 12px 25px rgba(0, 0, 0, 0.65);
+  color: #151515;
+  font-size: 0.72rem;
+  font-weight: 850;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(-5deg) scale(1.1);
+}
+.lockInDragStone.lockInStone5 { width: 4.1rem; }
+.lockInDragStone.lockInStone25 { width: 7.4rem; }
+@keyframes lockInStoneSettle { from { opacity: 0; translate: 0 -1.2rem; } to { opacity: 1; translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .lockInStackStone { animation: none; }
+  .lockInStoneMeter span, .lockInStoneChoice { transition: none; }
 }
 
 /* Minimal Focus Launch CTA */
@@ -6277,6 +6348,13 @@ select:focus {
 
 .lockInLaunchBtn:active {
   transform: scale(0.98);
+}
+
+.lockInLaunchBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .lockInLaunchIcon {
