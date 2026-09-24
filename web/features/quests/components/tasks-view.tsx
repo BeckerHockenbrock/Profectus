@@ -21,7 +21,7 @@ type TasksViewProps = {
   saveError: string;
   draggedId: string | null;
   getCardTransformY: (id: string, groupKey?: string) => number;
-  handleCardPointerDown: (event: React.PointerEvent, questId: string, isHandle?: boolean, groupKey?: string) => void;
+  handleCardPointerDown: (event: React.PointerEvent, questId: string, groupKey?: string) => void;
   suppressClickRef: React.MutableRefObject<boolean>;
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;

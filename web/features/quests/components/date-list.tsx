@@ -11,7 +11,7 @@ type DateListProps = {
   savingQuestId: string | null;
   draggedId?: string | null;
   getCardTransformY?: (id: string, groupKey?: string) => number;
-  handleCardPointerDown?: (event: React.PointerEvent, questId: string, isHandle?: boolean, groupKey?: string) => void;
+  handleCardPointerDown?: (event: React.PointerEvent, questId: string, groupKey?: string) => void;
   suppressClickRef: React.MutableRefObject<boolean>;
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;
@@ -83,7 +83,7 @@ export function DateList({
                     transformY={getCardTransformY ? getCardTransformY(quest.id, group.dateKey) : 0}
                     onPointerDown={
                       handleCardPointerDown
-                        ? (e, qId, isH) => handleCardPointerDown(e, qId, isH, group.dateKey)
+                        ? (e, qId) => handleCardPointerDown(e, qId, group.dateKey)
                         : undefined
                     }
                     onToggleSubtask={onToggleSubtask}

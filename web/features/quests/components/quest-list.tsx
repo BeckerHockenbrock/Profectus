@@ -11,7 +11,7 @@ type QuestListProps = {
   savingQuestId: string | null;
   draggedId: string | null;
   getCardTransformY: (id: string) => number;
-  handleCardPointerDown: (event: React.PointerEvent, questId: string, isHandle?: boolean) => void;
+  handleCardPointerDown: (event: React.PointerEvent, questId: string) => void;
   suppressClickRef: React.MutableRefObject<boolean>;
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;

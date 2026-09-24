@@ -13,7 +13,7 @@ type QuestCardProps = {
   isUpdating: boolean;
   isDragging?: boolean;
   transformY?: number;
-  onPointerDown?: (event: React.PointerEvent, questId: string, isHandle?: boolean) => void;
+  onPointerDown?: (event: React.PointerEvent, questId: string) => void;
   onToggleSubtask?: (questId: string, subtaskId: string) => void;
   onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
   onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
@@ -55,7 +55,7 @@ export function QuestCard({
       }}
       role="button"
       tabIndex={0}
-      onPointerDown={(event) => onPointerDown?.(event, quest.id, false)}
+      onPointerDown={(event) => onPointerDown?.(event, quest.id)}
       onClick={() => onSelect(quest)}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -63,7 +63,7 @@ export function QuestCard({
           onSelect(quest);
         }
       }}
-      aria-label={`${quest.title}, ${quest.completed ? "completed" : "incomplete"}. Hold or drag grip to reorder, or click to view details`}
+      aria-label={`${quest.title}, ${quest.completed ? "completed" : "incomplete"}. Press and hold to reorder, or click to view details`}
     >
       <div className="questCardHeader">
         <button
@@ -112,26 +112,6 @@ export function QuestCard({
         </div>
 
         <div className="questCardActionsRow">
-          {onPointerDown ? (
-            <span
-              className="dragGripHandle"
-              aria-label="Drag to reorder"
-              title="Drag to reorder"
-              onPointerDown={(event) => {
-                event.stopPropagation();
-                onPointerDown?.(event, quest.id, true);
-              }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <circle cx="9" cy="5" r="1.75" />
-                <circle cx="15" cy="5" r="1.75" />
-                <circle cx="9" cy="12" r="1.75" />
-                <circle cx="15" cy="12" r="1.75" />
-                <circle cx="9" cy="19" r="1.75" />
-                <circle cx="15" cy="19" r="1.75" />
-              </svg>
-            </span>
-          ) : null}
           <span className="questCardChevron" aria-hidden="true">
             <svg
               width="13"
