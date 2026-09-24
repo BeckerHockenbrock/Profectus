@@ -267,6 +267,27 @@ export function useQuestMutations({
     }
   };
 
+  const reorderSubtasks = async (questId: string, subtasks: Subtask[]) => {
+    const quest = quests.find((current) => current.id === questId);
+    if (!quest || !userId) return false;
+
+    setMutationError("");
+    setQuests((current) =>
+      current.map((item) => (item.id === questId ? { ...item, subtasks } : item))
+    );
+
+    try {
+      await updateSubtasksInFirestore(userId, questId, subtasks);
+      return true;
+    } catch {
+      setQuests((current) =>
+        current.map((item) => (item.id === questId ? quest : item))
+      );
+      setMutationError("Could not reorder subtasks. Try again.");
+      return false;
+    }
+  };
+
   const finishFocusSession = async (questId: string, addedMinutes: number) => {
     if (!userId) {
       throw new Error("Could not save focus session. Please check your connection and retry.");
@@ -300,6 +321,7 @@ export function useQuestMutations({
     addSubtask,
     updateSubtask,
     deleteSubtask,
+    reorderSubtasks,
     finishFocusSession,
   };
 }

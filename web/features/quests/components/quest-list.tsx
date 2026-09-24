@@ -1,5 +1,4 @@
-import type React from "react";
-import type { Quest } from "../types/quest";
+import type { Quest, Subtask } from "../types/quest";
 import { QuestCard } from "./quest-card";
 
 type QuestListProps = {
@@ -18,6 +17,7 @@ type QuestListProps = {
   onToggleSubtask?: (questId: string, subtaskId: string) => void;
   onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
   onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
+  onReorderSubtasks?: (questId: string, newSubtasks: Subtask[]) => void;
 };
 
 export function QuestList({
@@ -36,6 +36,7 @@ export function QuestList({
   onToggleSubtask,
   onOpenDatePicker,
   onOpenSubtaskDatePicker,
+  onReorderSubtasks,
 }: QuestListProps) {
   const selectQuest = (quest: Quest) => {
     if (suppressClickRef.current) return;
@@ -64,6 +65,7 @@ export function QuestList({
               onToggleSubtask={onToggleSubtask}
               onOpenDatePicker={onOpenDatePicker}
               onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
+              onReorderSubtasks={onReorderSubtasks}
             />
           ))
         )}

@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import type React from "react";
-import type { Quest } from "../types/quest";
+import type { Quest, Subtask } from "../types/quest";
 import { GoogleTasksDateBadge } from "./google-date-badge";
+import { useSubtaskReorder } from "../hooks/use-subtask-reorder";
 
 type QuestCardProps = {
   quest: Quest;
@@ -17,6 +18,7 @@ type QuestCardProps = {
   onToggleSubtask?: (questId: string, subtaskId: string) => void;
   onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
   onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
+  onReorderSubtasks?: (questId: string, newSubtasks: Subtask[]) => void;
 };
 
 export function QuestCard({
@@ -31,11 +33,24 @@ export function QuestCard({
   onToggleSubtask,
   onOpenDatePicker,
   onOpenSubtaskDatePicker,
+  onReorderSubtasks,
 }: QuestCardProps) {
   const [showCompletedSubtasks, setShowCompletedSubtasks] = useState(false);
   const subtasks = quest.subtasks ?? [];
   const openSubtasks = subtasks.filter((s) => !s.completed);
   const completedSubtasks = subtasks.filter((s) => s.completed);
+
+  const {
+    draggedSubtaskId,
+    suppressClickRef: subtaskSuppressClickRef,
+    handleSubtaskPointerDown,
+    getSubtaskTransformY,
+  } = useSubtaskReorder({
+    subtasks,
+    onReorder: onReorderSubtasks
+      ? (newSubtasks) => onReorderSubtasks(quest.id, newSubtasks)
+      : undefined,
+  });
 
   return (
     <article
@@ -131,48 +146,72 @@ export function QuestCard({
 
       {subtasks.length > 0 ? (
         <div className="questSubtasksContainer" role="list">
-          {openSubtasks.map((subtask) => (
-            <div
-              key={subtask.id}
-              className="googleSubtaskItem"
-              role="listitem"
-            >
-              <button
-                type="button"
-                className="googleSubtaskCheckbox"
-                aria-label={`Mark subtask "${subtask.title}" as completed`}
-                aria-pressed={false}
+          {openSubtasks.map((subtask) => {
+            const isSubtaskDragging = draggedSubtaskId === subtask.id;
+            const subtaskTransformY = getSubtaskTransformY(subtask.id);
+
+            return (
+              <div
+                key={subtask.id}
+                className="googleSubtaskItem"
+                data-subtask-id={subtask.id}
+                data-dragging={isSubtaskDragging ? "true" : undefined}
+                role="listitem"
+                style={{
+                  transform: isSubtaskDragging
+                    ? `translateY(${subtaskTransformY}px) scale(1.02)`
+                    : subtaskTransformY !== 0
+                      ? `translateY(${subtaskTransformY}px)`
+                      : undefined,
+                  zIndex: isSubtaskDragging ? 50 : undefined,
+                  transition: isSubtaskDragging ? "none" : "transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1)",
+                }}
                 onPointerDown={(event) => {
-                  event.stopPropagation();
+                  handleSubtaskPointerDown(event, subtask.id);
                 }}
                 onClick={(event) => {
-                  event.stopPropagation();
-                  onToggleSubtask?.(quest.id, subtask.id);
+                  if (subtaskSuppressClickRef.current) {
+                    event.stopPropagation();
+                  }
                 }}
               >
-                <span className="googleSubtaskCheckMark" aria-hidden="true" />
-              </button>
+                <button
+                  type="button"
+                  className="googleSubtaskCheckbox"
+                  aria-label={`Mark subtask "${subtask.title}" as completed`}
+                  aria-pressed={false}
+                  onPointerDown={(event) => {
+                    event.stopPropagation();
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onToggleSubtask?.(quest.id, subtask.id);
+                  }}
+                >
+                  <span className="googleSubtaskCheckMark" aria-hidden="true" />
+                </button>
 
-              <div className="googleSubtaskContent">
-                <span className="googleSubtaskTitle">{subtask.title}</span>
-                {subtask.dueDate ? (
-                  <GoogleTasksDateBadge
-                    dueDate={subtask.dueDate}
-                    today={today}
-                    completed={false}
-                    onClick={
-                      onOpenSubtaskDatePicker
-                        ? (event) => {
-                            const rect = event.currentTarget.getBoundingClientRect();
-                            onOpenSubtaskDatePicker(quest.id, subtask.id, subtask.dueDate ?? "", rect);
-                          }
-                        : undefined
-                    }
-                  />
-                ) : null}
+                <div className="googleSubtaskContent">
+                  <span className="googleSubtaskTitle">{subtask.title}</span>
+                  {subtask.dueDate ? (
+                    <GoogleTasksDateBadge
+                      dueDate={subtask.dueDate}
+                      today={today}
+                      completed={false}
+                      onClick={
+                        onOpenSubtaskDatePicker
+                          ? (event) => {
+                              const rect = event.currentTarget.getBoundingClientRect();
+                              onOpenSubtaskDatePicker(quest.id, subtask.id, subtask.dueDate ?? "", rect);
+                            }
+                          : undefined
+                      }
+                    />
+                  ) : null}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {completedSubtasks.length > 0 ? (
             <div className="subtasksCompletedSection">

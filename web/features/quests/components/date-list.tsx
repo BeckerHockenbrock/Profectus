@@ -1,5 +1,4 @@
-import type React from "react";
-import type { Quest } from "../types/quest";
+import type { Quest, Subtask } from "../types/quest";
 import type { DateQuestGroup } from "../domain/date-utils";
 import { QuestCard } from "./quest-card";
 
@@ -18,6 +17,7 @@ type DateListProps = {
   onToggleSubtask?: (questId: string, subtaskId: string) => void;
   onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
   onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
+  onReorderSubtasks?: (questId: string, newSubtasks: Subtask[]) => void;
 };
 
 export function DateList({
@@ -35,6 +35,7 @@ export function DateList({
   onToggleSubtask,
   onOpenDatePicker,
   onOpenSubtaskDatePicker,
+  onReorderSubtasks,
 }: DateListProps) {
   const selectQuest = (quest: Quest) => {
     if (suppressClickRef.current) return;
@@ -89,6 +90,7 @@ export function DateList({
                     onToggleSubtask={onToggleSubtask}
                     onOpenDatePicker={onOpenDatePicker}
                     onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
+                    onReorderSubtasks={onReorderSubtasks}
                   />
                 ))
               )}

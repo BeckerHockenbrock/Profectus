@@ -85,6 +85,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     addSubtask,
     updateSubtask,
     deleteSubtask,
+    reorderSubtasks,
     finishFocusSession,
   } = useQuestMutations({
     userId: user?.uid,
@@ -365,6 +366,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
                 onToggleSubtask={toggleSubtask}
                 onOpenDatePicker={handleOpenListDatePicker}
                 onOpenSubtaskDatePicker={handleOpenListSubtaskDatePicker}
+                onReorderSubtasks={reorderSubtasks}
               />
             </div>
           )}
@@ -393,6 +395,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
               onUpdateSubtask={(subtaskId, updates) => updateSubtask(selectedQuest.id, subtaskId, updates)}
               onAddSubtask={(title, dueDate) => addSubtask(selectedQuest.id, title, dueDate)}
               onDeleteSubtask={(subtaskId) => deleteSubtask(selectedQuest.id, subtaskId)}
+              onReorderSubtasks={(newSubtasks) => reorderSubtasks(selectedQuest.id, newSubtasks)}
               onStartFocus={(targetQuest) => {
                 setSelectedQuestId(null);
                 setFocusConfig({

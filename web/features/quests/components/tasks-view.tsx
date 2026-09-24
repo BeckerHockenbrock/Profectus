@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import type React from "react";
-import type { Quest, QuestView } from "../types/quest";
+import type { Quest, QuestView, Subtask } from "../types/quest";
 import { groupQuestsByDate } from "../domain/date-utils";
 import { CategoryList } from "./category-list";
 import { DateList } from "./date-list";
@@ -29,6 +29,7 @@ type TasksViewProps = {
   onToggleSubtask?: (questId: string, subtaskId: string) => void;
   onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
   onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
+  onReorderSubtasks?: (questId: string, newSubtasks: Subtask[]) => void;
 };
 
 export function TasksView({
@@ -50,6 +51,7 @@ export function TasksView({
   onToggleSubtask,
   onOpenDatePicker,
   onOpenSubtaskDatePicker,
+  onReorderSubtasks,
 }: TasksViewProps) {
   const [showCompleted, setShowCompleted] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
@@ -144,6 +146,7 @@ export function TasksView({
             onToggleSubtask={onToggleSubtask}
             onOpenDatePicker={onOpenDatePicker}
             onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
+            onReorderSubtasks={onReorderSubtasks}
           />
         ) : view === "categories" ? (
           <CategoryList
@@ -166,6 +169,7 @@ export function TasksView({
             onToggleSubtask={onToggleSubtask}
             onOpenDatePicker={onOpenDatePicker}
             onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
+            onReorderSubtasks={onReorderSubtasks}
           />
         ) : (
           <DateList
@@ -188,6 +192,7 @@ export function TasksView({
             onToggleSubtask={onToggleSubtask}
             onOpenDatePicker={onOpenDatePicker}
             onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
+            onReorderSubtasks={onReorderSubtasks}
           />
         )}
       </section>

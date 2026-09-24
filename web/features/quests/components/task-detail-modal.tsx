@@ -7,6 +7,7 @@ import { GoogleTasksDateBadge } from "./google-date-badge";
 import { IosDatePickerPopover } from "./ios-date-picker";
 import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
 import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
+import { useSubtaskReorder } from "../hooks/use-subtask-reorder";
 
 type TaskDetailModalProps = {
   quest: Quest;
@@ -19,6 +20,7 @@ type TaskDetailModalProps = {
   onUpdateSubtask?: (subtaskId: string, updates: Partial<Subtask>) => void | Promise<boolean>;
   onAddSubtask: (title: string, dueDate?: string) => void | Promise<boolean>;
   onDeleteSubtask: (subtaskId: string) => void | Promise<boolean>;
+  onReorderSubtasks?: (newSubtasks: Subtask[]) => void | Promise<boolean>;
   onStartFocus: (quest: Quest) => void;
   onUpdateDueDate?: (dueDate: string) => void | Promise<boolean>;
   isUpdating: boolean;
@@ -35,6 +37,7 @@ export function TaskDetailModal({
   onUpdateSubtask,
   onAddSubtask,
   onDeleteSubtask,
+  onReorderSubtasks,
   onStartFocus,
   onUpdateDueDate,
   isUpdating,
@@ -95,6 +98,17 @@ export function TaskDetailModal({
   const openSubtasks = subtasks.filter((s) => !s.completed);
   const completedSubtasks = subtasks.filter((s) => s.completed);
   const [showCompletedSubtasks, setShowCompletedSubtasks] = useState(false);
+
+  const {
+    draggedSubtaskId,
+    suppressClickRef: subtaskSuppressClickRef,
+    handleSubtaskPointerDown,
+    getSubtaskTransformY,
+  } = useSubtaskReorder({
+    subtasks,
+    onReorder: onReorderSubtasks,
+  });
+
   const completedSubtasksCount = completedSubtasks.length;
   const totalSubtasksCount = subtasks.length;
   const progressPercent =
@@ -304,73 +318,99 @@ export function TaskDetailModal({
 
             {openSubtasks.length > 0 ? (
               <ul className="detailSubtaskList" role="list">
-                {openSubtasks.map((subtask) => (
-                  <li key={subtask.id} className="detailSubtaskItem">
-                    <button
-                      type="button"
-                      className="subtaskCheckbox"
-                      onClick={() => onToggleSubtask(subtask.id)}
-                      aria-label={`Mark "${subtask.title}" as complete`}
-                      aria-pressed={false}
-                    >
-                      <span className="subtaskCheckIcon" aria-hidden="true" />
-                    </button>
+                {openSubtasks.map((subtask) => {
+                  const isDragging = draggedSubtaskId === subtask.id;
+                  const transformY = getSubtaskTransformY(subtask.id);
 
-                    <div className="subtaskTitleGroup">
-                      <span
-                        className="subtaskTitle"
-                        onClick={() => onToggleSubtask(subtask.id)}
-                      >
-                        {subtask.title}
-                      </span>
+                  return (
+                    <li
+                      key={subtask.id}
+                      className="detailSubtaskItem"
+                      data-subtask-id={subtask.id}
+                      data-dragging={isDragging ? "true" : undefined}
+                      style={{
+                        transform: isDragging
+                          ? `translateY(${transformY}px) scale(1.02)`
+                          : transformY !== 0
+                            ? `translateY(${transformY}px)`
+                            : undefined,
+                        zIndex: isDragging ? 50 : undefined,
+                        transition: isDragging ? "none" : "transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1)",
+                      }}
+                      onPointerDown={(e) => handleSubtaskPointerDown(e, subtask.id)}
+                    >
                       <button
                         type="button"
-                        className="subtaskDateLabelBtn"
-                        title={subtask.dueDate ? `Due ${subtask.dueDate} (click to change)` : "Set subtask due date"}
-                        onClick={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setDatePickerTarget({
-                            type: "subtask",
-                            subtaskId: subtask.id,
-                            currentDate: subtask.dueDate ?? "",
-                            anchorRect: rect,
-                          });
-                        }}
+                        className="subtaskCheckbox"
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={() => onToggleSubtask(subtask.id)}
+                        aria-label={`Mark "${subtask.title}" as complete`}
+                        aria-pressed={false}
                       >
-                        {subtask.dueDate ? (
-                          <GoogleTasksDateBadge
-                            dueDate={subtask.dueDate}
-                            today={today}
-                            completed={false}
-                          />
-                        ) : (
-                          <span className="subtaskDatePlaceholder">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                              <line x1="16" y1="2" x2="16" y2="6" />
-                              <line x1="8" y1="2" x2="8" y2="6" />
-                              <line x1="3" y1="10" x2="21" y2="10" />
-                            </svg>
-                            <span>+ Date</span>
-                          </span>
-                        )}
+                        <span className="subtaskCheckIcon" aria-hidden="true" />
                       </button>
-                    </div>
 
-                    <button
-                      type="button"
-                      className="subtaskDeleteButton"
-                      onClick={() => onDeleteSubtask(subtask.id)}
-                      aria-label={`Delete subtask "${subtask.title}"`}
-                      title="Delete subtask"
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
-                  </li>
-                ))}
+                      <div className="subtaskTitleGroup">
+                        <span
+                          className="subtaskTitle"
+                          onClick={() => {
+                            if (subtaskSuppressClickRef.current) return;
+                            onToggleSubtask(subtask.id);
+                          }}
+                        >
+                          {subtask.title}
+                        </span>
+                        <button
+                          type="button"
+                          className="subtaskDateLabelBtn"
+                          title={subtask.dueDate ? `Due ${subtask.dueDate} (click to change)` : "Set subtask due date"}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setDatePickerTarget({
+                              type: "subtask",
+                              subtaskId: subtask.id,
+                              currentDate: subtask.dueDate ?? "",
+                              anchorRect: rect,
+                            });
+                          }}
+                        >
+                          {subtask.dueDate ? (
+                            <GoogleTasksDateBadge
+                              dueDate={subtask.dueDate}
+                              today={today}
+                              completed={false}
+                            />
+                          ) : (
+                            <span className="subtaskDatePlaceholder">
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                              </svg>
+                              <span>+ Date</span>
+                            </span>
+                          )}
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="subtaskDeleteButton"
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={() => onDeleteSubtask(subtask.id)}
+                        aria-label={`Delete subtask "${subtask.title}"`}
+                        title="Delete subtask"
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             ) : null}
 
