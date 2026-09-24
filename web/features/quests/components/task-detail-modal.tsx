@@ -122,7 +122,14 @@ export function TaskDetailModal({
         </div>
 
         <header className="detailModalHeader" {...dragHandleProps}>
-          <div className="detailHeaderLeft">
+          <div className="categoryPillGroup">
+            <span className="categoryPill">
+              <span className="categoryPillDot" aria-hidden="true" />
+              <span>{quest.category}</span>
+            </span>
+          </div>
+
+          <div className="detailHeaderActions">
             <button
               type="button"
               className="detailIconButton"
@@ -131,7 +138,7 @@ export function TaskDetailModal({
               title="Edit quest"
               disabled={isUpdating}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 20h9" />
                 <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
               </svg>
@@ -144,82 +151,134 @@ export function TaskDetailModal({
               title="Delete quest"
               disabled={isUpdating}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M3 6h18" />
                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
               </svg>
             </button>
+            <button
+              type="button"
+              className="detailCloseButton"
+              onClick={onClose}
+              aria-label="Close task details"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
           </div>
-          <span className="categoryPill">{quest.category}</span>
-          <button
-            type="button"
-            className="detailCloseButton"
-            onClick={onClose}
-            aria-label="Close task details"
-          >
-            ×
-          </button>
         </header>
 
         <div className="detailModalBody">
-          <h2 id="task-detail-title" className={`detailTitle${quest.completed ? " isComplete" : ""}`}>
-            {quest.title}
-          </h2>
+          <div className="detailTitleSection">
+            <h2 id="task-detail-title" className={`detailTitle${quest.completed ? " isComplete" : ""}`}>
+              {quest.title}
+            </h2>
 
-          <div className="detailMetaRow">
-            <button
-              type="button"
-              className={`dueLabel isClickable${isDueToday ? " isToday" : ""}`}
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                setDatePickerTarget({
-                  type: "quest",
-                  currentDate: quest.dueDate,
-                  anchorRect: rect,
-                });
-              }}
-              title={quest.dueDate ? `Due ${quest.dueDate} (click to change)` : "Set due date"}
-              aria-label={`Due date: ${formatDueDateDetail(quest.dueDate, today, quest.completed)}. Click to change`}
-            >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+            <div className="detailMetaRow">
+              <button
+                type="button"
+                className={`dueLabel isClickable${isDueToday ? " isToday" : ""}`}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setDatePickerTarget({
+                    type: "quest",
+                    currentDate: quest.dueDate,
+                    anchorRect: rect,
+                  });
+                }}
+                title={quest.dueDate ? `Due ${quest.dueDate} (click to change)` : "Set due date"}
+                aria-label={`Due date: ${formatDueDateDetail(quest.dueDate, today, quest.completed)}. Click to change`}
               >
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              <span>{formatDueDateDetail(quest.dueDate, today, quest.completed)}</span>
-            </button>
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <span>{formatDueDateDetail(quest.dueDate, today, quest.completed)}</span>
+              </button>
 
-            {quest.completed ? (
-              <span className="detailStatusPill isCompleted">Completed</span>
-            ) : (
-              <span className="detailStatusPill inProgress">In Progress</span>
-            )}
+              {quest.completed ? (
+                <span className="detailStatusPill isCompleted">
+                  <span className="statusDot" aria-hidden="true" />
+                  Completed
+                </span>
+              ) : (
+                <span className="detailStatusPill inProgress">
+                  <span className="statusDot" aria-hidden="true" />
+                  In Progress
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="detailSection">
-            <h3 className="detailSectionLabel">Notes & Description</h3>
+          <div className="detailSection detailNotesSection">
+            <div className="detailSectionHeader">
+              <h3 className="detailSectionLabel">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+                <span>Notes & Description</span>
+              </h3>
+              {quest.description ? (
+                <button
+                  type="button"
+                  className="detailSectionEditBtn"
+                  onClick={onEdit}
+                  title="Edit notes"
+                  aria-label="Edit notes"
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
+                  <span>Edit</span>
+                </button>
+              ) : null}
+            </div>
             {quest.description ? (
               <p className="detailDescription">{quest.description}</p>
             ) : (
-              <p className="detailDescription isEmpty">No additional notes added for this quest.</p>
+              <button
+                type="button"
+                className="detailAddNotesPrompt"
+                onClick={onEdit}
+                aria-label="Add notes to quest"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Add notes or details…</span>
+              </button>
             )}
           </div>
 
           <div className="detailSection detailSubtasksSection">
             <div className="detailSubtasksHeader">
-              <h3 className="detailSectionLabel">Subtasks</h3>
+              <h3 className="detailSectionLabel">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points="9 11 12 14 22 4" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                </svg>
+                <span>Subtasks</span>
+              </h3>
               {totalSubtasksCount > 0 ? (
                 <span className="subtasksProgressText">
                   {completedSubtasksCount} of {totalSubtasksCount} completed ({progressPercent}%)
@@ -326,8 +385,8 @@ export function TaskDetailModal({
                 >
                   <svg
                     className={`subtasksCompletedChevron ${showCompletedSubtasks ? "isOpen" : ""}`}
-                    width="13"
-                    height="13"
+                    width="12"
+                    height="12"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -352,9 +411,9 @@ export function TaskDetailModal({
                           aria-label={`Mark "${subtask.title}" as incomplete`}
                           aria-pressed={true}
                         >
-                          <span className="subtaskCheckIcon" aria-hidden="true">
-                            ✓
-                          </span>
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
                         </button>
 
                         <div className="subtaskTitleGroup">
@@ -418,52 +477,81 @@ export function TaskDetailModal({
             ) : null}
 
             <form className="detailAddSubtaskForm" onSubmit={handleAddSubtask}>
-              <input
-                type="text"
-                className="detailAddSubtaskInput"
-                placeholder="Add a subtask…"
-                value={newSubtaskTitle}
-                onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                maxLength={160}
-              />
-              <button
-                type="button"
-                className={`detailAddSubtaskDateBtn${newSubtaskDueDate ? " hasDate" : ""}`}
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  setDatePickerTarget({
-                    type: "newSubtask",
-                    currentDate: newSubtaskDueDate,
-                    anchorRect: rect,
-                  });
-                }}
-                title="Subtask due date (optional)"
-                aria-label="Subtask due date"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-                <span>{newSubtaskDueDate ? formatGoogleTaskDueDate(newSubtaskDueDate, today) : "+ Date"}</span>
-              </button>
-              <button
-                type="submit"
-                className="detailAddSubtaskButton"
-                disabled={!newSubtaskTitle.trim() || isSubmittingSubtask}
-              >
-                Add
-              </button>
+              <div className="detailAddSubtaskCapsule">
+                <div className="detailAddSubtaskLeadingIcon" aria-hidden="true">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  className="detailAddSubtaskInput"
+                  placeholder="Add a subtask…"
+                  value={newSubtaskTitle}
+                  onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                  maxLength={160}
+                />
+                <div className="detailAddSubtaskTrailing">
+                  <button
+                    type="button"
+                    className={`detailAddSubtaskDateBtn${newSubtaskDueDate ? " hasDate" : ""}`}
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setDatePickerTarget({
+                        type: "newSubtask",
+                        currentDate: newSubtaskDueDate,
+                        anchorRect: rect,
+                      });
+                    }}
+                    title="Subtask due date (optional)"
+                    aria-label="Subtask due date"
+                  >
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span>{newSubtaskDueDate ? formatGoogleTaskDueDate(newSubtaskDueDate, today) : "+ Date"}</span>
+                  </button>
+                  <button
+                    type="submit"
+                    className="detailAddSubtaskButton"
+                    disabled={!newSubtaskTitle.trim() || isSubmittingSubtask}
+                    title="Add subtask"
+                    aria-label="Add subtask"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </form>
           </div>
 
           <div className="detailFocusCard">
             <div className="detailFocusInfo">
-              <span className="detailFocusLabel">Focus Progress</span>
-              <strong className="detailFocusStats">
-                {quest.focusMinutes} min focused · {quest.focusMinutes} XP
-              </strong>
+              <span className="detailFocusLabel">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span>Focus Progress</span>
+              </span>
+              <div className="detailFocusStatsRow">
+                <span className="detailFocusMinutes">
+                  <strong>{quest.focusMinutes}</strong> min focused
+                </span>
+                <span className="detailFocusDivider">·</span>
+                <span className="detailFocusXp">
+                  <svg className="detailFocusXpIcon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                  <strong>{quest.focusMinutes}</strong> XP
+                </span>
+              </div>
             </div>
 
             <button
@@ -475,8 +563,8 @@ export function TaskDetailModal({
               }}
               aria-label={`Start focus mode on ${quest.title}`}
             >
-              <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z" />
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="6 3 20 12 6 21 6 3" />
               </svg>
               <span>Start Focus Mode</span>
             </button>
@@ -490,7 +578,22 @@ export function TaskDetailModal({
             onClick={() => onToggleComplete(quest.id)}
             disabled={isUpdating}
           >
-            {quest.completed ? "Reopen Quest" : "Mark Completed"}
+            {quest.completed ? (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points="1 4 1 10 7 10" />
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                </svg>
+                <span>Reopen Quest</span>
+              </>
+            ) : (
+              <>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span>Mark Completed</span>
+              </>
+            )}
           </button>
         </footer>
       </section>

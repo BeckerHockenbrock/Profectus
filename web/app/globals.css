@@ -1500,14 +1500,14 @@ select:focus {
   max-height: min(88dvh, 44rem);
   margin: 0 auto;
   overflow-y: auto;
-  padding: 0.75rem 1.4rem calc(1.5rem + env(safe-area-inset-bottom));
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 0.65rem 1.4rem calc(1.5rem + env(safe-area-inset-bottom));
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-bottom: 0;
   border-radius: 1.75rem 1.75rem 0 0;
-  background: rgba(18, 19, 23, 0.96);
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
-  box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, rgba(22, 23, 28, 0.98) 0%, rgba(13, 14, 17, 0.99) 100%);
+  backdrop-filter: blur(36px) saturate(190%);
+  -webkit-backdrop-filter: blur(36px) saturate(190%);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.16), 0 -20px 60px rgba(0, 0, 0, 0.75);
   animation: slideUpModal 240ms cubic-bezier(0.2, 0.9, 0.3, 1);
   overscroll-behavior: contain;
   touch-action: pan-y;
@@ -1520,10 +1520,11 @@ select:focus {
 }
 
 .detailModalHeader {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
-  margin-bottom: 0.85rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
   touch-action: none !important;
   -webkit-touch-callout: none;
   user-select: none;
@@ -1531,42 +1532,62 @@ select:focus {
   cursor: grab;
 }
 
+.detailHeaderCategory {
+  display: flex;
+  align-items: center;
+}
+
+.categoryPillGroup {
+  display: flex;
+  align-items: center;
+}
+
+.categoryPillDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a78bfa;
+  flex-shrink: 0;
+  display: inline-block;
+  box-shadow: 0 0 6px rgba(167, 139, 250, 0.6);
+}
+
+.detailHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .detailHeaderLeft {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-}
-
-.detailModalHeader > .categoryPill {
-  justify-self: center;
+  gap: 0.35rem;
 }
 
 .detailIconButton {
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 2.1rem;
+  height: 2.1rem;
   place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.7rem;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--secondary);
   cursor: pointer;
-  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 100ms ease-out;
+  transition: all 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .detailIconButton:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.28);
-  color: var(--text);
-}
-
-.detailIconButton.isDestructive {
-  color: #ff9d9d;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .detailIconButton.isDestructive:hover {
-  border-color: rgba(255, 110, 110, 0.45);
-  background: rgba(255, 90, 90, 0.12);
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
 }
 
 .detailIconButton:active {
@@ -1575,103 +1596,188 @@ select:focus {
 
 .detailIconButton:disabled {
   cursor: wait;
-  opacity: 0.55;
+  opacity: 0.45;
 }
 
 .detailCloseButton {
   display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.1rem;
+  height: 2.1rem;
   place-items: center;
   border-radius: 50%;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--secondary);
   cursor: pointer;
-  font-size: 1.35rem;
-  line-height: 1;
-  transition: background-color 150ms ease, transform 100ms ease-out;
+  transition: all 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .detailCloseButton:hover {
   background: rgba(255, 255, 255, 0.12);
-  color: var(--accent-strong);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  transform: scale(1.05);
 }
 
 .detailCloseButton:active {
-  transform: scale(0.95);
+  transform: scale(0.92);
 }
 
 .detailModalBody {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1.15rem;
+}
+
+.detailTitleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0 0.15rem;
 }
 
 .detailTitle {
   margin: 0;
-  font-size: 1.45rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-size: 1.6rem;
+  font-weight: 750;
+  letter-spacing: -0.028em;
   line-height: 1.25;
+  color: #fff;
   word-break: break-word;
 }
 
 .detailTitle.isComplete {
   text-decoration: line-through;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .detailMetaRow {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.45rem;
   flex-wrap: wrap;
+}
+
+.dueLabel.isClickable {
+  cursor: pointer;
+  transition: all 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dueLabel.isClickable:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  transform: translateY(-0.5px);
+}
+
+.dueLabel.isClickable:active {
+  transform: scale(0.96);
 }
 
 .detailStatusPill {
   display: inline-flex;
   align-items: center;
+  gap: 0.35rem;
   font-size: 0.72rem;
-  font-weight: 680;
-  padding: 0.18rem 0.58rem;
+  font-weight: 650;
+  padding: 0.22rem 0.65rem;
   border-radius: 999px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.015em;
+  transition: all 140ms ease;
+}
+
+.detailStatusPill .statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
 }
 
 .detailStatusPill.isCompleted {
-  background: rgba(80, 200, 120, 0.14);
-  color: #72e098;
-  border: 1px solid rgba(80, 200, 120, 0.32);
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+.detailStatusPill.isCompleted .statusDot {
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.8);
 }
 
 .detailStatusPill.inProgress {
-  background: rgba(255, 255, 255, 0.07);
-  color: var(--secondary);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(59, 130, 246, 0.1);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.24);
+}
+
+.detailStatusPill.inProgress .statusDot {
+  background: #60a5fa;
+  box-shadow: 0 0 6px rgba(96, 165, 250, 0.8);
 }
 
 .detailSection {
-  padding: 0.95rem 1.05rem;
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid var(--line);
+  padding: 1rem 1.15rem;
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.detailSection:focus-within {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.detailSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  gap: 0.5rem;
 }
 
 .detailSectionLabel {
-  margin: 0 0 0.45rem;
-  font-size: 0.7rem;
-  font-weight: 680;
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.detailSectionLabel svg {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.detailSectionEditBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.18rem 0.45rem;
+  border-radius: 0.45rem;
+  transition: all 120ms ease;
+}
+
+.detailSectionEditBtn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .detailDescription {
   margin: 0;
   font-size: 0.92rem;
-  color: var(--text);
-  line-height: 1.55;
+  color: #e1e1dc;
+  line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -1682,11 +1788,33 @@ select:focus {
   font-size: 0.85rem;
 }
 
+.detailAddNotesPrompt {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.detailAddNotesPrompt:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+
 /* Detail Modal Subtasks Section */
 .detailSubtasksSection {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.7rem;
 }
 
 .detailSubtasksHeader {
@@ -1699,8 +1827,8 @@ select:focus {
 
 .subtasksProgressText {
   font-size: 0.72rem;
-  font-weight: 680;
-  color: var(--muted);
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .subtaskProgressBar {
@@ -1714,7 +1842,7 @@ select:focus {
 .subtaskProgressFill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #50c878, #72e098);
+  background: linear-gradient(90deg, #10b981, #34d399);
   transition: width 240ms cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 
@@ -1724,7 +1852,7 @@ select:focus {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .detailSubtaskItem {
@@ -1733,9 +1861,9 @@ select:focus {
   gap: 0.65rem;
   padding: 0.5rem 0.65rem;
   border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: background-color 150ms ease, border-color 150ms ease;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background-color 140ms ease, border-color 140ms ease;
 }
 
 .detailSubtaskItem:hover {
@@ -1744,24 +1872,22 @@ select:focus {
 }
 
 .detailSubtaskItem.isComplete {
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .subtaskCheckbox {
   display: grid;
   place-items: center;
-  width: 1.45rem;
-  height: 1.45rem;
+  width: 1.35rem;
+  height: 1.35rem;
   padding: 0;
   border-radius: 50%;
-  border: 1.8px solid rgba(255, 255, 255, 0.38);
+  border: 1.6px solid rgba(255, 255, 255, 0.32);
   background: transparent;
   cursor: pointer;
   flex-shrink: 0;
   color: #000;
-  font-size: 0.82rem;
-  line-height: 1;
-  transition: transform 100ms ease-out, background-color 140ms ease, border-color 140ms ease;
+  transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 140ms ease, border-color 140ms ease;
 }
 
 .subtaskCheckbox:hover {
@@ -1770,17 +1896,16 @@ select:focus {
 }
 
 .subtaskCheckbox.isChecked {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #000;
-  font-weight: 900;
+  background: #34d399;
+  border-color: #34d399;
+  color: #064e3b;
 }
 
 .subtaskTitleGroup {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.25rem;
+  gap: 0.2rem;
   flex: 1;
   min-width: 0;
 }
@@ -1788,7 +1913,7 @@ select:focus {
 .subtaskTitle {
   width: 100%;
   font-size: 0.88rem;
-  color: var(--text);
+  color: #e5e5e0;
   line-height: 1.4;
   word-break: break-word;
   cursor: pointer;
@@ -1801,6 +1926,26 @@ select:focus {
   color: var(--muted);
 }
 
+.subtaskDateLabelBtn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.subtaskDatePlaceholder {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.35);
+  transition: color 120ms ease;
+}
+
+.subtaskDateLabelBtn:hover .subtaskDatePlaceholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .subtaskDeleteButton {
   display: grid;
   place-items: center;
@@ -1808,23 +1953,23 @@ select:focus {
   height: 1.5rem;
   padding: 0;
   border: 0;
-  border-radius: 0.4rem;
+  border-radius: 0.45rem;
   background: transparent;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.35);
   cursor: pointer;
-  opacity: 0.65;
+  opacity: 0.7;
   flex-shrink: 0;
-  transition: opacity 140ms ease, color 140ms ease, background-color 140ms ease;
+  transition: all 140ms ease;
 }
 
 .subtaskDeleteButton:hover {
   opacity: 1;
-  color: #ff9d9d;
-  background: rgba(255, 90, 90, 0.12);
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
 }
 
 .detailCompletedSubtasksSection {
-  margin-top: 0.35rem;
+  margin-top: 0.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -1836,11 +1981,11 @@ select:focus {
   gap: 0.4rem;
   background: transparent;
   border: none;
-  padding: 0.3rem 0.45rem;
+  padding: 0.25rem 0.45rem;
   border-radius: 0.5rem;
-  color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 550;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
   user-select: none;
   transition: color 140ms ease, background-color 140ms ease;
@@ -1848,87 +1993,207 @@ select:focus {
 }
 
 .detailCompletedSubtasksToggle:hover {
-  color: var(--text);
+  color: #fff;
   background: rgba(255, 255, 255, 0.05);
+}
+
+.subtasksCompletedChevron {
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.subtasksCompletedChevron.isOpen {
+  transform: rotate(90deg);
 }
 
 .detailCompletedSubtaskList {
   margin-top: 0.1rem;
 }
 
+/* Modern Unified Subtask Add Capsule */
 .detailAddSubtaskForm {
   display: flex;
-  gap: 0.45rem;
-  align-items: center;
-  margin-top: 0.2rem;
-  flex-wrap: wrap;
+  width: 100%;
+  margin-top: 0.15rem;
 }
 
-.detailAddSubtaskDate {
-  min-height: 2.65rem;
-  padding: 0 0.65rem;
-  border: 1px solid var(--line);
+.detailAddSubtaskCapsule {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.35rem 0.25rem 0.75rem;
   border-radius: 0.85rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text);
-  font-size: 0.82rem;
-  outline: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  gap: 0.45rem;
+}
+
+.detailAddSubtaskCapsule:focus-within {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+}
+
+.detailAddSubtaskLeadingIcon {
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
 }
 
 .detailAddSubtaskInput {
   flex: 1;
-  min-height: 2.65rem;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
   font-size: 0.88rem;
+  padding: 0.35rem 0.1rem;
+}
+
+.detailAddSubtaskInput::placeholder {
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.detailAddSubtaskTrailing {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.detailAddSubtaskDateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.55rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: var(--secondary);
+  font-size: 0.75rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition: all 140ms ease;
+  white-space: nowrap;
+}
+
+.detailAddSubtaskDateBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.detailAddSubtaskDateBtn.hasDate {
+  background: rgba(167, 139, 250, 0.14);
+  border-color: rgba(167, 139, 250, 0.3);
+  color: #c4b5fd;
 }
 
 .detailAddSubtaskButton {
-  min-height: 2.65rem;
-  padding: 0 0.95rem;
-  border: 1px solid var(--line);
-  border-radius: 0.85rem;
+  width: 1.95rem;
+  height: 1.95rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  font-size: 0.82rem;
-  font-weight: 680;
+  color: rgba(255, 255, 255, 0.5);
+  display: grid;
+  place-items: center;
   cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 150ms ease, border-color 150ms ease;
+  transition: all 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  padding: 0;
+  flex-shrink: 0;
 }
 
-.detailAddSubtaskButton:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+.detailAddSubtaskButton:not(:disabled) {
+  background: #fff;
+  color: #0b0c10;
+  border-color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.22);
+}
+
+.detailAddSubtaskButton:not(:disabled):hover {
+  transform: scale(1.06);
+}
+
+.detailAddSubtaskButton:not(:disabled):active {
+  transform: scale(0.94);
 }
 
 .detailAddSubtaskButton:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
+/* Gamified Focus Progress Card */
 .detailFocusCard {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.9rem;
-  padding: 1.05rem 1.15rem;
-  border-radius: 1.15rem;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  padding: 1rem 1.25rem;
+  border-radius: 1.2rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 
 .detailFocusInfo {
-  display: grid;
-  gap: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .detailFocusLabel {
   font-size: 0.68rem;
-  font-weight: 680;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.detailFocusLabel svg {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.detailFocusStatsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  color: #e5e5e0;
+}
+
+.detailFocusMinutes strong,
+.detailFocusXp strong {
+  font-weight: 700;
+  color: #fff;
+}
+
+.detailFocusDivider {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.detailFocusXp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #fbbf24;
+}
+
+.detailFocusXp strong {
+  color: #fbbf24;
+}
+
+.detailFocusXpIcon {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
 }
 
 .detailFocusStats {
@@ -1941,28 +2206,31 @@ select:focus {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 2.85rem;
-  padding: 0.55rem 1.15rem;
-  border-radius: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: var(--accent-strong);
-  color: #050505;
+  min-height: 2.65rem;
+  padding: 0.52rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, #ffffff 0%, #ebebef 100%);
+  color: #090a0d;
   cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 750;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-  transition: transform 100ms ease-out, filter 150ms ease;
+  font-size: 0.85rem;
+  font-weight: 680;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  transition: all 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .detailStartFocusButton:hover {
-  filter: brightness(0.95);
   transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.18), 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  filter: brightness(1.02);
 }
 
 .detailStartFocusButton:active {
   transform: scale(0.96);
 }
 
+/* Modal Bottom Action Footer */
 .detailModalFooter {
   display: grid;
   gap: 0.6rem;
@@ -1971,29 +2239,44 @@ select:focus {
 
 .detailCompleteToggle {
   width: 100%;
-  min-height: 3rem;
-  border-radius: 0.95rem;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
+  min-height: 3.1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
   cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 680;
-  transition: background-color 150ms ease, border-color 150ms ease, transform 100ms ease-out;
+  font-size: 0.9rem;
+  font-weight: 650;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  transition: all 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .detailCompleteToggle:hover {
-  background: rgba(255, 255, 255, 0.11);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.18);
+  transform: translateY(-0.5px);
 }
 
 .detailCompleteToggle:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 .detailCompleteToggle.isReopen {
   background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(255, 255, 255, 0.08);
   color: var(--secondary);
+}
+
+.detailCompleteToggle.isReopen:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
 @media (min-width: 44rem) {
@@ -2004,7 +2287,7 @@ select:focus {
 
   .detailModalSheet {
     border-radius: 1.75rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     max-height: min(85dvh, 42rem);
   }
 }
