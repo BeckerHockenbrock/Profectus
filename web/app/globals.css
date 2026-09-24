@@ -2277,7 +2277,7 @@ select:focus {
   z-index: 100;
   display: flex;
   flex-direction: column;
-  background: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.055), transparent 48rem), #000;
+  background: #000;
   color: var(--text);
   min-height: 100vh;
   min-height: 100dvh;
@@ -2310,21 +2310,6 @@ select:focus {
   padding-top: 0.25rem;
 }
 
-.focusCategoryPill {
-  display: inline-flex;
-  min-height: 1.55rem;
-  align-items: center;
-  padding: 0.18rem 0.65rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--secondary);
-  font-size: 0.7rem;
-  font-weight: 650;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
 .focusQuestTitle {
   margin: 0;
   font-size: clamp(1.25rem, 4.2vw, 1.8rem);
@@ -2333,18 +2318,6 @@ select:focus {
   line-height: 1.22;
   max-width: 92%;
   word-break: break-word;
-}
-
-.focusQuestDesc {
-  margin: 0.1rem 0 0;
-  color: var(--secondary);
-  font-size: 0.82rem;
-  line-height: 1.42;
-  max-width: 28rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .focusVisualSection {
@@ -2359,68 +2332,59 @@ select:focus {
   margin: 0.5rem 0;
 }
 
-.sisyphusAnimationWrapper {
+.focusTimerBox {
   position: relative;
-  width: min(74vw, 42vh, 19rem);
-  width: min(74vw, 42dvh, 19rem);
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sisyphusFrameStage {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
   display: grid;
   place-items: center;
-  isolation: isolate;
+  width: min(76vw, 42dvh, 22rem);
+  aspect-ratio: 1;
+  margin: 0;
 }
 
-.sisyphusFrameStage::before {
+.focusProgressRing {
   position: absolute;
-  inset: 12%;
-  z-index: -1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.07), transparent 68%);
-  content: "";
-  filter: blur(16px);
-}
-
-.sisyphusFrame {
-  display: block;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.08));
-  transition: opacity 180ms ease;
+  overflow: visible;
 }
 
-.sisyphusFrameStage[data-ready="false"] .sisyphusFrame,
-.focusScreen[data-paused="true"] .sisyphusFrame {
-  opacity: 0.72;
+.focusProgressRingTrack,
+.focusProgressRingFill {
+  fill: none;
+  stroke-width: 1.6;
 }
 
-.focusTimerBox {
+.focusProgressRingTrack {
+  stroke: rgba(255, 255, 255, 0.13);
+}
+
+.focusProgressRingFill {
+  stroke: #deded8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 400ms ease, opacity 200ms ease;
+}
+
+.focusScreen[data-paused="true"] .focusProgressRingFill {
+  opacity: 0.45;
+}
+
+.focusTimerContent {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
-  margin-top: 0.4rem;
+  gap: 0.55rem;
 }
 
 .focusTimerNumerals {
   font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", "Courier New", monospace;
-  font-size: clamp(3.2rem, 14vw, 5.2rem);
+  font-size: clamp(2.5rem, 9.5vw, 3.5rem);
   font-weight: 340;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   color: #f1f1ed;
-  text-shadow: 0 0 1px rgba(255, 255, 255, 0.4), 0 0 18px rgba(255, 255, 255, 0.08);
-  filter: url(#pencil-stroke);
-  transition: opacity 200ms ease;
+  white-space: nowrap;
 }
 
 .focusScreen[data-paused="true"] .focusTimerNumerals {
@@ -2430,77 +2394,10 @@ select:focus {
 .focusStatusBadge {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.72rem;
-  font-weight: 680;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  min-height: 1rem;
+  font-size: 0.7rem;
+  font-weight: 550;
   color: var(--muted);
-  min-height: 1.25rem;
-}
-
-.focusStatusDot {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-  transition: background-color 200ms ease, opacity 200ms ease;
-}
-
-.focusScreen[data-paused="true"] .focusStatusDot {
-  background: var(--muted);
-  box-shadow: none;
-  opacity: 0.6;
-}
-
-/* =========================================================================
-   ORBITAL CELESTIAL STUDY CLOCK
-   ========================================================================= */
-
-.focusVisualToggleRow {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin-bottom: 0.35rem;
-  z-index: 10;
-}
-
-.focusVisualModeSwitch {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.2rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-.visualModeBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.28rem 0.72rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 650;
-  letter-spacing: 0.02em;
-  color: var(--secondary);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 160ms cubic-bezier(0.2, 0.9, 0.3, 1);
-}
-
-.visualModeBtn:hover {
-  color: var(--text);
-}
-
-.visualModeBtn.isActive {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .orbitalClockRoot {
@@ -2955,10 +2852,6 @@ select:focus {
     transition-duration: 1ms !important;
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
-  }
-
-  .sisyphusFrame {
-    transition: none !important;
   }
 
   .detailModalSheet,

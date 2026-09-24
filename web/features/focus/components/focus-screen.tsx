@@ -1,13 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { BreakAction, FocusScreenProps } from "../types/focus";
 import { formatTimerDigits } from "../domain/timer-format";
 import { useFocusTimer } from "../hooks/use-focus-timer";
-import { useLockInStats } from "../hooks/use-lock-in-stats";
-import { SisyphusFrameAnimation } from "./sisyphus-frame-animation";
-import { OrbitalStudyClock } from "./orbital-study-clock";
-import { getDailyStoicQuote } from "@/features/quests/data/stoic-quotes";
 
 export function FocusScreen({
   quest,
@@ -16,7 +12,6 @@ export function FocusScreen({
   onQuit,
   onFinish,
 }: FocusScreenProps) {
-  const [visualMode, setVisualMode] = useState<"orbital" | "sisyphus">("orbital");
   const [isFinishing, setIsFinishing] = useState(false);
   const [finishError, setFinishError] = useState<string | null>(null);
   const [showBreakModal, setShowBreakModal] = useState(false);
@@ -26,10 +21,7 @@ export function FocusScreen({
     earnedBreakMinutes: number;
   } | null>(null);
 
-  const { todayStats, streak } = useLockInStats();
-
   const isFinishingRef = useRef(false);
-  const quote = useMemo(() => getDailyStoicQuote(), []);
 
   const {
     isPaused,
@@ -102,30 +94,10 @@ export function FocusScreen({
       ? Math.min(100, Math.round((elapsedMs / targetMs) * 100))
       : null;
 
-  const headerCategory = quest
-    ? quest.category
-    : initialBlocks
-      ? `${initialBlocks} Block${initialBlocks === 1 ? "" : "s"} · ${targetMinutes}m`
-      : targetMinutes
-        ? `${targetMinutes}m Sprint`
-        : "General Study";
-
   const headerTitle = quest ? quest.title : "Lock In";
-  const headerDescription = quest
-    ? quest.description
-    : isCountdown
-      ? `Pushing the boulder for a ${targetMinutes}-minute focus block`
-      : "Open-ended study session";
-
-  const totalBlocksCount =
-    initialBlocks || (targetMinutes ? Math.max(1, Math.round(targetMinutes / 25)) : 4);
-  const currentBlockIndex =
-    targetMs && targetMs > 0 && totalBlocksCount > 1
-      ? Math.min(
-          totalBlocksCount,
-          Math.floor(elapsedMs / (targetMs / totalBlocksCount)) + 1,
-        )
-      : 1;
+  const timerLabel = isCountdown ? "remaining" : "elapsed";
+  const ringCircumference = 2 * Math.PI * 108;
+  const ringProgress = progressPercent ?? 0;
 
   return (
     <section
@@ -135,96 +107,41 @@ export function FocusScreen({
     >
       <div className="focusContainer">
         <header className="focusHeader">
-          <span className="focusCategoryPill">{headerCategory}</span>
           <h1 className="focusQuestTitle">{headerTitle}</h1>
-          {headerDescription ? <p className="focusQuestDesc">{headerDescription}</p> : null}
         </header>
 
         <div className="focusVisualSection">
-          {/* Subtle Visual Mode Switcher */}
-          <div className="focusVisualToggleRow">
-            <div className="focusVisualModeSwitch" role="group" aria-label="Clock visual style">
-              <button
-                type="button"
-                className={`visualModeBtn ${visualMode === "orbital" ? "isActive" : ""}`}
-                onClick={() => setVisualMode("orbital")}
-                title="Orbital Celestial Clock"
-              >
-                <span>🪐</span> Orbital
-              </button>
-              <button
-                type="button"
-                className={`visualModeBtn ${visualMode === "sisyphus" ? "isActive" : ""}`}
-                onClick={() => setVisualMode("sisyphus")}
-                title="Sisyphus Classic"
-              >
-                <span>🪨</span> Sisyphus
-              </button>
+          <div
+            className="focusTimerBox"
+            role="timer"
+            aria-live="off"
+            aria-label={`Focus time: ${formatTimerDigits(displayMs)} ${timerLabel}`}
+          >
+            <svg
+              className="focusProgressRing"
+              viewBox="0 0 240 240"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle className="focusProgressRingTrack" cx="120" cy="120" r="108" />
+              <circle
+                className="focusProgressRingFill"
+                cx="120"
+                cy="120"
+                r="108"
+                transform="rotate(-90 120 120)"
+                strokeDasharray={ringCircumference}
+                strokeDashoffset={ringCircumference * (1 - ringProgress / 100)}
+              />
+            </svg>
+            <div className="focusTimerContent">
+              <span className="focusTimerNumerals" aria-hidden="true">
+                {formatTimerDigits(displayMs)}
+              </span>
+              <span className="focusStatusBadge">
+                {isGoalReached ? "Complete" : isPaused ? "Paused" : isCountdown ? "Focusing" : "Elapsed"}
+              </span>
             </div>
-          </div>
-
-          {visualMode === "orbital" ? (
-            <OrbitalStudyClock
-              displayMs={displayMs}
-              targetMs={targetMs}
-              isPaused={isPaused}
-              isCountdown={isCountdown}
-              isGoalReached={isGoalReached}
-              currentBlock={currentBlockIndex}
-              totalBlocks={totalBlocksCount}
-              todayFocusMinutes={todayStats.totalMinutes}
-              taskTitle={headerTitle !== "Lock In" ? headerTitle : undefined}
-              streakDays={streak}
-              mode="focus"
-            />
-          ) : (
-            <>
-              <div className="sisyphusAnimationWrapper">
-                <SisyphusFrameAnimation isPaused={isPaused} />
-              </div>
-
-              <div
-                className="focusTimerBox"
-                role="timer"
-                aria-live="off"
-                aria-label={`Focus time: ${minutesFocused} minutes elapsed`}
-              >
-                {progressPercent !== null ? (
-                  <div className="focusProgressBarWrapper" aria-hidden="true">
-                    <div
-                      className="focusProgressBarFill"
-                      style={{ width: `${progressPercent}%` }}
-                    />
-                  </div>
-                ) : null}
-
-                <div className="focusTimerNumerals" aria-hidden="true">
-                  {formatTimerDigits(displayMs)}
-                </div>
-
-                <div className="focusStatusBadge">
-                  <span
-                    className={`focusStatusDot ${isGoalReached ? "isCompleted" : ""}`}
-                    aria-hidden="true"
-                  />
-                  <span>
-                    {isGoalReached
-                      ? "Summit Reached! 🪨"
-                      : isPaused
-                        ? "Paused"
-                        : isCountdown
-                          ? "Focusing"
-                          : "Locking In"}
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Stoic Motivation Under Timer */}
-          <div className="focusStoicQuote" aria-label="Stoic quote">
-            <p className="focusQuoteText">“{quote.text}”</p>
-            <span className="focusQuoteAuthor">— {quote.author}</span>
           </div>
         </div>
 
