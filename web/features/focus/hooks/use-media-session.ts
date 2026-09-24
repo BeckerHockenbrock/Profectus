@@ -161,38 +161,26 @@ export function useMediaSession({
           ? "Remaining"
           : "Elapsed";
 
+    const timerIconUrl =
+      typeof window !== "undefined"
+        ? new URL("/timer-icon.png", window.location.href).href
+        : "/timer-icon.png";
+
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: `${formatted} ${statusLabel}`,
         artist: sessionLabel,
-        album: "Todo Quest · Lock In",
+        album: "",
         artwork: [
-          { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
-          { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
+          { src: timerIconUrl, sizes: "512x512", type: "image/png" },
         ],
       });
 
       navigator.mediaSession.playbackState = isPaused || !isAudioPlaying ? "paused" : "playing";
-
-      // Set position state for lock screen scrubber bar
-      if (
-        "setPositionState" in navigator.mediaSession &&
-        targetMs &&
-        targetMs > 0 &&
-        !isGoalReached
-      ) {
-        const duration = Math.max(1, targetMs / 1000);
-        const position = Math.min(duration, Math.max(0, elapsedMs / 1000));
-        navigator.mediaSession.setPositionState({
-          duration,
-          playbackRate: isPaused ? 1 : 1,
-          position,
-        });
-      }
     } catch (err) {
       console.debug("MediaSession update error:", err);
     }
-  }, [displayMs, elapsedMs, targetMs, isPaused, isGoalReached, isCountdown, title, isAudioPlaying]);
+  }, [displayMs, isPaused, isGoalReached, isCountdown, title, isAudioPlaying]);
 
   // Wire bidirectional MediaSession action handlers (Lock Screen / Earbud Play & Pause)
   useEffect(() => {
@@ -218,6 +206,10 @@ export function useMediaSession({
       navigator.mediaSession.setActionHandler("play", handleMediaPlay);
       navigator.mediaSession.setActionHandler("pause", handleMediaPause);
       navigator.mediaSession.setActionHandler("stop", handleMediaPause);
+      navigator.mediaSession.setActionHandler("previoustrack", null);
+      navigator.mediaSession.setActionHandler("nexttrack", null);
+      navigator.mediaSession.setActionHandler("seekbackward", null);
+      navigator.mediaSession.setActionHandler("seekforward", null);
     } catch {}
 
     return () => {
@@ -225,6 +217,10 @@ export function useMediaSession({
         navigator.mediaSession.setActionHandler("play", null);
         navigator.mediaSession.setActionHandler("pause", null);
         navigator.mediaSession.setActionHandler("stop", null);
+        navigator.mediaSession.setActionHandler("previoustrack", null);
+        navigator.mediaSession.setActionHandler("nexttrack", null);
+        navigator.mediaSession.setActionHandler("seekbackward", null);
+        navigator.mediaSession.setActionHandler("seekforward", null);
       } catch {}
     };
   }, []);
