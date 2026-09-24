@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type React from "react";
 import type { Quest } from "../types/quest";
 import { GoogleTasksDateBadge } from "./google-date-badge";
@@ -31,7 +32,10 @@ export function QuestCard({
   onOpenDatePicker,
   onOpenSubtaskDatePicker,
 }: QuestCardProps) {
+  const [showCompletedSubtasks, setShowCompletedSubtasks] = useState(false);
   const subtasks = quest.subtasks ?? [];
+  const openSubtasks = subtasks.filter((s) => !s.completed);
+  const completedSubtasks = subtasks.filter((s) => s.completed);
 
   return (
     <article
@@ -81,6 +85,9 @@ export function QuestCard({
 
         <div className="questContent">
           <h3 className="questTitle">{quest.title}</h3>
+          {quest.description?.trim() ? (
+            <p className="questNotesSnippet">{quest.description.trim()}</p>
+          ) : null}
           <div className="questMeta">
             {quest.dueDate ? (
               <GoogleTasksDateBadge
@@ -144,21 +151,17 @@ export function QuestCard({
 
       {subtasks.length > 0 ? (
         <div className="questSubtasksContainer" role="list">
-          {subtasks.map((subtask) => (
+          {openSubtasks.map((subtask) => (
             <div
               key={subtask.id}
-              className={`googleSubtaskItem${subtask.completed ? " isComplete" : ""}`}
+              className="googleSubtaskItem"
               role="listitem"
             >
               <button
                 type="button"
-                className={`googleSubtaskCheckbox${subtask.completed ? " isChecked" : ""}`}
-                aria-label={
-                  subtask.completed
-                    ? `Mark subtask "${subtask.title}" as incomplete`
-                    : `Mark subtask "${subtask.title}" as completed`
-                }
-                aria-pressed={subtask.completed}
+                className="googleSubtaskCheckbox"
+                aria-label={`Mark subtask "${subtask.title}" as completed`}
+                aria-pressed={false}
                 onPointerDown={(event) => {
                   event.stopPropagation();
                 }}
@@ -167,9 +170,7 @@ export function QuestCard({
                   onToggleSubtask?.(quest.id, subtask.id);
                 }}
               >
-                <span className="googleSubtaskCheckMark" aria-hidden="true">
-                  {subtask.completed ? "✓" : ""}
-                </span>
+                <span className="googleSubtaskCheckMark" aria-hidden="true" />
               </button>
 
               <div className="googleSubtaskContent">
@@ -178,7 +179,7 @@ export function QuestCard({
                   <GoogleTasksDateBadge
                     dueDate={subtask.dueDate}
                     today={today}
-                    completed={subtask.completed}
+                    completed={false}
                     onClick={
                       onOpenSubtaskDatePicker
                         ? (event) => {
@@ -192,6 +193,89 @@ export function QuestCard({
               </div>
             </div>
           ))}
+
+          {completedSubtasks.length > 0 ? (
+            <div className="subtasksCompletedSection">
+              <button
+                type="button"
+                className="subtasksCompletedToggle"
+                aria-expanded={showCompletedSubtasks}
+                aria-label={`${showCompletedSubtasks ? "Hide" : "Show"} completed subtasks (${completedSubtasks.length})`}
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setShowCompletedSubtasks((previous) => !previous);
+                }}
+              >
+                <svg
+                  className={`subtasksCompletedChevron ${showCompletedSubtasks ? "isOpen" : ""}`}
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="9 6 15 12 9 18" />
+                </svg>
+                <span>Completed ({completedSubtasks.length})</span>
+              </button>
+
+              {showCompletedSubtasks ? (
+                <div className="subtasksCompletedList">
+                  {completedSubtasks.map((subtask) => (
+                    <div
+                      key={subtask.id}
+                      className="googleSubtaskItem isComplete"
+                      role="listitem"
+                    >
+                      <button
+                        type="button"
+                        className="googleSubtaskCheckbox isChecked"
+                        aria-label={`Mark subtask "${subtask.title}" as incomplete`}
+                        aria-pressed={true}
+                        onPointerDown={(event) => {
+                          event.stopPropagation();
+                        }}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onToggleSubtask?.(quest.id, subtask.id);
+                        }}
+                      >
+                        <span className="googleSubtaskCheckMark" aria-hidden="true">
+                          ✓
+                        </span>
+                      </button>
+
+                      <div className="googleSubtaskContent">
+                        <span className="googleSubtaskTitle">{subtask.title}</span>
+                        {subtask.dueDate ? (
+                          <GoogleTasksDateBadge
+                            dueDate={subtask.dueDate}
+                            today={today}
+                            completed={true}
+                            onClick={
+                              onOpenSubtaskDatePicker
+                                ? (event) => {
+                                    const rect = event.currentTarget.getBoundingClientRect();
+                                    onOpenSubtaskDatePicker(quest.id, subtask.id, subtask.dueDate ?? "", rect);
+                                  }
+                                : undefined
+                            }
+                          />
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </article>
