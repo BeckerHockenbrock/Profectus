@@ -2,17 +2,22 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type React from "react";
+import { formatTimerDigits } from "../domain/timer-format";
+import { useMediaSession } from "./use-media-session";
+import { useWakeLock } from "./use-wake-lock";
 
 type UseFocusTimerOptions = {
   onQuit: () => void;
   isFinishingRef: React.MutableRefObject<boolean>;
   targetMinutes?: number | null;
+  title?: string;
 };
 
 export function useFocusTimer({
   onQuit,
   isFinishingRef,
   targetMinutes,
+  title,
 }: UseFocusTimerOptions) {
   const isCountdown = Boolean(targetMinutes && targetMinutes > 0);
   const targetMs = isCountdown ? (targetMinutes as number) * 60 * 1000 : null;
@@ -28,6 +33,10 @@ export function useFocusTimer({
   const isPausedRef = useRef(false);
   const wasRunningBeforeQuitRef = useRef(false);
   const pauseButtonRef = useRef<HTMLButtonElement>(null);
+  const hasNotifiedGoalRef = useRef(false);
+
+  // Keep screen awake while focus timer is actively running
+  useWakeLock(!isPaused && !showQuitConfirm);
 
   const getElapsedMs = useCallback(() => {
     if (isPausedRef.current) {
@@ -173,6 +182,70 @@ export function useFocusTimer({
     return finalElapsedMs;
   }, [getElapsedMs, targetMs]);
 
+  // Request notification permission on entry if supported and unprompted
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission().catch(() => {});
+      }
+    }
+  }, []);
+
+  // Fire system notification once when target countdown/goal is reached
+  useEffect(() => {
+    if (isGoalReached && !hasNotifiedGoalRef.current) {
+      hasNotifiedGoalRef.current = true;
+      if (
+        typeof window !== "undefined" &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
+        try {
+          new Notification("Focus Session Complete! 🎉", {
+            body: `You finished your focus block for "${title || "Lock In"}". Time for a rest!`,
+            icon: "/icon-192.png",
+            tag: "focus-complete",
+          });
+        } catch {
+          // Ignore notification errors
+        }
+      }
+    }
+  }, [isGoalReached, title]);
+
+  // Live browser tab title update with graceful restore on exit
+  useEffect(() => {
+    const originalTitle = typeof document !== "undefined" ? document.title : "";
+    return () => {
+      if (typeof document !== "undefined") {
+        document.title = originalTitle;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const formatted = formatTimerDigits(displayMs);
+    const sessionLabel = title || "Lock In";
+    if (isPaused) {
+      document.title = `⏸ ${formatted} · ${sessionLabel}`;
+    } else {
+      document.title = `${formatted} · ${sessionLabel}`;
+    }
+  }, [displayMs, isPaused, title]);
+
+  // Lock Screen & Dynamic Island Live Widget via MediaSession and silent audio
+  const mediaSession = useMediaSession({
+    isPaused,
+    isGoalReached,
+    isCountdown,
+    displayMs,
+    elapsedMs,
+    targetMs,
+    title,
+    onTogglePause: handleTogglePause,
+  });
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -209,5 +282,6 @@ export function useFocusTimer({
     cancelQuit,
     freezeTimer,
     getElapsedMs,
+    mediaSession,
   };
 }

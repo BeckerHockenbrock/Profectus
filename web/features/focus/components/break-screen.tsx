@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatTimerDigits } from "../domain/timer-format";
+import { useWakeLock } from "../hooks/use-wake-lock";
 import { OrbitalStudyClock } from "./orbital-study-clock";
 
 type BreakScreenProps = {
@@ -38,6 +39,10 @@ export function BreakScreen({ durationMinutes, onFinish, onSkip }: BreakScreenPr
   const accumulatedMsRef = useRef(0);
   const segmentStartRef = useRef<number | null>(null);
   const isPausedRef = useRef(false);
+  const hasNotifiedDoneRef = useRef(false);
+
+  // Keep screen awake while break is active
+  useWakeLock(!isPaused && !isDone);
 
   const quote = REST_QUOTES[Math.abs(durationMinutes) % REST_QUOTES.length];
 
@@ -70,6 +75,50 @@ export function BreakScreen({ durationMinutes, onFinish, onSkip }: BreakScreenPr
     return () => clearInterval(intervalId);
   }, [targetMs, isDone]);
 
+  // Live browser tab title update for break with restore on exit
+  useEffect(() => {
+    const originalTitle = typeof document !== "undefined" ? document.title : "";
+    return () => {
+      if (typeof document !== "undefined") {
+        document.title = originalTitle;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const formatted = formatTimerDigits(displayMs);
+    if (isDone) {
+      document.title = "Break Complete! · Todo Quest";
+    } else if (isPaused) {
+      document.title = `⏸ ☕ ${formatted} · Rest`;
+    } else {
+      document.title = `☕ ${formatted} · Rest`;
+    }
+  }, [displayMs, isPaused, isDone]);
+
+  // Fire notification when break completes
+  useEffect(() => {
+    if (isDone && !hasNotifiedDoneRef.current) {
+      hasNotifiedDoneRef.current = true;
+      if (
+        typeof window !== "undefined" &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
+        try {
+          new Notification("Break Complete! ☕", {
+            body: "Your rest period is over. Ready to lock in again?",
+            icon: "/icon-192.png",
+            tag: "break-complete",
+          });
+        } catch {
+          // Ignore notification errors
+        }
+      }
+    }
+  }, [isDone]);
+
   const handleTogglePause = () => {
     if (isPausedRef.current) {
       // Resume
@@ -86,11 +135,6 @@ export function BreakScreen({ durationMinutes, onFinish, onSkip }: BreakScreenPr
       setIsPaused(true);
     }
   };
-
-  const progressPercent = Math.min(
-    100,
-    Math.round(((targetMs - displayMs) / targetMs) * 100),
-  );
 
   return (
     <section className="breakScreen" data-paused={isPaused} aria-label="Rest & Recovery Break">

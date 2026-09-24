@@ -23,6 +23,8 @@ export function FocusScreen({
 
   const isFinishingRef = useRef(false);
 
+  const headerTitle = quest ? quest.title : "Lock In";
+
   const {
     isPaused,
     displayMs,
@@ -37,7 +39,13 @@ export function FocusScreen({
     confirmQuit,
     cancelQuit,
     freezeTimer,
-  } = useFocusTimer({ onQuit, isFinishingRef, targetMinutes });
+    mediaSession,
+  } = useFocusTimer({
+    onQuit,
+    isFinishingRef,
+    targetMinutes,
+    title: headerTitle,
+  });
 
   const handleFinishClick = () => {
     if (isFinishingRef.current) return;
@@ -94,10 +102,10 @@ export function FocusScreen({
       ? Math.min(100, Math.round((elapsedMs / targetMs) * 100))
       : null;
 
-  const headerTitle = quest ? quest.title : "Lock In";
   const timerLabel = isCountdown ? "remaining" : "elapsed";
   const ringCircumference = 2 * Math.PI * 108;
   const ringProgress = progressPercent ?? 0;
+  const isLiveActive = mediaSession.isEnabled && (mediaSession.isAudioPlaying || !isPaused);
 
   return (
     <section
@@ -108,6 +116,34 @@ export function FocusScreen({
       <div className="focusContainer">
         <header className="focusHeader">
           <h1 className="focusQuestTitle">{headerTitle}</h1>
+          <button
+            type="button"
+            className={`focusLivePill ${isLiveActive ? "isActive" : ""} ${mediaSession.needsGesture ? "needsGesture" : ""}`}
+            onClick={mediaSession.needsGesture ? mediaSession.activateAudio : mediaSession.toggleEnabled}
+            aria-label={
+              mediaSession.needsGesture
+                ? "Tap to enable Lock Screen live widget"
+                : isLiveActive
+                  ? "Lock Screen live widget active. Tap to turn off."
+                  : "Lock Screen live widget off. Tap to turn on."
+            }
+            title={
+              mediaSession.needsGesture
+                ? "Tap to activate Lock Screen & Dynamic Island Live widget"
+                : isLiveActive
+                  ? "Live on Lock Screen & Dynamic Island (Tap to turn off)"
+                  : "Tap to turn on Lock Screen & Dynamic Island Live widget"
+            }
+          >
+            <span className="livePillDot" aria-hidden="true" />
+            <span>
+              {mediaSession.needsGesture
+                ? "Tap for Lock Screen"
+                : isLiveActive
+                  ? "Lock Screen Live"
+                  : "Lock Screen Off"}
+            </span>
+          </button>
         </header>
 
         <div className="focusVisualSection">
