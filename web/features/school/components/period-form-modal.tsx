@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
 import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
 import type { DayOfWeek, PeriodFormData } from "../types/school";
 import { ALL_DAYS, PERIOD_ICONS } from "../types/school";
@@ -34,6 +35,7 @@ export function PeriodFormModal({
   onDelete,
 }: PeriodFormModalProps) {
   const { sheetRef, scrimRef, dragHandleProps } = useSheetSwipe({ onClose });
+  useBodyScrollLock(sheetOpen);
 
   return (
     <div

@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import type React from "react";
+import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
 import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
 import type { DayOfWeek, Period, PeriodStatusInfo } from "../types/school";
 import { ALL_DAYS, WEEKDAYS } from "../types/school";
@@ -29,6 +31,20 @@ export function PeriodDetailModal({
   onDelete,
 }: PeriodDetailModalProps) {
   const { sheetRef, scrimRef, dragHandleProps } = useSheetSwipe({ onClose });
+  useBodyScrollLock(true);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
 
   return (
     <div
