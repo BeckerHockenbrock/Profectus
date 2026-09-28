@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { type AppTab, LiquidDock } from "@/components/navigation/liquid-dock";
@@ -20,6 +20,12 @@ import { SchoolView } from "@/features/school/components/school-view";
 import { useQuestMutations } from "@/features/quests/hooks/use-quest-mutations";
 import { useQuestReorder } from "@/features/quests/hooks/use-quest-reorder";
 import { useQuestSubscription } from "@/features/quests/hooks/use-quest-subscription";
+import {
+  getCategoryOrderStorageKey,
+  loadCategoryOrder,
+  saveCategoryOrder,
+  sortCategoriesByStoredOrder,
+} from "@/features/quests/data/quest-storage";
 import { getLocalTodayString } from "@/features/quests/domain/date-utils";
 import type { Quest, QuestForm, QuestView } from "@/features/quests/types/quest";
 import { useAppNavigation } from "./use-app-navigation";
@@ -136,10 +142,41 @@ export function AppShell({ today: initialToday }: AppShellProps) {
 
   const openQuests = useMemo(() => quests.filter((quest) => !quest.completed), [quests]);
   const completedQuests = useMemo(() => quests.filter((quest) => quest.completed), [quests]);
-  const categories = useMemo(
-    () => Array.from(new Set(["General", ...quests.map((quest) => quest.category)])).sort(),
-    [quests],
+  const [prevUserId, setPrevUserId] = useState(user?.uid);
+  const [categoryOrder, setCategoryOrder] = useState<string[]>(() => {
+    return loadCategoryOrder(user?.uid) ?? [];
+  });
+
+  if (prevUserId !== user?.uid) {
+    setPrevUserId(user?.uid);
+    setCategoryOrder(loadCategoryOrder(user?.uid) ?? []);
+  }
+
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === getCategoryOrderStorageKey(user?.uid)) {
+        const stored = loadCategoryOrder(user?.uid);
+        if (stored) {
+          setCategoryOrder(stored);
+        }
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [user?.uid]);
+
+  const handleReorderCategories = useCallback(
+    (newCategories: string[]) => {
+      setCategoryOrder(newCategories);
+      saveCategoryOrder(user?.uid, newCategories);
+    },
+    [user?.uid],
   );
+
+  const categories = useMemo(() => {
+    const raw = Array.from(new Set(["General", ...quests.map((quest) => quest.category)]));
+    return sortCategoriesByStoredOrder(raw, categoryOrder);
+  }, [quests, categoryOrder]);
 
   const {
     draggedId,
@@ -367,6 +404,8 @@ export function AppShell({ today: initialToday }: AppShellProps) {
                 onOpenDatePicker={handleOpenListDatePicker}
                 onOpenSubtaskDatePicker={handleOpenListSubtaskDatePicker}
                 onReorderSubtasks={reorderSubtasks}
+                categoryOrder={categoryOrder}
+                onReorderCategories={handleReorderCategories}
               />
             </div>
           )}

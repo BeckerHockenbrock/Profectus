@@ -57,9 +57,11 @@ web/
 │   │   ├── data/quest-firestore.ts
 │   │   ├── data/quest-storage.ts
 │   │   ├── domain/date-utils.ts
+│   │   ├── hooks/use-category-reorder.ts
 │   │   ├── hooks/use-quest-mutations.ts
 │   │   ├── hooks/use-quest-reorder.ts
 │   │   ├── hooks/use-quest-subscription.ts
+│   │   ├── hooks/use-subtask-reorder.ts
 │   │   └── types/quest.ts
 │   ├── school/
 │   │   ├── components/period-card.tsx
@@ -125,8 +127,9 @@ The transaction reads and updates `users/{uid}/quests/{questId}`, sets `complete
 - `use-quest-subscription.ts` owns listener lifecycle and returns the unsubscribe cleanup.
 - `use-quest-mutations.ts` owns optimistic completion, rollback errors, creation, subtask mutations, and focus completion.
 - `use-quest-reorder.ts` owns the original 200 ms hold threshold, 16 px cancellation threshold, haptics, auto-scroll, transforms, and 180 ms click suppression.
+- `use-category-reorder.ts` owns category drag thresholds, variable-height measurements, transforms, and keyboard reordering.
 - `quest-firestore.ts` owns Firestore reads and writes.
-- `quest-storage.ts` exclusively owns the `todo-quest-order-<uid>` localStorage key and ordering fallback.
+- `quest-storage.ts` exclusively owns the `todo-quest-order-<uid>` and `todo-quest-category-order-<uid>` localStorage keys and ordering fallbacks.
 - `date-utils.ts` is the shared pure date-formatting source for quest cards and details.
 
 ### Authentication
@@ -147,8 +150,9 @@ The transaction reads and updates `users/{uid}/quests/{questId}`, sets `complete
 | Quest card DOM | `features/quests/components/quest-card.tsx` |
 | All/Completed list composition | `features/quests/components/quest-list.tsx` |
 | Category grouping UI | `features/quests/components/category-list.tsx` |
+| Category reordering | `features/quests/hooks/use-category-reorder.ts` |
 | Date grouping UI | `features/quests/components/date-list.tsx` |
-| Quest order localStorage | `features/quests/data/quest-storage.ts` |
+| Quest & category order localStorage | `features/quests/data/quest-storage.ts` |
 | Quest Firestore paths and writes | `features/quests/data/quest-firestore.ts` |
 | Focus timer behavior | `features/focus/hooks/use-focus-timer.ts` |
 | Focus completion orchestration | `features/quests/hooks/use-quest-mutations.ts` and `app/app-shell.tsx` |

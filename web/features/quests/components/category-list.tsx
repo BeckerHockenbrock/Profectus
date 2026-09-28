@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import type { Quest, Subtask } from "../types/quest";
 import { QuestCard } from "./quest-card";
+import { useCategoryReorder } from "../hooks/use-category-reorder";
 
 type QuestGroup = {
   category: string;
@@ -22,6 +24,7 @@ type CategoryListProps = {
   onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
   onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
   onReorderSubtasks?: (questId: string, newSubtasks: Subtask[]) => void;
+  onReorderCategories?: (newCategories: string[]) => void;
 };
 
 export function CategoryList({
@@ -40,7 +43,20 @@ export function CategoryList({
   onOpenDatePicker,
   onOpenSubtaskDatePicker,
   onReorderSubtasks,
+  onReorderCategories,
 }: CategoryListProps) {
+  const categoryNames = useMemo(() => groups.map((g) => g.category), [groups]);
+
+  const {
+    draggedCategory,
+    handleCategoryPointerDown,
+    handleCategoryKeyDown,
+    getCategoryTransformY,
+  } = useCategoryReorder({
+    categories: categoryNames,
+    onReorder: onReorderCategories,
+  });
+
   const selectQuest = (quest: Quest) => {
     if (suppressClickRef.current) return;
     onSelectQuest(quest);
@@ -58,15 +74,89 @@ export function CategoryList({
 
   return (
     <div className="categoryList">
-      {groups.map((group) => {
+      {groups.map((group, index) => {
         const groupOpen = group.quests.filter((quest) => !quest.completed);
         const groupCompleted = group.quests.filter((quest) => quest.completed);
         const isGroupExpanded = expandedCategories[group.category] ?? false;
+        const isThisCategoryDragging = draggedCategory === group.category;
+        const categoryTransformY = getCategoryTransformY(group.category);
 
         return (
-          <section className="categoryGroup" key={group.category}>
-            <div className="categoryHeading">
-              <h3>{group.category}</h3>
+          <section
+            className="categoryGroup"
+            key={group.category}
+            data-category={group.category}
+            data-dragging={isThisCategoryDragging ? "true" : undefined}
+            style={{
+              transform: isThisCategoryDragging
+                ? `translateY(${categoryTransformY}px) scale(1.015)`
+                : categoryTransformY !== 0
+                  ? `translateY(${categoryTransformY}px)`
+                  : undefined,
+              zIndex: isThisCategoryDragging ? 70 : undefined,
+              transition: isThisCategoryDragging
+                ? "none"
+                : "transform 220ms cubic-bezier(0.2, 0.9, 0.3, 1)",
+              position: "relative",
+              boxShadow: isThisCategoryDragging
+                ? "0 16px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.12)"
+                : undefined,
+              borderRadius: isThisCategoryDragging ? "0.75rem" : undefined,
+              background: isThisCategoryDragging ? "rgba(22, 23, 27, 0.96)" : undefined,
+            }}
+          >
+            <div
+              className="categoryHeading"
+              onPointerDown={
+                groups.length > 1
+                  ? (e) => handleCategoryPointerDown(e, group.category)
+                  : undefined
+              }
+              onKeyDown={
+                groups.length > 1
+                  ? (e) => handleCategoryKeyDown(e, group.category)
+                  : undefined
+              }
+              tabIndex={groups.length > 1 ? 0 : undefined}
+              role={groups.length > 1 ? "button" : undefined}
+              title={groups.length > 1 ? "Press and hold or use Alt+Up/Down arrow to reorder category" : undefined}
+              aria-label={
+                groups.length > 1
+                  ? `${group.category} category, position ${index + 1} of ${groups.length}. Press and hold or use Alt+Up/Down arrow to reorder`
+                  : `${group.category} category`
+              }
+              style={{
+                cursor: groups.length > 1 ? (isThisCategoryDragging ? "grabbing" : "grab") : undefined,
+                userSelect: "none",
+                WebkitUserSelect: "none",
+                touchAction: groups.length > 1 ? "pan-y" : undefined,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+                {groups.length > 1 ? (
+                  <span
+                    className="categoryDragGrip"
+                    aria-hidden="true"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      opacity: 0.38,
+                      cursor: "grab",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="9" cy="6" r="1.6" />
+                      <circle cx="15" cy="6" r="1.6" />
+                      <circle cx="9" cy="12" r="1.6" />
+                      <circle cx="15" cy="12" r="1.6" />
+                      <circle cx="9" cy="18" r="1.6" />
+                      <circle cx="15" cy="18" r="1.6" />
+                    </svg>
+                  </span>
+                ) : null}
+                <h3>{group.category}</h3>
+              </div>
               <span>{groupOpen.length}</span>
             </div>
 

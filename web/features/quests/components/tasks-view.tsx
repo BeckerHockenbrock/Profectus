@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import type React from "react";
 import type { Quest, QuestView, Subtask } from "../types/quest";
 import { groupQuestsByDate } from "../domain/date-utils";
+import { sortCategoriesByStoredOrder } from "../data/quest-storage";
 import { CategoryList } from "./category-list";
 import { DateList } from "./date-list";
 import { QuestList } from "./quest-list";
@@ -30,6 +31,8 @@ type TasksViewProps = {
   onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
   onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
   onReorderSubtasks?: (questId: string, newSubtasks: Subtask[]) => void;
+  categoryOrder?: string[];
+  onReorderCategories?: (newCategories: string[]) => void;
 };
 
 export function TasksView({
@@ -52,18 +55,21 @@ export function TasksView({
   onOpenDatePicker,
   onOpenSubtaskDatePicker,
   onReorderSubtasks,
+  categoryOrder,
+  onReorderCategories,
 }: TasksViewProps) {
   const [showCompleted, setShowCompleted] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
 
   const groupedQuests = useMemo(() => {
-    const categories = Array.from(new Set(quests.map((quest) => quest.category))).sort();
+    const rawCategories = Array.from(new Set(quests.map((quest) => quest.category)));
+    const categories = sortCategoriesByStoredOrder(rawCategories, categoryOrder);
     return categories.map((category) => ({
       category,
       quests: quests.filter((quest) => quest.category === category),
     }));
-  }, [quests]);
+  }, [quests, categoryOrder]);
 
   const dateGroups = useMemo(() => groupQuestsByDate(quests, today), [quests, today]);
 
@@ -170,6 +176,7 @@ export function TasksView({
             onOpenDatePicker={onOpenDatePicker}
             onOpenSubtaskDatePicker={onOpenSubtaskDatePicker}
             onReorderSubtasks={onReorderSubtasks}
+            onReorderCategories={onReorderCategories}
           />
         ) : (
           <DateList
