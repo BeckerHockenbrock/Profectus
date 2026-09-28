@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import type { Quest, Subtask } from "../types/quest";
-import { formatDueDateDetail, formatGoogleTaskDueDate } from "../domain/date-utils";
-import { GoogleTasksDateBadge } from "./google-date-badge";
+import { formatDueDateDetail, formatGoogleTaskDueDate, getDueDateStatus } from "../domain/date-utils";
+import { GoogleTasksDateBadge, DateStatusIcon, DateStatusPip } from "./google-date-badge";
 import { IosDatePickerPopover } from "./ios-date-picker";
 import { useBodyScrollLock } from "@/components/shared/use-body-scroll-lock";
 import { useSheetSwipe } from "@/components/shared/use-sheet-swipe";
@@ -93,7 +93,12 @@ export function TaskDetailModal({
     }
   };
 
-  const isDueToday = quest.dueDate === today;
+  const dueStatus = quest.dueDate
+    ? getDueDateStatus(quest.dueDate, today, quest.completed)
+    : "none";
+  const isDueToday = dueStatus === "today";
+  const isDueTomorrow = dueStatus === "tomorrow";
+  const todayDayNum = today ? Number(today.slice(8, 10)) : null;
   const subtasks = quest.subtasks ?? [];
   const openSubtasks = subtasks.filter((s) => !s.completed);
   const completedSubtasks = subtasks.filter((s) => s.completed);
@@ -194,7 +199,7 @@ export function TaskDetailModal({
             <div className="detailMetaRow">
               <button
                 type="button"
-                className={`dueLabel isClickable${isDueToday ? " isToday" : ""}`}
+                className={`dueLabel isClickable is-${dueStatus}${isDueToday ? " isToday" : ""}${isDueTomorrow ? " isTomorrow" : ""}`}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   setDatePickerTarget({
@@ -206,23 +211,9 @@ export function TaskDetailModal({
                 title={quest.dueDate ? `Due ${quest.dueDate} (click to change)` : "Set due date"}
                 aria-label={`Due date: ${formatDueDateDetail(quest.dueDate, today, quest.completed)}. Click to change`}
               >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
+                <DateStatusIcon status={dueStatus} dayNumber={todayDayNum} />
                 <span>{formatDueDateDetail(quest.dueDate, today, quest.completed)}</span>
+                <DateStatusPip status={dueStatus} />
               </button>
 
               {quest.completed ? (

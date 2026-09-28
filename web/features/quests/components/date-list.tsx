@@ -1,6 +1,8 @@
 import type { Quest, Subtask } from "../types/quest";
+import { addDays } from "../domain/date-utils";
 import type { DateQuestGroup } from "../domain/date-utils";
 import { QuestCard } from "./quest-card";
+import { DateStatusIcon } from "./google-date-badge";
 
 type DateListProps = {
   groups: DateQuestGroup[];
@@ -52,17 +54,32 @@ export function DateList({
     );
   }
 
+  const todayDayNum = today ? Number(today.slice(8, 10)) : null;
+
   return (
     <div className="categoryList">
       {groups.map((group) => {
         const groupOpen = group.quests.filter((quest) => !quest.completed);
         const groupCompleted = group.quests.filter((quest) => quest.completed);
         const isGroupExpanded = expandedDates[group.dateKey] ?? false;
+        const isGroupToday = Boolean(today && group.dateKey === today);
+        const isGroupTomorrow = Boolean(today && group.dateKey === addDays(today, 1));
 
         return (
           <section className="categoryGroup" key={group.dateKey || "__no_date__"}>
-            <div className="categoryHeading">
-              <h3>{group.title}</h3>
+            <div className={`categoryHeading${isGroupToday ? " isDateToday" : isGroupTomorrow ? " isDateTomorrow" : ""}`}>
+              <div className="categoryHeadingTitleGroup">
+                {isGroupToday ? (
+                  <span className="dateHeadingIndicator isToday" aria-hidden="true">
+                    <DateStatusIcon status="today" dayNumber={todayDayNum} />
+                  </span>
+                ) : isGroupTomorrow ? (
+                  <span className="dateHeadingIndicator isTomorrow" aria-hidden="true">
+                    <DateStatusIcon status="tomorrow" />
+                  </span>
+                ) : null}
+                <h3>{group.title}</h3>
+              </div>
               <span>{groupOpen.length}</span>
             </div>
 

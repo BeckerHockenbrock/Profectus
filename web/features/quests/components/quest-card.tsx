@@ -5,6 +5,7 @@ import type React from "react";
 import type { Quest, Subtask } from "../types/quest";
 import { GoogleTasksDateBadge } from "./google-date-badge";
 import { useSubtaskReorder } from "../hooks/use-subtask-reorder";
+import { getDueDateStatus } from "../domain/date-utils";
 
 type QuestCardProps = {
   quest: Quest;
@@ -52,12 +53,19 @@ export function QuestCard({
       : undefined,
   });
 
+  const dueStatus = quest.dueDate
+    ? getDueDateStatus(quest.dueDate, today, quest.completed)
+    : "none";
+
   return (
     <article
       className={`questCard${quest.completed ? " isComplete" : ""}${
         subtasks.length > 0 ? " hasSubtasks" : ""
+      }${dueStatus === "today" ? " isDueToday" : ""}${
+        dueStatus === "tomorrow" ? " isDueTomorrow" : ""
       }`}
       data-quest-id={quest.id}
+      data-due-status={dueStatus !== "none" ? dueStatus : undefined}
       data-dragging={isDragging ? "true" : undefined}
       style={{
         transform: isDragging

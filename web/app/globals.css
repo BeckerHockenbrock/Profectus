@@ -710,10 +710,48 @@ h2 {
   font-size: 0.68rem;
 }
 
-.dueLabel.isToday {
-  background: rgba(255, 255, 255, 0.14);
-  color: var(--accent);
+.dueLabel.isToday,
+.dueLabel.is-today {
+  background: rgba(138, 180, 248, 0.18);
+  border-color: rgba(138, 180, 248, 0.65);
+  color: #ffffff;
   font-weight: 700;
+  box-shadow: 0 0 12px rgba(138, 180, 248, 0.18);
+}
+
+.dueLabel.isToday .googleDateIcon,
+.dueLabel.is-today .googleDateIcon {
+  color: #8ab4f8;
+  stroke: #8ab4f8;
+}
+
+.dueLabel.isTomorrow,
+.dueLabel.is-tomorrow {
+  background: rgba(255, 159, 10, 0.12);
+  border-color: rgba(255, 159, 10, 0.5);
+  color: #ffe082;
+  font-weight: 650;
+  box-shadow: 0 0 10px rgba(255, 159, 10, 0.14);
+}
+
+.dueLabel.isTomorrow .googleDateIcon,
+.dueLabel.is-tomorrow .googleDateIcon {
+  color: #ff9f0a;
+  stroke: #ff9f0a;
+}
+
+.dueLabel.isOverdue,
+.dueLabel.is-overdue {
+  background: rgba(242, 139, 130, 0.12);
+  border-color: rgba(242, 139, 130, 0.45);
+  color: #fca5a5;
+  font-weight: 650;
+}
+
+.dueLabel.isOverdue .googleDateIcon,
+.dueLabel.is-overdue .googleDateIcon {
+  color: #f28b82;
+  stroke: #f28b82;
 }
 
 .dueCalendarIcon {
@@ -771,11 +809,12 @@ h2 {
   flex-shrink: 0;
 }
 
-/* Overdue - red/salmon like Google Tasks dark mode (#f28b82) */
+/* Overdue - red/salmon (#f28b82) */
 .googleDateBadge.is-overdue {
-  color: #f28b82;
-  border-color: rgba(242, 139, 130, 0.38);
-  background: rgba(242, 139, 130, 0.08);
+  color: #fca5a5;
+  border-color: rgba(242, 139, 130, 0.48);
+  background: rgba(242, 139, 130, 0.12);
+  font-weight: 600;
 }
 
 .googleDateBadge.is-overdue .googleDateIcon {
@@ -783,11 +822,13 @@ h2 {
   stroke: #f28b82;
 }
 
-/* Due Today - Google blue/accent (#8ab4f8 / #c2d7fe) */
+/* Due Today - Google blue/accent (#8ab4f8 / #c2d7fe) - High-contrast for greyscale & color */
 .googleDateBadge.is-today {
-  color: #c2d7fe;
-  border-color: rgba(138, 180, 248, 0.36);
-  background: rgba(138, 180, 248, 0.09);
+  color: #ffffff;
+  border-color: rgba(138, 180, 248, 0.65);
+  background: rgba(138, 180, 248, 0.18);
+  font-weight: 650;
+  box-shadow: 0 0 12px rgba(138, 180, 248, 0.18);
 }
 
 .googleDateBadge.is-today .googleDateIcon {
@@ -795,18 +836,56 @@ h2 {
   stroke: #8ab4f8;
 }
 
-/* Due Tomorrow / Future - Muted slate (#bdc1c6 / #9aa0a6) */
-.googleDateBadge.is-tomorrow,
+/* Due Tomorrow - Warm amber/orange (#ff9f0a / #ffe082) - Distinct from future & today */
+.googleDateBadge.is-tomorrow {
+  color: #ffe082;
+  border-color: rgba(255, 159, 10, 0.5);
+  background: rgba(255, 159, 10, 0.12);
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(255, 159, 10, 0.14);
+}
+
+.googleDateBadge.is-tomorrow .googleDateIcon {
+  color: #ff9f0a;
+  stroke: #ff9f0a;
+}
+
+/* Future - Muted slate (#bdc1c6 / #9aa0a6) */
 .googleDateBadge.is-future {
   color: #bdc1c6;
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.04);
 }
 
-.googleDateBadge.is-tomorrow .googleDateIcon,
 .googleDateBadge.is-future .googleDateIcon {
   color: #9aa0a6;
   stroke: #9aa0a6;
+}
+
+/* Visual Status Pip Indicator */
+.googleDatePip {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: 0.08rem;
+}
+
+.googleDatePip.is-today {
+  background: #8ab4f8;
+  box-shadow: 0 0 6px rgba(138, 180, 248, 0.8);
+}
+
+.googleDatePip.is-tomorrow {
+  border: 1.5px solid #ff9f0a;
+  background: transparent;
+  box-shadow: 0 0 6px rgba(255, 159, 10, 0.6);
+}
+
+.googleDatePip.is-overdue {
+  background: #f28b82;
+  box-shadow: 0 0 6px rgba(242, 139, 130, 0.8);
 }
 
 /* Google Tasks Subtasks Nested In-List Container */
@@ -1010,6 +1089,32 @@ h2 {
   font-weight: 680;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+}
+
+.categoryHeadingTitleGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.dateHeadingIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dateHeadingIndicator .googleDateIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.dateHeadingIndicator.isToday {
+  color: #8ab4f8;
+}
+
+.dateHeadingIndicator.isTomorrow {
+  color: #ff9f0a;
 }
 
 .categoryHeading span {
@@ -5862,13 +5967,20 @@ select:focus {
 }
 
 .googleDateBadge.isClickable.is-overdue:hover {
-  background: rgba(242, 139, 130, 0.16);
-  border-color: rgba(242, 139, 130, 0.6);
+  background: rgba(242, 139, 130, 0.22);
+  border-color: rgba(242, 139, 130, 0.7);
 }
 
 .googleDateBadge.isClickable.is-today:hover {
-  background: rgba(138, 180, 248, 0.18);
-  border-color: rgba(138, 180, 248, 0.6);
+  background: rgba(138, 180, 248, 0.28);
+  border-color: rgba(138, 180, 248, 0.85);
+  box-shadow: 0 4px 14px rgba(138, 180, 248, 0.25);
+}
+
+.googleDateBadge.isClickable.is-tomorrow:hover {
+  background: rgba(255, 159, 10, 0.22);
+  border-color: rgba(255, 159, 10, 0.75);
+  box-shadow: 0 4px 14px rgba(255, 159, 10, 0.2);
 }
 
 .dueLabel.isClickable {
