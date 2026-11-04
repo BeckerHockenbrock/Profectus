@@ -121,30 +121,16 @@ export function LockInView({
     <>
       {/* Hero section */}
       <WorkspaceHero
-        eyebrow="03 / FIND YOUR STILLNESS"
-        title="Less noise. More focus."
-        description="Set aside a little time for what matters."
-        image="/lock-in.png"
+        index="03"
+        title="Focus"
       >
 
         {/* Minimal Status Strip */}
+        {todayStats.totalMinutes > 0 || streak > 0 || bankedBreakMinutes > 0 ? (
         <div className="lockInStatusStrip" role="status" aria-label="Today's study status">
           <div className="statusStripStats">
-            <span className="statusStatItem">
-              {todayStats.totalMinutes > 0 ? (
-                <>
-                  <strong>{formattedTodayTime}</strong> focused
-                </>
-              ) : (
-                "Ready to focus"
-              )}
-            </span>
-            <span className="statusStripDivider" aria-hidden="true">
-              ·
-            </span>
-            <span className="statusStatItem">
-              {streak > 0 ? `🔥 ${streak}d streak` : "Start streak"}
-            </span>
+            {todayStats.totalMinutes > 0 ? <span className="statusStatItem"><strong>{formattedTodayTime}</strong> focused</span> : null}
+            {streak > 0 ? <span className="statusStatItem">{streak}d streak</span> : null}
           </div>
 
           {bankedBreakMinutes > 0 ? (
@@ -158,6 +144,7 @@ export function LockInView({
             </button>
           ) : null}
         </div>
+        ) : null}
       </WorkspaceHero>
 
       {/* Main Lock In Workspace */}
@@ -166,16 +153,13 @@ export function LockInView({
           {/* Header */}
           <header className="lockInHeader">
             <div>
-              <span className="lockInEyebrow">THE FOCUS RITUAL</span>
-              <h2 className="lockInHeading">Build your session</h2>
+              <h2 className="lockInHeading">Session</h2>
             </div>
-            <span className="lockInHeaderMark" aria-hidden="true">✦</span>
           </header>
 
           {/* Add and remove stones to compose the session length. */}
           <div className="lockInTimerSelector">
             <div className="lockInTimeContent" aria-live="polite" aria-atomic="true">
-              <span className="lockInTimeCaption">YOUR FOCUS TIME</span>
               {isOpenStopwatch ? (
                 <span className="lockInTimeMain lockInTimeOpen">Open</span>
               ) : (
@@ -185,7 +169,7 @@ export function LockInView({
               )}
               <span className="lockInTimeSub">
                 {isOpenStopwatch
-                  ? "No finish line. Stop when you are ready."
+                  ? "Stop when you're ready."
                   : selectedMinutes === 0
                     ? "Choose a stone to begin."
                     : `${calculatedBlocks} ${calculatedBlocks === 1 ? "block" : "blocks"} · ${earnedBreakMinutes}m break earned`}
@@ -206,7 +190,7 @@ export function LockInView({
                 {isOpenStopwatch ? (
                   <span className="lockInOpenSymbol" aria-hidden="true">∞</span>
                 ) : stones.length === 0 ? (
-                  <span className="lockInEmptyStack">Your first stone goes here</span>
+                  <span className="lockInEmptyStack">Add time below</span>
                 ) : (
                   <>
                     {stones.slice(-VISIBLE_STONES).reverse().map((stone) => (
@@ -231,13 +215,12 @@ export function LockInView({
             </div>
 
             <div className="lockInStoneGuide">
-              <span>STACK YOUR TIME</span>
               <span>{isOpenStopwatch ? "Open session" : `${selectedMinutes} / ${MAX_FOCUS_MINUTES} min`}</span>
             </div>
             <div className="lockInStoneMeter" aria-hidden="true">
               <span style={{ width: `${(isOpenStopwatch ? 0 : selectedMinutes / MAX_FOCUS_MINUTES) * 100}%` }} />
             </div>
-            <p className="lockInStoneHint">Tap or drag a stone to add time. Tap the stack to remove one.</p>
+            <p className="lockInStoneHint">Tap to add time. Tap the stack to remove it.</p>
             <div className="lockInStoneTray" role="group" aria-label="Add focus time">
               {STONE_MINUTES.map((minutes) => (
                 <button
@@ -310,7 +293,7 @@ export function LockInView({
           </div>
 
           {todaySessions.length === 0 ? (
-            <p className="lockInLogEmpty">No sessions completed yet today.</p>
+            <p className="lockInLogEmpty">No sessions yet.</p>
           ) : (
             <ul className="lockInLogList" role="list">
               {todaySessions.map((session) => {

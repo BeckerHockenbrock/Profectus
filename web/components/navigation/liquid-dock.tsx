@@ -39,7 +39,7 @@ export function LiquidDock({
           <path d="M9 11l3 3L22 4" />
           <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
         </svg>
-        <span>Tasks</span>
+        <span className="dockOrdinal" aria-hidden="true">01</span><span>Quests</span>
       </button>
 
       {/* 2. School */}
@@ -63,7 +63,7 @@ export function LiquidDock({
           <path d="M22 10v6" />
           <path d="M6 12.5V16c0 2.21 2.69 4 6 4s6-1.79 6-4v-3.5" />
         </svg>
-        <span>School</span>
+        <span className="dockOrdinal" aria-hidden="true">02</span><span>School</span>
       </button>
 
       {/* 3. Lock In - Study timer */}
@@ -87,7 +87,7 @@ export function LiquidDock({
         >
           <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
         </svg>
-        <span>Lock In</span>
+        <span className="dockOrdinal" aria-hidden="true">03</span><span>Focus</span>
       </button>
 
       {/* 4. Add task button */}

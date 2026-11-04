@@ -140,13 +140,7 @@ export function BreakScreen({ durationMinutes, onFinish, onSkip }: BreakScreenPr
     <section className="breakScreen" data-paused={isPaused} aria-label="Rest & Recovery Break">
       <div className="breakContainer">
         <header className="breakHeader">
-          <span className="breakCategoryPill">REST & RECOVERY</span>
-          <h1 className="breakTitle">{isDone ? "Break Complete" : "Take a Breather."}</h1>
-          <p className="breakDesc">
-            {isDone
-              ? "Your mind is restored. Ready to push the boulder again?"
-              : "Step away, stretch your neck, hydrate, and rest your eyes."}
-          </p>
+          <h1 className="breakTitle">{isDone ? "Break complete" : "Break"}</h1>
         </header>
 
         <div className="breakVisualSection">

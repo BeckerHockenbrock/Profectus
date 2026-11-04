@@ -139,7 +139,7 @@ The transaction reads and updates `users/{uid}/quests/{questId}`, sets `complete
 
 ## Styling invariant
 
-`app/globals.css` supplies base component layouts and interaction styles. `app/ryoku-theme.css` loads after it and owns the Ryoku-inspired visual identity: palette, type hierarchy, workspace artwork, panels, and responsive shell. Shared `BrandMark` and `WorkspaceHero` components keep the sign-in, tasks, school, and focus views consistent. Visual changes should be checked at desktop and mobile widths, including editing sheets and the focus timer.
+`app/globals.css` supplies base component layouts and neutral colors for component states. `app/ryoku-theme.css` loads after it and implements the image-led Ryoku settings reference: a narrow desktop navigation rail, self-hosted Fraunces headings, Space Grotesk body text, Space Mono labels, and translucent task surfaces with backdrop blur. Root-level `WorkspaceScene` places the generated halftone marble portrait behind sign-in, quests, school, and focus; `WorkspaceHero` supplies compact section headings without a separate illustration block. Artwork and its generation prompt live in `public/art/`; fonts and licenses live in `public/fonts/`. Navigation moves to the bottom on mobile, with a different portrait crop and darker panels for readability. Visual changes should be checked at desktop and mobile widths, including editing sheets and the focus timer.
 
 ## Where to make common changes
 

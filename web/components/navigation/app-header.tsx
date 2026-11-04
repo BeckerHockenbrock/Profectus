@@ -27,9 +27,8 @@ export function AppHeader({
         }}
       >
         <BrandMark />
-        <span className="brandLockup"><span className="brandName">Profectus</span><span className="brandCaption">THE EVERYDAY ASCENT</span></span>
+        <span className="railBrand"><span className="brandName">Profectus</span><span className="railBrandCaption">{"// Workspace"}</span></span>
       </a>
-      <span className="shellStatus"><span aria-hidden="true" />Your personal workspace</span>
       <div className="topBarActions">
         <button
           className="topAddButton"

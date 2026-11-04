@@ -92,10 +92,8 @@ export function SchoolView({ userId }: SchoolViewProps) {
     <>
       {/* Hero section */}
       <WorkspaceHero
-        eyebrow="02 / A LITTLE WISER"
-        title="A rhythm for your day."
-        description="Know what comes next. Be present for what is now."
-        image="/school.png"
+        index="02"
+        title="School"
       >
 
         {/* Live Day & Period Status Banner */}
@@ -110,12 +108,12 @@ export function SchoolView({ userId }: SchoolViewProps) {
           >
             <div className="livePulseDot" aria-hidden="true" />
             <div className="liveBannerInfo">
-              <span className="liveBannerTag">IN SESSION NOW</span>
+              <span className="liveBannerTag">Now</span>
               <strong className="liveBannerTitle">{currentPeriod.period.name}</strong>
               <span className="liveBannerMeta">
                 Ends at {formatTime12Hour(currentPeriod.period.endTime)}
                 {currentPeriod.minutesRemaining !== undefined ? ` · ${currentPeriod.minutesRemaining}m left` : ""}
-                {currentPeriod.period.room ? ` · 📍 ${currentPeriod.period.room}` : ""}
+                {currentPeriod.period.room ? ` · ${currentPeriod.period.room}` : ""}
               </span>
             </div>
           </div>
@@ -130,41 +128,38 @@ export function SchoolView({ userId }: SchoolViewProps) {
           >
             <div className="upcomingDot" aria-hidden="true" />
             <div className="liveBannerInfo">
-              <span className="upcomingBannerTag">UP NEXT TODAY</span>
+              <span className="upcomingBannerTag">Next</span>
               <strong className="liveBannerTitle">{nextPeriod.period.name}</strong>
               <span className="liveBannerMeta">
                 Starts at {formatTime12Hour(nextPeriod.period.startTime)}
                 {nextPeriod.minutesUntil !== undefined ? ` · in ${nextPeriod.minutesUntil}m` : ""}
-                {nextPeriod.period.room ? ` · 📍 ${nextPeriod.period.room}` : ""}
+                {nextPeriod.period.room ? ` · ${nextPeriod.period.room}` : ""}
               </span>
             </div>
           </div>
-        ) : (
+        ) : periods.length > 0 ? (
           <div className="schoolLiveBanner isOffHours">
             <div className="offHoursDot" aria-hidden="true" />
             <div className="liveBannerInfo">
               <span className="offHoursBannerTag">{todayDay} SCHEDULE</span>
               <strong className="liveBannerTitle">
-                {periods.length === 0 ? "No Schedule Yet" : "No Active Classes"}
+                No active classes
               </strong>
               <span className="liveBannerMeta">
                 {todayPeriodsCount > 0
                   ? `${todayPeriodsCount} ${todayPeriodsCount === 1 ? "period" : "periods"} scheduled for ${todayDay}`
-                  : periods.length > 0
-                    ? `No periods scheduled for ${todayDay}`
-                    : "Add your periods to get started"}
+                  : `No periods scheduled for ${todayDay}`}
               </span>
             </div>
           </div>
-        )}
+        ) : null}
       </WorkspaceHero>
 
       {/* Main Period Schedule List */}
       <section className="schoolPeriodSection" aria-label="Periods List">
         <div className="schoolSectionTitleRow">
           <div>
-            <span className="schoolSubhead">Schedule</span>
-            <h2 className="schoolHeading">School</h2>
+            <h2 className="schoolHeading sectionLabel">Schedule</h2>
           </div>
           <div className="schoolTitleActions">
             {periods.length > 0 ? (
@@ -203,14 +198,14 @@ export function SchoolView({ userId }: SchoolViewProps) {
               <PeriodIcon name="book" size={32} />
             </div>
             <h3>No periods yet</h3>
-            <p>Add your class periods and when they take place so your day is organized.</p>
+            <p>Add classes to build your schedule.</p>
             <div className="emptyActions">
               <button
                 type="button"
                 className="schoolPrimaryButton"
                 onClick={() => openAdd(periods)}
               >
-                + Add your first period
+                Add period
               </button>
               <button
                 type="button"

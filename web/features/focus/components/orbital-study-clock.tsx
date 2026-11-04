@@ -176,31 +176,11 @@ export function OrbitalStudyClock({
     return nodes;
   }, [totalBlocks, currentBlock, waypointsRadius, cx, cy]);
 
-  // Color variables according to mode and state
+  // Monochrome state contrast; the labels identify mode and completion.
   const isBreak = mode === "break";
-  const primaryThemeColor = isBreak
-    ? "#22d3ee" // Cyan
-    : isGoalReached
-      ? "#34d399" // Emerald
-      : isPaused
-        ? "#94a3b8" // Slate
-        : "#f59e0b"; // Solar Amber
-
-  const secondaryThemeColor = isBreak
-    ? "#818cf8" // Indigo
-    : isGoalReached
-      ? "#10b981"
-      : isPaused
-        ? "#64748b"
-        : "#fbbf24"; // Light Amber
-
-  const auraGlowColor = isBreak
-    ? "rgba(34, 211, 238, 0.15)"
-    : isGoalReached
-      ? "rgba(52, 211, 153, 0.22)"
-      : isPaused
-        ? "rgba(148, 163, 184, 0.08)"
-        : "rgba(245, 158, 11, 0.18)";
+  const primaryThemeColor = isPaused ? "#999" : "#eee";
+  const secondaryThemeColor = isPaused ? "#666" : "#bbb";
+  const auraGlowColor = isPaused ? "rgba(255, 255, 255, 0.04)" : "rgba(255, 255, 255, 0.12)";
 
   // Format daily study stat (e.g. "2h 15m")
   const formattedDailyTime =
@@ -475,7 +455,7 @@ export function OrbitalStudyClock({
                 cx={satX + Math.cos(effectiveAngle) * 1.2}
                 cy={satY + Math.sin(effectiveAngle) * 1.2}
                 r="3.2"
-                fill="rgba(8, 9, 13, 0.65)"
+                fill="rgba(9, 9, 9, 0.65)"
               />
             </g>
           </g>
@@ -487,7 +467,7 @@ export function OrbitalStudyClock({
               cx={cx}
               cy={cy}
               r={coreRadius}
-              fill="rgba(10, 11, 16, 0.88)"
+              fill="rgba(11, 11, 11, 0.88)"
               stroke="rgba(255, 255, 255, 0.12)"
               strokeWidth="1"
             />
@@ -515,7 +495,7 @@ export function OrbitalStudyClock({
             className="orbitalTimeDigits"
             aria-live="off"
             style={{
-              color: isPaused ? "#94a3b8" : isGoalReached ? "#34d399" : "#f1f1ed",
+              color: isPaused ? "#999" : "#eee",
             }}
           >
             {formatTimerDigits(displayMs)}

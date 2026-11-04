@@ -26,7 +26,6 @@ type TasksViewProps = {
   suppressClickRef: React.MutableRefObject<boolean>;
   onToggleQuest: (id: string) => void;
   onSelectQuest: (quest: Quest) => void;
-  onOpenNewQuest: () => void;
   onToggleSubtask?: (questId: string, subtaskId: string) => void;
   onOpenDatePicker?: (questId: string, currentDate: string, anchorRect: DOMRect) => void;
   onOpenSubtaskDatePicker?: (questId: string, subtaskId: string, currentDate: string, anchorRect: DOMRect) => void;
@@ -50,7 +49,6 @@ export function TasksView({
   suppressClickRef,
   onToggleQuest,
   onSelectQuest,
-  onOpenNewQuest,
   onToggleSubtask,
   onOpenDatePicker,
   onOpenSubtaskDatePicker,
@@ -76,34 +74,21 @@ export function TasksView({
   return (
     <>
       <WorkspaceHero
-        eyebrow="01 / THE EVERYDAY ASCENT"
-        title="Make room for progress."
-        description="A clear mind. A little intention. One quest at a time."
-        image="/sisyphus.png"
+        index="01"
+        title="Quests"
       >
         <StoicQuote today={today} />
+        <dl className="workspaceLedger">
+          <div><dt>Open</dt><dd>{openQuests.length}</dd></div>
+          <div><dt>Today</dt><dd>{openQuests.filter((quest) => quest.dueDate === today).length}</dd></div>
+          <div><dt>Done</dt><dd>{completedQuests.length}</dd></div>
+        </dl>
       </WorkspaceHero>
-
-      <section className="workspaceMetrics" aria-label="Quest overview">
-        <div><span>On your path</span><strong>{openQuests.length}<small>open quests</small></strong></div>
-        <div><span>For today</span><strong>{openQuests.filter((quest) => quest.dueDate === today).length}<small>to work on</small></strong></div>
-        <div><span>Steps taken</span><strong>{completedQuests.length}<small>completed</small></strong></div>
-      </section>
 
       <section className="questSection" aria-labelledby="quest-heading">
         <div className="sectionHeading">
           <div className="sectionTitleGroup">
-            <div><p className="sectionEyebrow">YOUR NEXT STEPS</p><h2 id="quest-heading">Quests</h2></div>
-            <button
-              type="button"
-              className="sectionAddButton"
-              onClick={onOpenNewQuest}
-              aria-label="Create new quest"
-              title="New quest"
-            >
-              <span aria-hidden="true">+</span>
-              <span>New</span>
-            </button>
+            <h2 id="quest-heading" className="sectionLabel">Your list</h2>
           </div>
 
           <div className="viewSwitch" aria-label="Quest view">

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { WorkspaceScene } from "@/components/shared/workspace-scene";
 import "./globals.css";
 import "./ryoku-theme.css";
 
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0c0b",
+  themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -41,7 +42,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body><WorkspaceScene />{children}</body>
     </html>
   );
 }

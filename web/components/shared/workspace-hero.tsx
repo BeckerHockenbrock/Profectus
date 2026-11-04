@@ -1,26 +1,18 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 
 type WorkspaceHeroProps = {
-  eyebrow: string;
+  index: string;
   title: string;
-  description: string;
-  image: string;
   children?: ReactNode;
 };
 
-export function WorkspaceHero({ eyebrow, title, description, image, children }: WorkspaceHeroProps) {
+export function WorkspaceHero({ index, title, children }: WorkspaceHeroProps) {
   return (
-    <section className="workspaceHero" aria-label={title}>
+    <section className="workspaceHero" aria-labelledby={`workspace-${index}`}>
+      <div className="sheetCaption"><span>{index}</span><span>{title}</span><span className="sheetCaptionRule" /><span aria-hidden="true">↗</span></div>
       <div className="workspaceHeroCopy">
-        <p className="workspaceEyebrow"><span aria-hidden="true" />{eyebrow}</p>
-        <h1>{title}</h1>
-        <p className="workspaceDescription">{description}</p>
+        <h1 id={`workspace-${index}`}>{title}<span aria-hidden="true">.</span></h1>
         {children ? <div className="workspaceHeroDetail">{children}</div> : null}
-      </div>
-      <div className="workspaceArtwork" aria-hidden="true">
-        <Image src={image} alt="" width={384} height={456} sizes="(max-width: 40rem) 32vw, 270px" preload unoptimized />
-        <span className="artworkCaption">A LITTLE HIGHER, EVERY DAY.</span>
       </div>
     </section>
   );

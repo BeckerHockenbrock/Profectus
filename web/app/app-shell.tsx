@@ -399,7 +399,6 @@ export function AppShell({ today: initialToday }: AppShellProps) {
                 suppressClickRef={suppressClickRef}
                 onToggleQuest={toggleQuest}
                 onSelectQuest={(targetQuest) => setSelectedQuestId(targetQuest.id)}
-                onOpenNewQuest={openNewQuest}
                 onToggleSubtask={toggleSubtask}
                 onOpenDatePicker={handleOpenListDatePicker}
                 onOpenSubtaskDatePicker={handleOpenListSubtaskDatePicker}
