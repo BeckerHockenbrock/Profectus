@@ -4,7 +4,7 @@ Verified November 4, 2026.
 
 ## Direction and references
 
-The [Ryoku website](https://ryoku.dev/) and [Ryoku repository](https://github.com/Ryoku-dev/ryoku) describe a continuous shell with black surfaces, warm bone text, and coordinated accents. The [official showroom](https://ryoku.dev/showroom) supplied the visual reference for the rail, artwork, and independent panels. Todo Quest keeps its own name and classical artwork, using a muted ember palette, editorial headings, small monospace labels, and a floating navigation dock.
+The [Ryoku website](https://ryoku.dev/) and [Ryoku repository](https://github.com/Ryoku-dev/ryoku) describe a continuous shell with black surfaces, warm bone text, and coordinated accents. The [official showroom](https://ryoku.dev/showroom) supplied the visual reference for the rail, artwork, and independent panels. Profectus keeps its classical artwork, using a muted ember palette, editorial headings, small monospace labels, and a floating navigation dock.
 
 ## Verification
 
@@ -30,3 +30,9 @@ Authenticated screens were checked through a temporary local component fixture, 
 - `school-desktop.jpg`
 - `focus-desktop.jpg`, `focus-timer-mobile.jpg`
 - `quest-form-mobile.jpg`
+
+## Follow-up: Profectus name and circle removal
+
+Removed the sun decoration from the shared feature artwork and welcome screen, along with its unused CSS. Renamed the header, welcome brand, accessible labels, home-screen hint, browser metadata, install manifest, and break-completion title to Profectus. Existing local-storage identifiers remain compatible with saved data.
+
+Production build and lint passed. The production welcome screen was visually inspected: header and document title both read Profectus, application-name metadata reads Profectus, and no `.workspaceSun` elements are present. `profectus-no-circle.jpg` is the updated production capture; earlier captures above document the original rebrand.

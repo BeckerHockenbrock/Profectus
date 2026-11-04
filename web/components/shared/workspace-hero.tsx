@@ -19,7 +19,6 @@ export function WorkspaceHero({ eyebrow, title, description, image, children }: 
         {children ? <div className="workspaceHeroDetail">{children}</div> : null}
       </div>
       <div className="workspaceArtwork" aria-hidden="true">
-        <span className="workspaceSun" />
         <Image src={image} alt="" width={384} height={456} sizes="(max-width: 40rem) 32vw, 270px" preload unoptimized />
         <span className="artworkCaption">A LITTLE HIGHER, EVERY DAY.</span>
       </div>

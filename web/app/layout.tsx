@@ -3,9 +3,9 @@ import "./globals.css";
 import "./ryoku-theme.css";
 
 export const metadata: Metadata = {
-  title: "Todo Quest",
+  title: "Profectus",
   description: "Focus clearly. Progress quietly.",
-  applicationName: "Todo Quest",
+  applicationName: "Profectus",
   manifest: "/manifest.webmanifest",
   formatDetection: {
     telephone: false,
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "Todo Quest",
+    title: "Profectus",
     statusBarStyle: "black-translucent",
   },
   other: {

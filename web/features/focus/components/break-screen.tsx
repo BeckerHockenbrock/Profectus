@@ -89,7 +89,7 @@ export function BreakScreen({ durationMinutes, onFinish, onSkip }: BreakScreenPr
     if (typeof document === "undefined") return;
     const formatted = formatTimerDigits(displayMs);
     if (isDone) {
-      document.title = "Break Complete! · Todo Quest";
+      document.title = "Break Complete! · Profectus";
     } else if (isPaused) {
       document.title = `⏸ ☕ ${formatted} · Rest`;
     } else {

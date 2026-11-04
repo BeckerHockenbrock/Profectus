@@ -18,7 +18,7 @@ export function AppHeader({
       <a
         className="brand"
         href="#top"
-        aria-label="Todo Quest home"
+        aria-label="Profectus home"
         onClick={(event) => {
           if (onNavigateTasks) {
             event.preventDefault();
@@ -27,7 +27,7 @@ export function AppHeader({
         }}
       >
         <BrandMark />
-        <span className="brandLockup"><span className="brandName">Todo Quest</span><span className="brandCaption">THE EVERYDAY ASCENT</span></span>
+        <span className="brandLockup"><span className="brandName">Profectus</span><span className="brandCaption">THE EVERYDAY ASCENT</span></span>
       </a>
       <span className="shellStatus"><span aria-hidden="true" />Your personal workspace</span>
       <div className="topBarActions">

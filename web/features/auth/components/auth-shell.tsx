@@ -25,9 +25,9 @@ export function AuthShell({
 
   return (
     <main className="authShell">
-      <Link className="brand authBrand" href="/" aria-label="Todo Quest home"><BrandMark /><span className="brandLockup"><span className="brandName">Todo Quest</span><span className="brandCaption">THE EVERYDAY ASCENT</span></span></Link>
+      <Link className="brand authBrand" href="/" aria-label="Profectus home"><BrandMark /><span className="brandLockup"><span className="brandName">Profectus</span><span className="brandCaption">THE EVERYDAY ASCENT</span></span></Link>
       <section className="authCard" aria-labelledby="sign-in-heading">
-        <div className="authArtwork" aria-hidden="true"><span className="workspaceSun" /><Image src="/sisyphus.png" alt="" width={384} height={456} sizes="(max-width: 40rem) 60vw, 384px" preload unoptimized /></div>
+        <div className="authArtwork" aria-hidden="true"><Image src="/sisyphus.png" alt="" width={384} height={456} sizes="(max-width: 40rem) 60vw, 384px" preload unoptimized /></div>
         <div className="authCardCopy">
         <p className="workspaceEyebrow"><span aria-hidden="true" />A SPACE FOR WHAT MATTERS</p>
         <h1 id="sign-in-heading">Small steps.<br /><em>Higher ground.</em></h1>

@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Todo Quest",
-    short_name: "Todo Quest",
+    name: "Profectus",
+    short_name: "Profectus",
     description: "Focus clearly. Progress quietly.",
     start_url: "/",
     scope: "/",

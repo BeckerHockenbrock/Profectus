@@ -1,6 +1,6 @@
-# Todo Quest Web Architecture
+# Profectus Web Architecture
 
-Todo Quest is a client-interactive Next.js 16 task application with optional focus sessions. `app/page.tsx` remains a Server Component; it supplies the current date to the client-owned `AppShell`.
+Profectus is a client-interactive Next.js 16 task application with optional focus sessions. `app/page.tsx` remains a Server Component; it supplies the current date to the client-owned `AppShell`.
 
 ## Directory map
 
