@@ -172,45 +172,93 @@ input:focus, textarea:focus, select:focus { border-color: #aaa; background-color
   .dockCreateButton { display: none; }
   .categoryList { grid-template-columns: 1fr; }
 }
-@media (max-width: 40rem) {
+/* Mobile floats over the portrait with soft, touch-friendly shapes. */
+@media (max-width: 63.999rem) {
+  .appShell { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
   .workspaceScene img { object-position: 55% center; }
-  .sceneWordmark { left: -.5rem; top: 4.5rem; font-size: 7rem; }
-  .sceneShade { background: linear-gradient(90deg, #0009, #0003 90%), linear-gradient(0deg, #0004, #0000 50%); }
-  .content { padding: 1.5rem 1rem 2rem; }
+  .sceneWordmark { left: -.5rem; top: 5rem; font-size: clamp(7rem, 24vw, 12rem); }
+  .sceneShade { background: linear-gradient(90deg, #000b, #0003 95%), linear-gradient(0deg, #0007, #0000 65%); }
+  .topBar { min-height: calc(5rem + env(safe-area-inset-top)); padding: calc(.75rem + env(safe-area-inset-top)) max(1.1rem, env(safe-area-inset-right)) .75rem max(1.1rem, env(safe-area-inset-left)); border: 0; background: linear-gradient(#000b, #0000); backdrop-filter: none; }
   .railBrandCaption { display: none; }
-  .brand { gap: .4rem; }
-  .brandName { font-size: .9rem; }
-  .topAddButton { width: 2.4rem; padding: .5rem; flex: initial; }
+  .brand { gap: .5rem; min-height: 2.75rem; }
+  .brandName { font-size: .95rem; }
+  .topBarActions { gap: .6rem; }
+  .topAddButton, .profileButton { flex: none; width: 2.75rem; height: 2.75rem; min-height: 2.75rem; padding: 0; border-radius: 50%; }
+  .topAddButton { border-color: transparent; background: #e5e5e5; color: #080808; }
+  .topAddButton:hover { background: #fff; }
+  .topAddButton svg { width: 1.1rem; height: 1.1rem; }
   .topAddButton span { display: none; }
-  .workspaceHero { max-width: none; padding-bottom: 1.4rem; }
-  .workspaceHero h1 { font-size: 3.5rem; }
-  .sheetCaption { margin-bottom: 1rem; font-size: .48rem; }
-  .workspaceHero .heroQuoteText { font-size: .88rem; }
-  .workspaceHero .heroQuoteAuthor { font-size: .45rem; }
-  .workspaceLedger > div { padding: .6rem .65rem; }
-  .workspaceLedger dt { font-size: .45rem; }
-  .workspaceLedger dd { font-size: 1.3rem; }
-  .questSection, .schoolPeriodSection { max-width: none; padding: 1rem; border-color: #ffffff28; background: #03030399; backdrop-filter: blur(20px); }
-  .sectionHeading { gap: .6rem; margin-bottom: 1rem; }
-  .sectionLabel, .schoolSectionTitleRow .sectionLabel { font-size: .52rem; }
-  .viewSwitch button { padding: .3rem .4rem; font-size: .5rem; }
-  .categoryHeading h3 { font-size: .54rem; }
-  .questTitle { font-size: .87rem; }
-  .questCardHeader { gap: .65rem; }
+  .profileButton { background: #08080866; backdrop-filter: blur(16px); color: #ddd; }
+  .content { width: 100%; max-width: 44rem; margin-inline: auto; padding: clamp(1rem, 4vw, 2rem) clamp(.875rem, 4vw, 1.5rem) 1.5rem; }
+  .workspaceHero { max-width: none; padding-bottom: 1.5rem; }
+  .workspaceHero h1 { margin-bottom: 1rem; font-size: clamp(3.6rem, 13vw, 5.25rem); }
+  .sheetCaption { width: fit-content; margin-bottom: .85rem; font-size: .58rem; color: #bbb; }
+  .sheetCaptionRule, .sheetCaption > span:last-child { display: none; }
+  .workspaceHero .heroQuoteText { font-size: .96rem; line-height: 1.5; color: #d0d0d0; }
+  .workspaceHero .heroQuoteAuthor { font-size: .51rem; color: #aaa; }
+  .workspaceLedger { max-width: none; margin-top: 1.5rem; padding: .25rem .5rem; border: 1px solid #ffffff14; border-radius: 999px; background: #08080866; backdrop-filter: blur(18px); }
+  .workspaceLedger > div { align-items: center; padding: .65rem .3rem; gap: .4rem; }
+  .workspaceLedger > div + div { border: 0; }
+  .workspaceLedger dt { font-size: .52rem; color: #aaa; }
+  .workspaceLedger dd { font-size: 1.45rem; }
+  .questSection, .schoolPeriodSection, .lockInMainCard { max-width: none; padding: clamp(1rem, 4vw, 1.5rem); border: 1px solid #ffffff12; border-radius: 2rem; background: #08080899; backdrop-filter: blur(24px); box-shadow: 0 12px 40px #0003; }
+  .sectionHeading { flex-wrap: wrap; gap: .9rem; margin-bottom: 1.25rem; }
+  .sectionLabel, .schoolSectionTitleRow .sectionLabel { font-size: .62rem; letter-spacing: .08em; color: #aaa; }
+  .viewSwitch { display: flex; width: 100%; padding: .25rem; gap: .15rem; border-radius: 999px; background: #ffffff08; }
+  .viewSwitch button { flex: 1; min-width: 0; min-height: 2.5rem; padding: .4rem .25rem; border: 0; border-radius: 999px; font: .7rem var(--font-ui); text-transform: none; color: #aaa; transition: background-color 180ms ease, color 180ms ease; }
+  .viewSwitch button.isActive { background: #ffffff1c; color: #fff; }
+  .categoryHeading { padding-bottom: .6rem; border-color: #ffffff0e; }
+  .categoryHeading h3 { font-size: .6rem; }
+  .categoryHeading > span { display: grid; place-items: center; min-width: 1.5rem; min-height: 1.5rem; border-radius: 50%; background: #ffffff08; }
+  .questList { gap: .1rem; }
+  .questCard { padding: .75rem 0; border-radius: 1.25rem; }
+  .questCardHeader { gap: .35rem; align-items: flex-start; }
+  .questTitle { padding-top: .55rem; font-size: 1rem; line-height: 1.4; }
+  .questNotesSnippet { font-size: .8rem; line-height: 1.5; }
+  .questContent { flex: 1; gap: .35rem; }
+  .questCardActionsRow { display: none; }
+  .questMeta { gap: .4rem; }
+  .completeButton, .completeButton[aria-pressed="true"] { position: relative; width: 2.75rem; height: 2.75rem; margin: 0 0 0 -.4rem; border: 0; border-radius: 50%; background: transparent; }
+  .completeButton:hover { background: #ffffff08; transform: none; }
+  .completeButton .checkIcon { display: grid; place-items: center; width: 1.35rem; height: 1.35rem; border: 1px solid #aaa; border-radius: 50%; color: #000; font-size: .8rem; transition: background-color 160ms ease; }
+  .completeButton[aria-pressed="true"] .checkIcon { background: #eee; border-color: #eee; }
+  .googleSubtaskCheckbox { border-radius: 50%; }
+  .categoryPill, .googleDateBadge[class*="is-"], .dueLabel[class*="is"], .questXPBadge { min-height: 1.65rem; padding: .2rem .5rem; border-radius: 999px; font-size: .65rem; }
+  .liquidGlassDock { left: max(.875rem, env(safe-area-inset-left)); right: max(.875rem, env(safe-area-inset-right)); bottom: calc(.75rem + env(safe-area-inset-bottom)); width: auto; max-width: 27rem; margin-inline: auto; padding: .4rem; gap: .25rem; border: 1px solid #ffffff20; border-radius: 999px; background: #101010b8; backdrop-filter: blur(24px); box-shadow: 0 8px 32px #0008; }
   .dockOrdinal { display: none; }
-  .dockItem { font: .58rem var(--font-mono); text-transform: uppercase; letter-spacing: .04em; }
-  .dockItem.isActive, .dockLockInItem.isActive { background: #ffffff14; color: var(--text); }
-  .statusStripStats { flex-wrap: wrap; font-size: .65rem; }
-  .workspaceHero .liveBannerTitle { font-size: .9rem; }
-  .workspaceHero .liveBannerMeta { font-size: .65rem; }
-  .lockInMainCard { padding: 1rem; background: #03030399; }
-  .lockInHeading { font-size: 1.7rem; }
+  .dockItem { gap: .45rem; min-width: 0; min-height: 3rem; padding: .65rem .4rem; border-radius: 999px; font: .73rem var(--font-ui); text-transform: none; letter-spacing: 0; transition: background-color 200ms ease, color 200ms ease; }
+  .dockIcon { display: block; flex: none; width: 1.05rem; height: 1.05rem; }
+  .dockItem.isActive, .dockLockInItem.isActive { background: #e5e5e5; color: #080808; }
+  .dockItem.isActive:hover { background: #fff; color: #000; }
+  .dockCreateButton { display: none; }
+  .sheet { border-radius: 2rem 2rem 0 0; padding-inline: 1.25rem; }
+  .detailModalSheet, .focusModalCard, .iosDatePickerPopover { border-radius: 1.75rem; }
+  .closeButton, .periodIconBadge { border-radius: 50%; }
+  .periodCountBadge, .statusBadge { border-radius: 999px; }
+  .closeButton { width: 2.75rem; height: 2.75rem; }
+  input, textarea, select { border-radius: 1rem; font-size: 1rem; }
+  .formDateTriggerBtn, .formSubtaskDateBtn, .formAddSubtaskButton { min-height: 2.75rem; border-radius: 999px; }
+  .saveButton, .schoolAddButton, .schoolPrimaryButton, .schoolSecondaryButton, .lockInLaunchBtn, .focusPauseButton, .breakPrimaryButton, .signInButton { min-height: 3rem; border-radius: 999px; }
+  .homeScreenHint, .formError, .periodCard { border-radius: 1.5rem; }
+  .periodCard { padding: 1rem; }
+  .statusStripStats { flex-wrap: wrap; font-size: .75rem; }
+  .workspaceHero .liveBannerTitle { font-size: 1rem; }
+  .workspaceHero .liveBannerMeta { font-size: .75rem; }
+  .lockInWorkspace { max-width: none; }
+  .lockInHeading { font-size: 1.9rem; }
+  .lockInStoneChoice { border-radius: 1.5rem; min-height: 3rem; }
+  .lockInLogSection { border-radius: 1.5rem; }
   .authShell { padding: 1.25rem; }
-  .authCard { width: 100%; margin: 2rem 0; padding: 1.5rem; background: #03030388; }
-  .authKicker { font-size: .47rem; margin-bottom: 1.1rem; }
-  .authCard h1 { font-size: 3.1rem; }
-  .authMotto { font-size: .95rem; }
-  .signInButton { font-size: .58rem; }
+  .authBrand { border-radius: 999px; }
+  .authCard { width: 100%; margin: 2rem 0; padding: clamp(1.5rem, 6vw, 2.5rem); border-radius: 2rem; background: #08080888; }
+  .authKicker { font-size: .55rem; margin-bottom: 1.25rem; }
+  .authCard h1 { font-size: clamp(3.1rem, 12vw, 5rem); }
+  .authMotto { font-size: 1rem; }
+  .signInButton { width: 100%; font-size: .68rem; }
+}
+@media (max-width: 22rem) {
+  .dockItem { gap: .3rem; font-size: .68rem; }
+  .dockIcon { width: .95rem; height: .95rem; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } .liquidGlassDock { transform: none !important; } }
 @media (prefers-contrast: more) { :root { --line: #999; --secondary: #ddd; --muted: #bbb; } .questSection, .schoolPeriodSection, .lockInMainCard { background: #000e; } }
