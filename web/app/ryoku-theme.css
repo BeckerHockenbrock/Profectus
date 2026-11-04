@@ -1,0 +1,272 @@
+/* Todo Quest — a Ryoku-inspired shell. Ink, warm paper, and a little ember.
+   Keep palette and visual overrides here; interaction geometry lives in globals.css. */
+:root {
+  --background: #0b0c0b;
+  --surface: #171815;
+  --surface-solid: #171815;
+  --surface-soft: rgba(228, 218, 195, .045);
+  --text: #e8e3d5;
+  --secondary: #b8b6aa;
+  --muted: #94968a;
+  --accent: #e7a579;
+  --accent-strong: #edb48e;
+  --accent-soft: rgba(231, 165, 121, .1);
+  --line: rgba(218, 216, 191, .13);
+  --shadow: 0 24px 80px #0008;
+  --font-ui: "Segoe UI Variable", "Segoe UI", sans-serif;
+  --font-editorial: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-ui);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 94% 8%, #87513814, transparent 48%),
+    radial-gradient(ellipse at 0% 85%, #68734c0c, transparent 50%),
+    var(--background);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: #e7a57945; color: #fff5e7; }
+select { font-family: inherit; }
+button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* A thin desktop rail and a compact, independent navigation island. */
+.topBar {
+  min-height: calc(4.75rem + env(safe-area-inset-top));
+  padding: calc(.7rem + env(safe-area-inset-top)) max(2rem, env(safe-area-inset-right)) .7rem max(2rem, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--line);
+  background: #0b0c0bf2;
+  backdrop-filter: blur(20px);
+}
+.topBar::after { display: none; }
+.brand { gap: .7rem; text-transform: none; }
+.brandMark { width: 2.5rem; height: 2.5rem; flex: 0 0 auto; color: var(--accent); }
+.brandLockup { display: grid; gap: .35rem; }
+.brandName { font-size: .94rem; font-weight: 600; letter-spacing: -.025em; color: var(--text); }
+.brandCaption { font: .52rem var(--font-mono); letter-spacing: .14em; color: var(--muted); }
+.shellStatus { display: inline-flex; align-items: center; gap: .6rem; font: .65rem var(--font-mono); color: var(--muted); }
+.shellStatus > span { width: .35rem; height: .35rem; border-radius: 50%; background: #a6b68a; }
+.topAddButton { border: 0; min-height: 2.5rem; padding: .5rem 1rem; background: var(--accent); color: #251a12; box-shadow: none; font-weight: 650; }
+.topAddButton:hover { background: #f2c09b; box-shadow: none; }
+.profileButton { width: 2.5rem; height: 2.5rem; color: var(--secondary); background: #24251f; font: .8rem var(--font-mono); }
+.content { display: block; width: min(100%, 70rem); padding: 2rem 2rem 3rem; }
+.appShell { padding: 0 0 calc(7rem + env(safe-area-inset-bottom)); }
+
+.liquidGlassDock {
+  top: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  left: 50%; right: auto; bottom: calc(1.15rem + env(safe-area-inset-bottom));
+  width: min(calc(100% - 2rem), 29rem);
+  transform: translateX(-50%);
+  align-items: center; gap: .35rem; padding: .45rem;
+  border: 1px solid #73746350; border-radius: 1.35rem;
+  background: #191b17f5;
+  box-shadow: 0 12px 40px #0008, inset 0 1px #e8e3d509;
+  backdrop-filter: blur(24px);
+}
+.dockItem { flex-direction: column; justify-content: center; min-height: 3.4rem; padding: .55rem; gap: .35rem; border-radius: .95rem; color: var(--muted); font-size: .64rem; font-weight: 500; }
+.dockIcon { width: 1.25rem; height: 1.25rem; }
+.dockItem.isActive, .dockLockInItem.isActive { background: var(--accent-soft); color: var(--accent); text-shadow: none; }
+.dockItem:hover, .dockLockInItem:hover { color: var(--text); background: #e8e3d50b; }
+.dockCreateButton { margin-top: 0; border: 0; border-left: 1px solid var(--line); border-radius: .2rem .95rem .95rem .2rem; background: transparent; color: var(--accent); }
+
+/* Shared feature cover: editorial type, an orbital sun, and the app's own art. */
+.workspaceHero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 17rem; gap: 2rem; align-items: center; min-height: 20rem; padding: 1rem 0 2rem; }
+.workspaceHeroCopy { position: relative; z-index: 1; min-width: 0; }
+.workspaceEyebrow, .sectionEyebrow { display: flex; align-items: center; gap: .65rem; margin: 0 0 1.2rem; color: var(--accent); font: .62rem/1.5 var(--font-mono); letter-spacing: .14em; }
+.workspaceEyebrow > span { display: inline-block; width: .4rem; height: .4rem; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+.workspaceHero h1 { max-width: 38rem; margin: 0 0 1rem; font: 400 clamp(2.6rem, 4.8vw, 4.5rem)/1.03 var(--font-editorial); letter-spacing: -.065em; text-wrap: balance; }
+.workspaceDescription { max-width: 28rem; margin: 0; color: var(--secondary); font-size: .88rem; line-height: 1.7; }
+.workspaceHeroDetail { max-width: 31rem; margin-top: 1.5rem; }
+.workspaceArtwork { position: relative; display: grid; isolation: isolate; place-items: center; align-self: stretch; min-height: 18rem; background: var(--background); border-radius: 50%; }
+.workspaceSun { position: absolute; z-index: -1; width: 12.2rem; height: 12.2rem; border-radius: 50%; background: #ad6947; top: 12%; left: 50%; transform: translateX(-50%); box-shadow: 0 0 90px #b06b4512; }
+.workspaceSun::after { content: ""; position: absolute; inset: -.75rem; border: 1px solid #c1977130; border-radius: 50%; }
+.workspaceArtwork img { position: relative; display: block; width: 15rem; height: 17.5rem; object-fit: contain; mix-blend-mode: screen; mask-image: radial-gradient(ellipse, #000 48%, transparent 73%); }
+.artworkCaption { align-self: end; padding-top: .8rem; color: var(--muted); font: .5rem var(--font-mono); letter-spacing: .15em; }
+.workspaceHero .heroQuote { align-items: start; text-align: left; min-height: 0; max-width: none; margin: 0; padding: .3rem 0 .3rem 1rem; border: 0; border-left: 1px solid #e7a57966; border-radius: 0; }
+.workspaceHero .heroQuote:hover { background: transparent; }
+.workspaceHero .heroQuoteText { font: italic .86rem/1.5 var(--font-editorial); color: var(--secondary); }
+.workspaceHero .heroQuoteAuthor { margin-top: .25rem; color: var(--muted); font: .52rem var(--font-mono); letter-spacing: .08em; }
+
+.workspaceMetrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.workspaceMetrics > div { display: grid; gap: .65rem; padding: 1rem 1.25rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+.workspaceMetrics > div > span { font: .59rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.workspaceMetrics strong { display: flex; flex-wrap: wrap; gap: .65rem; align-items: baseline; font: 400 1.9rem/1.2 var(--font-ui); letter-spacing: -.05em; }
+.workspaceMetrics small { color: var(--secondary); font: .68rem var(--font-ui); letter-spacing: 0; }
+.workspaceMetrics > div:first-child strong { color: var(--accent); }
+
+/* Quiet, tactile panels rather than bright glass. */
+.questSection { padding-top: 2.25rem; }
+.sectionHeading { margin-bottom: 1.4rem; gap: 1rem; }
+.sectionEyebrow { margin-bottom: .35rem; color: var(--muted); font-size: .54rem; }
+h2, .schoolHeading, .lockInHeading { color: var(--text); font-size: 1.7rem; font-weight: 500; letter-spacing: -.05em; }
+.sectionAddButton { margin-top: 1rem; background: var(--accent-soft); border-color: #e7a57926; color: var(--accent); }
+.viewSwitch { padding: .25rem; border: 1px solid var(--line); background: #171815; border-radius: .75rem; }
+.viewSwitch button { min-height: 2rem; padding: .3rem .85rem; border-radius: .5rem; font-size: .7rem; font-weight: 500; }
+.viewSwitch button.isActive { background: #343329; color: var(--text); }
+.categoryList { gap: 1rem; }
+.categoryGroup { padding: 1.15rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+.categoryHeading { padding: 0 .25rem; margin-bottom: .8rem; }
+.categoryHeading h3 { color: var(--secondary); font: .66rem var(--font-mono); letter-spacing: .08em; }
+.categoryHeading span { color: var(--muted); background: transparent; }
+.categoryHeading .dateHeadingIndicator.isToday, .categoryHeading.isDateToday h3 { color: var(--accent); }
+.questList { gap: .35rem; }
+.questCard { padding: .9rem .65rem; border-radius: .7rem; }
+.questCard:hover { background: #e8e3d508; }
+.questCard + .questCard { border-top: 1px solid #e8e3d509; }
+.questTitle { color: var(--text); font-weight: 500; }
+.questNotesSnippet { color: var(--muted); font-size: .77rem; }
+.questCardHeader { gap: .9rem; }
+.completeButton { width: 1.3rem; height: 1.3rem; border: 1px solid #929581; border-radius: .4rem; }
+.completeButton:hover { border-color: var(--accent); }
+.categoryPill { color: var(--secondary); background: #c6c6a90d; font-weight: 500; }
+.dueLabel.isToday, .dueLabel.is-today, .googleDateBadge.is-today { color: var(--accent); background: var(--accent-soft); box-shadow: none; }
+.googleDateBadge.is-today { border-color: #e7a57945; }
+.googleDateBadge.is-today .googleDateIcon { color: var(--accent); stroke: var(--accent); filter: none; }
+.googleDatePip.is-today { background: var(--accent); box-shadow: none; }
+.googleDateBadge.isClickable.is-today:hover { background: #e7a57924; border-color: #e7a57980; }
+.dueLabel.isToday .googleDateIcon, .dueLabel.is-today .googleDateIcon { color: var(--accent); stroke: var(--accent); }
+.emptyState { padding: 2rem 1.25rem; border-style: dashed; background: #e8e3d503; font-size: .83rem; text-align: center; }
+.formError { border-color: #d7a38650; background: #d7a3860d; color: #e8baa5; }
+.homeScreenHint { background: #20221c; border-color: var(--line); box-shadow: none; }
+.sheet, .detailModalSheet, .iosDatePickerPopover, .focusModalCard { border-color: #89857050; background: #171815fa; backdrop-filter: blur(24px); }
+.sheetHeading h2 { font-size: 1.6rem; }
+.sheetHandle { background: #898674; }
+.closeButton { background: #e8e3d509; border-color: var(--line); color: var(--secondary); }
+input, textarea, select { border-radius: .7rem; border-color: var(--line); background-color: #0e100d; color: var(--text); }
+input:focus, textarea:focus, select:focus { border-color: var(--accent); background-color: #0e100d; }
+.saveButton, .schoolAddButton, .schoolPrimaryButton, .lockInLaunchBtn { background: var(--accent); border-color: transparent; color: #251a12; box-shadow: none; }
+.saveButton:hover, .schoolAddButton:hover, .schoolPrimaryButton:hover, .lockInLaunchBtn:hover { background: #f2c09b; color: #251a12; box-shadow: none; }
+.formDateActionText { color: var(--accent); }
+
+/* School and focus use the same surfaces and accent, including full-screen modes. */
+.workspaceHero .schoolLiveBanner { width: 100%; margin: 0; padding: .85rem 1rem; text-align: left; border-radius: .8rem; background: #191c15; border-color: var(--line); }
+.workspaceHero .lockInStatusStrip { width: fit-content; margin: 0; padding: .65rem 1rem; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+.schoolPeriodSection { padding-top: 1.5rem; }
+.schoolSubhead, .lockInEyebrow, .lockInTimeCaption, .lockInStoneGuide, .lockInLogTitle { font-family: var(--font-mono); font-weight: 400; letter-spacing: .1em; color: var(--muted); }
+.schoolEmptyState, .periodCard, .lockInMainCard { background: var(--surface); border-color: var(--line); box-shadow: none; border-radius: 1rem; }
+.schoolEmptyState { padding: 2.5rem 1.5rem; }
+.emptyIconWrapper { color: var(--accent); background: var(--accent-soft); }
+.schoolSecondaryButton { background: transparent; border-color: var(--line); color: var(--secondary); }
+.lockInWorkspace { gap: 1.5rem; }
+.lockInMainCard { padding: 1.5rem; }
+.lockInHeaderMark { color: var(--accent); }
+.lockInTimeMain, .lockInOpenSymbol { color: var(--text); font-family: var(--font-editorial); font-weight: 400; }
+.lockInStoneScene { background: radial-gradient(ellipse at 50% 90%, #b0744212, transparent 70%), #11130f; border-color: var(--line); }
+.lockInSceneHalo { border-color: #e7a57930; }
+.lockInStoneMeter span { background: var(--accent); }
+.lockInStoneChoice { border-color: var(--line); border-radius: .8rem; background: #20221c; box-shadow: none; }
+.lockInStoneChoice:hover:not(:disabled) { background: #2b2c22; border-color: #e7a57970; }
+.lockInLaunchBtn { border-radius: .75rem; }
+.lockInLogEmpty, .lockInLogItem { border-color: var(--line); background: var(--surface); }
+.focusScreen, .breakScreen { background: radial-gradient(ellipse at 50% 20%, #9f6b3810, transparent 60%), var(--background); }
+.focusTimerNumerals, .breakTimerNumerals { color: var(--text); font-family: var(--font-editorial); font-weight: 400; }
+.focusProgressRingFill { stroke: var(--accent); }
+.focusPauseButton, .breakPrimaryButton { background: var(--accent); color: #251a12; border-color: transparent; box-shadow: none; }
+.focusQuitButton, .breakSkipButton { color: var(--muted); }
+
+/* The welcome screen is part of the same workspace. */
+.authShell { position: relative; grid-template-rows: auto 1fr auto; gap: 2rem; padding: 2rem clamp(1.25rem, 5vw, 5rem); }
+.authBrand { justify-self: start; }
+.authCard { position: relative; width: min(100%, 65rem); grid-template-columns: .95fr 1.05fr; gap: 4rem; padding: 2rem 0; border: 0; border-radius: 0; background: transparent; text-align: left; }
+.authArtwork { position: relative; display: grid; width: 100%; place-items: center; isolation: isolate; }
+.authArtwork .workspaceSun { width: 17rem; height: 17rem; top: 13%; }
+.authArtwork img { width: min(100%, 24rem); height: auto; mix-blend-mode: screen; filter: sepia(.25); }
+.authCardCopy { min-width: 0; }
+.authCard h1 { margin: 0 0 1.5rem; font: 400 clamp(2.7rem, 4.7vw, 4.4rem)/1.05 var(--font-editorial); letter-spacing: -.06em; }
+.authCard h1 em { color: var(--accent); font-weight: 400; }
+.authCardCopy .authDescription { max-width: 25rem; color: var(--secondary); font-size: .9rem; line-height: 1.8; }
+.signInButton { display: flex; gap: .8rem; align-items: center; justify-content: center; min-height: 3.2rem; margin-top: 1.7rem; border-radius: .65rem; background: var(--accent); color: #251a12; font-size: .85rem; font-weight: 600; transition: background-color 160ms ease; }
+.signInButton:hover { background: #f2c09b; }
+.signInButton > span { margin-left: auto; }
+.signInButton > svg { margin-right: auto; }
+.authSyncNote { margin: .8rem 0 1.8rem; text-align: center; color: var(--muted); font-size: .65rem; }
+.authCard .heroQuote { align-items: start; max-width: none; margin: 1.5rem 0 0; padding: 1.25rem 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; text-align: left; }
+.authCard .heroQuote:hover { background: transparent; }
+.authCard .heroQuoteText { color: var(--secondary); font: italic .9rem/1.5 var(--font-editorial); }
+.authCard .heroQuoteAuthor { margin-top: .4rem; font: .55rem var(--font-mono); }
+.authFooter { justify-self: start; width: 100%; margin: 0; padding-top: 1.25rem; border-top: 1px solid var(--line); color: var(--muted); font: .55rem var(--font-mono); letter-spacing: .15em; }
+.authFooter span { float: right; }
+
+@media (min-width: 60rem) {
+  .lockInWorkspace { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: start; }
+  .lockInLogSection { padding: 1.25rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+  .categoryList { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
+
+@media (max-width: 40rem) {
+  .topBar { min-height: calc(4.3rem + env(safe-area-inset-top)); padding: calc(.7rem + env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) .7rem max(1rem, env(safe-area-inset-left)); }
+  .brandMark { width: 2.1rem; height: 2.1rem; }
+  .brand { gap: .5rem; }
+  .brandName { font-size: .85rem; }
+  .brandCaption { font-size: .44rem; letter-spacing: .1em; }
+  .shellStatus { display: none; }
+  .topBarActions { gap: .5rem; }
+  .topAddButton { padding: .5rem .75rem; font-size: .68rem; }
+  .profileButton { width: 2.2rem; height: 2.2rem; }
+  .content { padding: 1.25rem 1.1rem 2rem; }
+  .workspaceHero { grid-template-columns: minmax(0, 1fr) 7rem; gap: .5rem; min-height: 0; padding: 1.5rem 0 1.75rem; align-items: start; }
+  .workspaceHero h1 { font-size: clamp(2.15rem, 7.8vw, 3rem); letter-spacing: -.06em; }
+  .workspaceEyebrow { font-size: .48rem; letter-spacing: .06em; gap: .4rem; margin-bottom: .9rem; }
+  .workspaceDescription { font-size: .76rem; }
+  .workspaceArtwork { align-self: start; min-height: 9rem; margin-top: 1.75rem; }
+  .workspaceSun { width: 6.2rem; height: 6.2rem; top: 10%; }
+  .workspaceSun::after { inset: -.4rem; }
+  .workspaceArtwork img { width: 7rem; height: 9.5rem; }
+  .artworkCaption { display: none; }
+  .workspaceHeroDetail { margin-top: 1.1rem; }
+  .workspaceHero .heroQuoteText { font-size: .78rem; }
+  .workspaceHero .heroQuoteAuthor { font-size: .46rem; }
+  .workspaceMetrics { gap: .45rem; }
+  .workspaceMetrics > div { padding: .9rem .65rem; gap: .6rem; border-radius: .8rem; }
+  .workspaceMetrics > div > span { font-size: .47rem; letter-spacing: .025em; }
+  .workspaceMetrics strong { flex-direction: column; gap: .2rem; font-size: 1.6rem; }
+  .workspaceMetrics small { font-size: .6rem; }
+  .questSection { padding-top: 1.8rem; }
+  .sectionHeading { gap: .85rem; }
+  .sectionTitleGroup { gap: .6rem; }
+  .sectionEyebrow { font-size: .45rem; }
+  h2, .schoolHeading, .lockInHeading { font-size: 1.45rem; }
+  .sectionAddButton { padding: .2rem .5rem; font-size: .65rem; }
+  .viewSwitch button { min-height: 2rem; padding: .25rem .55rem; font-size: .63rem; }
+  .categoryGroup { padding: .85rem .65rem; }
+  .questTitle { font-size: .88rem; }
+  .questCardHeader { gap: .65rem; }
+  .workspaceHero .schoolLiveBanner { padding: .65rem; }
+  .workspaceHero .liveBannerTitle { font-size: .85rem; }
+  .workspaceHero .liveBannerMeta { font-size: .65rem; }
+  .workspaceHero .lockInStatusStrip { padding: .5rem .6rem; }
+  .statusStripStats { flex-wrap: wrap; font-size: .65rem; }
+  .lockInMainCard { padding: 1.15rem; }
+  .authShell { gap: .5rem; padding: 1.25rem; }
+  .authCard { grid-template-columns: 1fr; gap: 0; padding: 1rem 0 2rem; }
+  .authArtwork { height: 12rem; overflow: hidden; }
+  .authArtwork img { width: 11rem; }
+  .authArtwork .workspaceSun { width: 9rem; height: 9rem; top: 12%; }
+  .authCardCopy { width: 100%; }
+  .authCardCopy .workspaceEyebrow { margin-top: 1.4rem; font-size: .52rem; }
+  .authCard h1 { font-size: 2.9rem; margin-bottom: 1rem; }
+  .authCardCopy .authDescription { font-size: .83rem; }
+  .authSyncNote { margin-bottom: 1rem; }
+  .authCard .heroQuote { margin-top: 1rem; }
+  .authFooter { font-size: .44rem; letter-spacing: .06em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .liquidGlassDock { transform: translateX(-50%) !important; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+@media (prefers-contrast: more) {
+  :root { --line: #9a9c89; --secondary: #d5d4c7; --muted: #bbbeae; }
+  .liquidGlassDock, .categoryGroup, .workspaceMetrics > div { border-color: var(--line); }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .topBar, .liquidGlassDock, .sheet, .detailModalSheet { background: var(--surface-solid); backdrop-filter: none; }
+}

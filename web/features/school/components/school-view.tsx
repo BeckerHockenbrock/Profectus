@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import { type FormEvent, useMemo, useState } from "react";
 import type { Period } from "../types/school";
 import { formatTime12Hour } from "../domain/period-clock";
@@ -91,17 +91,12 @@ export function SchoolView({ userId }: SchoolViewProps) {
   return (
     <>
       {/* Hero section */}
-      <section className="hero schoolHero" aria-label="School schedule overview">
-        <Image
-          className="heroLogo"
-          src="/school.png"
-          alt="Classical scholar reading a scroll"
-          width={1024}
-          height={1365}
-          sizes="(max-width: 48rem) 70vw, 18rem"
-          preload
-          unoptimized
-        />
+      <WorkspaceHero
+        eyebrow="02 / A LITTLE WISER"
+        title="A rhythm for your day."
+        description="Know what comes next. Be present for what is now."
+        image="/school.png"
+      >
 
         {/* Live Day & Period Status Banner */}
         {currentPeriod ? (
@@ -162,7 +157,7 @@ export function SchoolView({ userId }: SchoolViewProps) {
             </div>
           </div>
         )}
-      </section>
+      </WorkspaceHero>
 
       {/* Main Period Schedule List */}
       <section className="schoolPeriodSection" aria-label="Periods List">

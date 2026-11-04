@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import { useMemo, useState } from "react";
 import type React from "react";
 import type { Quest, QuestView, Subtask } from "../types/quest";
@@ -75,24 +75,25 @@ export function TasksView({
 
   return (
     <>
-      <section className="hero" aria-label="Stoic quote">
-        <Image
-          className="heroLogo"
-          src="/sisyphus.png"
-          alt="Sisyphus carrying a boulder"
-          width={1152}
-          height={1366}
-          sizes="(max-width: 48rem) 70vw, 18rem"
-          preload
-          unoptimized
-        />
+      <WorkspaceHero
+        eyebrow="01 / THE EVERYDAY ASCENT"
+        title="Make room for progress."
+        description="A clear mind. A little intention. One quest at a time."
+        image="/sisyphus.png"
+      >
         <StoicQuote today={today} />
+      </WorkspaceHero>
+
+      <section className="workspaceMetrics" aria-label="Quest overview">
+        <div><span>On your path</span><strong>{openQuests.length}<small>open quests</small></strong></div>
+        <div><span>For today</span><strong>{openQuests.filter((quest) => quest.dueDate === today).length}<small>to work on</small></strong></div>
+        <div><span>Steps taken</span><strong>{completedQuests.length}<small>completed</small></strong></div>
       </section>
 
       <section className="questSection" aria-labelledby="quest-heading">
         <div className="sectionHeading">
           <div className="sectionTitleGroup">
-            <h2 id="quest-heading">Quests</h2>
+            <div><p className="sectionEyebrow">YOUR NEXT STEPS</p><h2 id="quest-heading">Quests</h2></div>
             <button
               type="button"
               className="sectionAddButton"

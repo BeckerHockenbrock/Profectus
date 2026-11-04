@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./ryoku-theme.css";
 
 export const metadata: Metadata = {
   title: "Todo Quest",
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#0b0c0b",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

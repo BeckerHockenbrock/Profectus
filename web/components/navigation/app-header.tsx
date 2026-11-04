@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { BrandMark } from "@/components/shared/brand-mark";
 
 type AppHeaderProps = {
   userInitial: string;
@@ -26,17 +26,10 @@ export function AppHeader({
           }
         }}
       >
-        <Image
-          className="brandLogo"
-          src="/icon-192.png"
-          alt=""
-          width={40}
-          height={40}
-          preload
-          unoptimized
-        />
-        <span className="brandName">Todo Quest</span>
+        <BrandMark />
+        <span className="brandLockup"><span className="brandName">Todo Quest</span><span className="brandCaption">THE EVERYDAY ASCENT</span></span>
       </a>
+      <span className="shellStatus"><span aria-hidden="true" />Your personal workspace</span>
       <div className="topBarActions">
         <button
           className="topAddButton"

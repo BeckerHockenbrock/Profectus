@@ -9,7 +9,8 @@ web/
 ├── app/
 │   ├── app-shell.tsx                 # Authenticated feature composition and modal ownership
 │   ├── use-app-navigation.ts         # Dock navigation, Tasks reset, and scroll behavior
-│   ├── globals.css                   # The single application stylesheet
+│   ├── globals.css                   # Base component layouts and behavior
+│   ├── ryoku-theme.css               # Shared visual identity, loaded after base styles
 │   ├── layout.tsx
 │   ├── manifest.ts
 │   └── page.tsx
@@ -138,7 +139,7 @@ The transaction reads and updates `users/{uid}/quests/{questId}`, sets `complete
 
 ## Styling invariant
 
-`app/globals.css` remains the sole stylesheet. Component extraction must not change selector names, DOM hierarchy, declaration order, cascade order, media queries, SVG paths, animations, or inline style values. Only documentation comments may be added to this file.
+`app/globals.css` supplies base component layouts and interaction styles. `app/ryoku-theme.css` loads after it and owns the Ryoku-inspired visual identity: palette, type hierarchy, workspace artwork, panels, and responsive shell. Shared `BrandMark` and `WorkspaceHero` components keep the sign-in, tasks, school, and focus views consistent. Visual changes should be checked at desktop and mobile widths, including editing sheets and the focus timer.
 
 ## Where to make common changes
 

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
@@ -120,17 +120,12 @@ export function LockInView({
   return (
     <>
       {/* Hero section */}
-      <section className="hero lockInHero" aria-label="Lock in overview">
-        <Image
-          className="heroLogo"
-          src="/lock-in.png"
-          alt="Spartan scholar focused at stone desk"
-          width={1024}
-          height={1365}
-          sizes="(max-width: 48rem) 70vw, 18rem"
-          preload
-          unoptimized
-        />
+      <WorkspaceHero
+        eyebrow="03 / FIND YOUR STILLNESS"
+        title="Less noise. More focus."
+        description="Set aside a little time for what matters."
+        image="/lock-in.png"
+      >
 
         {/* Minimal Status Strip */}
         <div className="lockInStatusStrip" role="status" aria-label="Today's study status">
@@ -163,7 +158,7 @@ export function LockInView({
             </button>
           ) : null}
         </div>
-      </section>
+      </WorkspaceHero>
 
       {/* Main Lock In Workspace */}
       <section className="lockInWorkspace" aria-label="Study session workspace">
