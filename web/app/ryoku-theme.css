@@ -70,11 +70,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .workspaceHero .heroQuote:hover { background: transparent; }
 .workspaceHero .heroQuoteText { color: var(--secondary); font: italic .96rem/1.55 var(--font-editorial); text-shadow: 0 1px 10px #000; }
 .workspaceHero .heroQuoteAuthor { margin-top: .55rem; color: var(--muted); font: .49rem var(--font-mono); letter-spacing: .1em; }
-.workspaceLedger { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 26rem; margin: 1.3rem 0 0; border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #0002; backdrop-filter: blur(6px); }
-.workspaceLedger > div { display: flex; flex-direction: column-reverse; gap: .35rem; padding: .65rem .8rem; }
-.workspaceLedger > div + div { border-left: 1px solid var(--line); }
-.workspaceLedger dt { color: var(--muted); font: .49rem var(--font-mono); text-transform: uppercase; letter-spacing: .08em; }
-.workspaceLedger dd { margin: 0; color: var(--text); font: 300 1.45rem/1 var(--font-ui); }
+/* Statistics sit in the artwork; the task list remains the glass surface. */
+.workspaceLedger { position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 26rem; margin: 1.3rem 0 0; border: 0; background: transparent; text-shadow: 0 1px 3px #000, 0 2px 12px #000; }
+.workspaceLedger::before { content: ""; position: absolute; z-index: -1; inset: -.75rem -1rem; pointer-events: none; background: radial-gradient(ellipse, #0008, #0004 45%, transparent 72%); }
+.workspaceLedger > div { display: flex; align-items: center; flex-direction: column-reverse; gap: .5rem; padding: .6rem .5rem; }
+.workspaceLedger > div + div { border: 0; }
+.workspaceLedger dt { color: #c7c7c7; font: .55rem var(--font-mono); text-transform: uppercase; letter-spacing: .16em; }
+.workspaceLedger dd { margin: 0; color: #f0f0f0; font: 400 2rem/1 var(--font-editorial); font-variant-numeric: tabular-nums; }
 
 /* Real backdrop blur keeps task text readable while the portrait shows through. */
 .questSection, .schoolPeriodSection { max-width: 39rem; padding: 1.2rem 1.3rem; border: 1px solid var(--line); border-radius: .55rem; background: rgba(4, 4, 4, .42); backdrop-filter: blur(18px); box-shadow: 0 16px 45px #0004; }
@@ -196,11 +198,10 @@ input:focus, textarea:focus, select:focus { border-color: #aaa; background-color
   .sheetCaptionRule, .sheetCaption > span:last-child { display: none; }
   .workspaceHero .heroQuoteText { font-size: .96rem; line-height: 1.5; color: #d0d0d0; }
   .workspaceHero .heroQuoteAuthor { font-size: .51rem; color: #aaa; }
-  .workspaceLedger { max-width: none; margin-top: 1.5rem; padding: .25rem .5rem; border: 1px solid #ffffff14; border-radius: 999px; background: #08080866; backdrop-filter: blur(18px); }
-  .workspaceLedger > div { align-items: center; padding: .65rem .3rem; gap: .4rem; }
-  .workspaceLedger > div + div { border: 0; }
-  .workspaceLedger dt { font-size: .52rem; color: #aaa; }
-  .workspaceLedger dd { font-size: 1.45rem; }
+  .workspaceLedger { max-width: none; margin-top: 1.5rem; padding: .2rem 0; }
+  .workspaceLedger > div { padding: .6rem .3rem; }
+  .workspaceLedger dt { font-size: .6rem; }
+  .workspaceLedger dd { font-size: 2rem; }
   .questSection, .schoolPeriodSection, .lockInMainCard { max-width: none; padding: clamp(1rem, 4vw, 1.5rem); border: 1px solid #ffffff12; border-radius: 2rem; background: #08080899; backdrop-filter: blur(24px); box-shadow: 0 12px 40px #0003; }
   .sectionHeading { flex-wrap: wrap; gap: .9rem; margin-bottom: 1.25rem; }
   .sectionLabel, .schoolSectionTitleRow .sectionLabel { font-size: .62rem; letter-spacing: .08em; color: #aaa; }
