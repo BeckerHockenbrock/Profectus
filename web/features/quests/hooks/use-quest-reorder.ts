@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getDragScrollSurface } from "@/components/shared/drag-scroll";
 import type { Quest, QuestView } from "../types/quest";
 import { saveQuestOrderToFirestore } from "../data/quest-firestore";
 import { getQuestSubtasksForDate, isQuestInDateGroup } from "../domain/date-utils";
@@ -191,18 +192,14 @@ export function useQuestReorder({
       document.body.style.touchAction = "none";
       document.body.style.cursor = "grabbing";
 
+      const scrollSurface = getDragScrollSurface(cardEl);
       // Attach active dragging listeners
       const onPointerMove = (e: PointerEvent) => {
         if (activePointerIdRef.current !== null && e.pointerId !== activePointerIdRef.current) return;
         e.preventDefault();
 
-        if (e.clientY < 110) {
-          window.scrollBy({ top: -8, behavior: "auto" });
-        } else if (e.clientY > window.innerHeight - 110) {
-          window.scrollBy({ top: 8, behavior: "auto" });
-        }
-
-        const deltaY = e.clientY - startPointerYRef.current;
+        const scrollDelta = scrollSurface.scrollAtEdge(e.clientY);
+        const deltaY = e.clientY - startPointerYRef.current + scrollDelta;
         setDragDeltaY(deltaY);
 
         const h = dragItemHeightRef.current || 62;

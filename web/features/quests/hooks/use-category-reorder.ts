@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getDragScrollSurface } from "@/components/shared/drag-scroll";
 
 type UseCategoryReorderProps = {
   categories: string[];
@@ -145,17 +146,13 @@ export function useCategoryReorder({
       document.body.style.touchAction = "none";
       document.body.style.cursor = "grabbing";
 
+      const scrollSurface = getDragScrollSurface(targetSection ?? null);
       const onPointerMove = (e: PointerEvent) => {
         if (activePointerIdRef.current !== null && e.pointerId !== activePointerIdRef.current) return;
         e.preventDefault();
 
-        if (e.clientY < 110) {
-          window.scrollBy({ top: -8, behavior: "auto" });
-        } else if (e.clientY > window.innerHeight - 110) {
-          window.scrollBy({ top: 8, behavior: "auto" });
-        }
-
-        const deltaY = e.clientY - startPointerYRef.current;
+        const scrollDelta = scrollSurface.scrollAtEdge(e.clientY);
+        const deltaY = e.clientY - startPointerYRef.current + scrollDelta;
         setDragDeltaY(deltaY);
 
         const midpointsArr = orderedMidpointsRef.current;

@@ -79,7 +79,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* Real backdrop blur keeps task text readable while the portrait shows through. */
 .questSection, .schoolPeriodSection { max-width: 39rem; padding: 1.2rem 1.3rem; border: 1px solid var(--line); border-radius: .55rem; background: rgba(4, 4, 4, .42); backdrop-filter: blur(18px); box-shadow: 0 16px 45px #0004; }
-.sectionHeading { align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+.sectionHeading { align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
 .sectionLabel, .schoolSectionTitleRow .sectionLabel { margin: 0; color: var(--muted); font: .6rem var(--font-mono); text-transform: uppercase; letter-spacing: .11em; }
 .viewSwitch { gap: .2rem; padding: 0; border: 0; border-radius: 0; background: transparent; }
 .viewSwitch button { min-height: 1.9rem; padding: .3rem .5rem; border: 1px solid transparent; border-radius: .2rem; background: transparent; color: var(--muted); font: .54rem var(--font-mono); text-transform: uppercase; letter-spacing: .025em; }
@@ -89,6 +89,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .categoryHeading { margin-bottom: .45rem; padding: 0 0 .65rem; border-bottom: 1px solid var(--line); }
 .categoryHeading h3 { color: var(--secondary); font: .57rem var(--font-mono); letter-spacing: .035em; }
 .categoryHeading span { color: var(--muted); background: transparent; }
+.categoryHeadingTitleGroup { min-width: 0; }
+.categoryHeading h3 { overflow-wrap: anywhere; }
 .questList { gap: .2rem; }
 .questCard { padding: .75rem .2rem; border-radius: .25rem; background: transparent; }
 .questCard:hover { background: #ffffff08; }
@@ -97,7 +99,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .questNotesSnippet { color: var(--muted); font: .76rem/1.45 var(--font-ui); }
 .completeButton { width: 1.15rem; height: 1.15rem; border: 1px solid #999; border-radius: .15rem; }
 .completeButton:hover { border-color: #fff; }
-.categoryPill { border-radius: .15rem; background: #ffffff07; color: var(--muted); font-size: .63rem; font-weight: 400; }
+.categoryPill { min-width: 0; max-width: 100%; overflow-wrap: anywhere; border-radius: .15rem; background: #ffffff07; color: var(--muted); font-size: .63rem; font-weight: 400; }
 .googleDateBadge[class*="is-"], .dueLabel[class*="is"] { border-radius: .15rem; background: #ffffff04; border-color: var(--line); box-shadow: none; font-size: .63rem; font-weight: 400; }
 .emptyState { padding: 1.5rem .5rem; border: 0; border-radius: 0; background: transparent; color: var(--muted); font-size: .83rem; }
 .formError { border-color: #777; background: #0b0b0be6; color: var(--text); }
@@ -155,10 +157,12 @@ input:focus, textarea:focus, select:focus { border-color: #aaa; background-color
 .authCard .homeScreenHint { margin-top: 1rem; }
 
 @media (min-width: 64rem) {
-  body::after { content: ""; position: fixed; inset: 1rem; z-index: 190; pointer-events: none; border: 1px solid #555; }
+  body:has(.authShell)::after { content: ""; position: fixed; inset: 1rem; z-index: 190; pointer-events: none; border: 1px solid #555; border-radius: 1.5rem; }
   .workspaceScene { inset: 1rem 1rem 1rem 17rem; }
   body:has(.authShell) .workspaceScene { left: 1rem; }
-  .appShell { padding: 1rem 1rem 2rem 17rem; }
+  /* The frame owns the scroll viewport, so long lists stay inside its edges. */
+  .appShell { position: fixed; inset: 1rem; display: flex; flex-direction: column; min-height: 0; width: auto; padding: 0 0 0 16rem; overflow: hidden; border: 1px solid #555; border-radius: 1.5rem; }
+  .appShell > .content { flex: 1; min-height: 0; min-width: 0; overflow-y: auto; overscroll-behavior-y: contain; scroll-padding-block: 2.5rem; }
   .appShell::before { content: ""; position: fixed; top: 1rem; bottom: 1rem; left: 16.8rem; width: 1px; z-index: 190; pointer-events: none; background: var(--line); }
   .topBar { position: fixed; top: 2.2rem; left: 2.2rem; right: auto; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 1rem; width: 12.6rem; min-height: 0; padding: 0; border: 0; background: transparent; backdrop-filter: none; }
   .topBar .brand { padding: .8rem .75rem; border: 1px solid var(--line); }
@@ -174,7 +178,6 @@ input:focus, textarea:focus, select:focus { border-color: #aaa; background-color
   .categoryList { grid-template-columns: 1fr; }
 
   /* Round the desktop surfaces while preserving the rail and canvas layout. */
-  body::after { border-radius: 1.5rem; }
   .workspaceScene { border-radius: 0 1.5rem 1.5rem 0; }
   .topBar .brand { border-radius: 1.25rem; }
   .topAddButton, .dockItem, .viewSwitch, .viewSwitch button { border-radius: 999px; }
