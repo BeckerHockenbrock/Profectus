@@ -10,3 +10,7 @@ Checked 2026-11-04 at 390 x 844, 320 x 740, and the default 1280px desktop viewp
 Screenshots: `mobile-390.jpg`, `mobile-320.jpg`, and `desktop.jpg`. The temporary component fixture was removed before the production build; no account data or persistence behavior changed. Development screenshots include the Next.js indicator.
 
 Production build (including TypeScript), ESLint, and `git diff --check` pass. The first sandboxed build encountered a Windows EPERM on a generated directory; rerunning the same build outside the sandbox passed. Existing Next.js metadata and workspace-root notices remain.
+
+## Shadow removal follow-up
+
+Removed the stats text shadows and the radial shading pseudo-element after visual feedback. The current row has a transparent background, computed `text-shadow: none`, and no generated `::before` content. Checked at 390 x 844 over the portrait using the same sample counts. `no-shadow-mobile.jpg` shows this current treatment; the earlier screenshots above document the previous version. The temporary fixture was removed, and the production build, ESLint, and diff checks passed again.

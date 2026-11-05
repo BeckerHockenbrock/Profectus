@@ -71,8 +71,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .workspaceHero .heroQuoteText { color: var(--secondary); font: italic .96rem/1.55 var(--font-editorial); text-shadow: 0 1px 10px #000; }
 .workspaceHero .heroQuoteAuthor { margin-top: .55rem; color: var(--muted); font: .49rem var(--font-mono); letter-spacing: .1em; }
 /* Statistics sit in the artwork; the task list remains the glass surface. */
-.workspaceLedger { position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 26rem; margin: 1.3rem 0 0; border: 0; background: transparent; text-shadow: 0 1px 3px #000, 0 2px 12px #000; }
-.workspaceLedger::before { content: ""; position: absolute; z-index: -1; inset: -.75rem -1rem; pointer-events: none; background: radial-gradient(ellipse, #0008, #0004 45%, transparent 72%); }
+.workspaceLedger { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 26rem; margin: 1.3rem 0 0; border: 0; background: transparent; text-shadow: none; }
 .workspaceLedger > div { display: flex; align-items: center; flex-direction: column-reverse; gap: .5rem; padding: .6rem .5rem; }
 .workspaceLedger > div + div { border: 0; }
 .workspaceLedger dt { color: #c7c7c7; font: .55rem var(--font-mono); text-transform: uppercase; letter-spacing: .16em; }
@@ -173,6 +172,21 @@ input:focus, textarea:focus, select:focus { border-color: #aaa; background-color
   .dockItem { justify-content: flex-start; min-height: 2.6rem; padding: .6rem .75rem; font-size: .86rem; }
   .dockCreateButton { display: none; }
   .categoryList { grid-template-columns: 1fr; }
+
+  /* Round the desktop surfaces while preserving the rail and canvas layout. */
+  body::after { border-radius: 1.5rem; }
+  .workspaceScene { border-radius: 0 1.5rem 1.5rem 0; }
+  .topBar .brand { border-radius: 1.25rem; }
+  .topAddButton, .dockItem, .viewSwitch, .viewSwitch button { border-radius: 999px; }
+  .profileButton, .completeButton, .googleSubtaskCheckbox, .closeButton, .periodIconBadge { border-radius: 50%; }
+  .questSection, .schoolPeriodSection, .lockInMainCard, .authCard { border-radius: 2rem; }
+  .questCard { border-radius: 1.25rem; }
+  .categoryPill, .googleDateBadge[class*="is-"], .dueLabel[class*="is"], .questXPBadge, .periodCountBadge, .statusBadge { border-radius: 999px; }
+  .sheet { border-radius: 2rem 2rem 0 0; }
+  .detailModalSheet, .focusModalCard, .iosDatePickerPopover { border-radius: 1.75rem; }
+  input, textarea, select { border-radius: 1rem; }
+  .formDateTriggerBtn, .formSubtaskDateBtn, .formAddSubtaskButton, .saveButton, .schoolAddButton, .schoolPrimaryButton, .schoolSecondaryButton, .lockInLaunchBtn, .focusPauseButton, .breakPrimaryButton, .signInButton, .authBrand { border-radius: 999px; }
+  .homeScreenHint, .formError, .periodCard, .lockInStoneChoice, .lockInLogSection { border-radius: 1.5rem; }
 }
 /* Mobile floats over the portrait with soft, touch-friendly shapes. */
 @media (max-width: 63.999rem) {
