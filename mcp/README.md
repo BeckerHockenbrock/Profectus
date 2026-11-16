@@ -1,32 +1,41 @@
 # Profectus MCP
 
-Thin MCP server for Grok (or any MCP client) to read/write the daily brief and create/list quests. No prompts — content is supplied by the caller.
+Thin MCP server for Grok (or any MCP client). It signs in as a **Profectus user** and reads/writes that user's brief + quests through Firestore security rules. No shared bot API key, no single-owner account.
 
 ## Tools
 
 | Tool | Purpose |
 | --- | --- |
-| `get_brief` | Read brief for a date |
-| `set_brief` | Write brief (`body` required, optional `title` / `date`) |
-| `list_quests` | List quests |
-| `create_quest` | Create a quest |
+| `get_brief` | Read the signed-in user's brief for a date |
+| `set_brief` | Write that user's brief (`body` required, optional `title` / `date`) |
+| `list_quests` | List that user's quests |
+| `create_quest` | Create a quest for that user |
 
-## Environment
+## Per-user auth
 
-| Variable | Purpose |
-| --- | --- |
-| `PROFECTUS_APP_URL` | Base URL of the Next app (e.g. `https://your-host` or `http://127.0.0.1:3000`) |
-| `PROFECTUS_BOT_API_KEY` | Shared secret; must match the web app |
-
-## Run
+1. Sign into Profectus in the browser.
+2. Open **Account → Assistant access → Copy refresh token**.
+3. Save it once:
 
 ```bash
 cd mcp
 npm install
-PROFECTUS_APP_URL=http://127.0.0.1:3000 PROFECTUS_BOT_API_KEY=... npm start
+export FIREBASE_API_KEY=...          # same as NEXT_PUBLIC_FIREBASE_API_KEY
+export FIREBASE_PROJECT_ID=...       # same as NEXT_PUBLIC_FIREBASE_PROJECT_ID
+node src/login.js <paste-refresh-token>
 ```
 
-Example MCP client config:
+Credentials are stored at `~/.config/profectus/credentials.json` and only authorize that Firebase uid. Another person repeats the same steps with their own login — their bot only touches their data.
+
+You can also set `PROFECTUS_FIREBASE_REFRESH_TOKEN` instead of using the login file.
+
+## Run / Grok connector
+
+```bash
+FIREBASE_API_KEY=... FIREBASE_PROJECT_ID=... npm start
+```
+
+Example Cursor / Grok **command** connector:
 
 ```json
 {
@@ -35,12 +44,12 @@ Example MCP client config:
       "command": "node",
       "args": ["/absolute/path/to/Profectus/mcp/src/index.js"],
       "env": {
-        "PROFECTUS_APP_URL": "http://127.0.0.1:3000",
-        "PROFECTUS_BOT_API_KEY": "your-shared-secret"
+        "FIREBASE_API_KEY": "your-web-api-key",
+        "FIREBASE_PROJECT_ID": "your-project-id"
       }
     }
   }
 }
 ```
 
-The web app also needs `PROFECTUS_BOT_API_KEY`, `PROFECTUS_OWNER_UID`, and `FIREBASE_SERVICE_ACCOUNT_JSON` so the `/api/bot/*` routes can write to Firestore.
+Writes go to `users/{thatUserUid}/briefs/*` and `users/{thatUserUid}/quests/*` using the user's Firebase ID token, so existing Firestore owner rules are what grant permission.

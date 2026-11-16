@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node src/index.js",
+    "login": "node src/login.js",
     "typecheck": "tsc --noEmit"
   },
   "engines": {

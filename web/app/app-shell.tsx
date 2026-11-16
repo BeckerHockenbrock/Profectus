@@ -325,6 +325,7 @@ export function AppShell({ today: initialToday }: AppShellProps) {
               displayName={displayName}
               email={user.email}
               userInitial={userInitial}
+              refreshToken={user.refreshToken || null}
               openQuestCount={openQuests.length}
               completedQuestCount={completedQuests.length}
               onSignOut={signOut}
