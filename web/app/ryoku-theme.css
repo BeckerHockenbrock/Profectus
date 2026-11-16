@@ -298,51 +298,104 @@ input:focus, textarea:focus, select:focus { border-color: #aaa; background-color
 .profileButton { overflow: hidden; padding: 0; }
 .profileButtonImage { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.briefView, .accountView { max-width: 39rem; }
-.briefDateLine, .accountLead { margin: 0; color: var(--secondary); font: .95rem/1.5 var(--font-editorial); font-style: italic; }
-.briefArticle { margin-top: .5rem; padding: 1.35rem 1.4rem; border: 1px solid var(--line); border-radius: .55rem; background: rgba(4, 4, 4, .42); backdrop-filter: blur(18px); }
-.briefTitle { margin: 0 0 .85rem; color: var(--text); font: 400 1.7rem/1.15 var(--font-editorial); letter-spacing: -.02em; }
-.briefBody { white-space: pre-wrap; color: var(--secondary); font: .95rem/1.65 var(--font-ui); }
-.briefMeta { margin: 1.1rem 0 0; color: var(--muted); font: .55rem var(--font-mono); text-transform: uppercase; letter-spacing: .08em; }
-.briefEmpty { margin: 1rem 0 0; color: var(--muted); font: .9rem/1.5 var(--font-ui); }
-
-.accountProfile { display: flex; align-items: center; gap: 1rem; margin: .35rem 0 1.4rem; }
-.accountAvatarButton { width: 4.5rem; height: 4.5rem; border: 1px solid var(--line); border-radius: .35rem; background: #ffffff08; color: var(--text); overflow: hidden; padding: 0; cursor: pointer; }
-.accountAvatarImage { width: 100%; height: 100%; object-fit: cover; display: block; }
-.accountAvatarInitial { font: .95rem var(--font-mono); letter-spacing: .08em; }
-.accountIdentity { min-width: 0; }
-.accountName { margin: 0; color: var(--text); font: 400 1.55rem/1.15 var(--font-editorial); }
-.accountEmail { margin: .35rem 0 0; color: var(--muted); font: .8rem/1.4 var(--font-ui); overflow-wrap: anywhere; }
-.accountAvatarActions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .55rem; }
-.accountTextButton { border: 0; background: transparent; color: var(--secondary); padding: 0; font: .55rem var(--font-mono); text-transform: uppercase; letter-spacing: .08em; cursor: pointer; }
-.accountTextButton:hover { color: var(--text); }
-.accountStatsRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 0 0 1.5rem; max-width: 18rem; }
-.accountStatsRow > div { display: flex; flex-direction: column-reverse; gap: .35rem; padding: .85rem .9rem; border: 1px solid var(--line); border-radius: .45rem; background: #ffffff05; }
-.accountStatsRow dt { margin: 0; color: var(--muted); font: .52rem var(--font-mono); text-transform: uppercase; letter-spacing: .12em; }
-.accountStatsRow dd { margin: 0; color: var(--text); font: 400 1.7rem/1 var(--font-editorial); font-variant-numeric: tabular-nums; }
-.accountSectionLabel { margin: 0 0 .75rem; color: var(--muted); font: .55rem var(--font-mono); text-transform: uppercase; letter-spacing: .12em; }
-.accountThemeGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; }
-.accountThemeOption { display: flex; flex-direction: column; align-items: flex-start; gap: .55rem; min-height: 4.5rem; padding: .7rem; border: 1px solid var(--line); border-radius: .4rem; background: #0004; color: var(--secondary); font: .72rem var(--font-ui); cursor: pointer; }
-.accountThemeOption.isActive { border-color: #bbb; color: var(--text); background: #ffffff0c; }
-.accountThemeSwatch { width: 100%; height: 1.35rem; border-radius: .2rem; border: 1px solid #ffffff22; }
-.accountAssistantBlock { margin: 1.75rem 0 0; padding: 1.1rem 1.15rem; border: 1px solid var(--line); border-radius: .45rem; background: #ffffff05; }
-.accountAssistantCopy { margin: 0 0 .7rem; color: var(--secondary); font: .86rem/1.5 var(--font-ui); }
-.accountAssistantCopy code, .accountAssistantMeta code { font: .72rem/1.4 var(--font-mono); color: var(--text); }
-.accountAssistantMeta { margin: 0 0 .7rem; color: var(--muted); font: .72rem/1.4 var(--font-ui); overflow-wrap: anywhere; }
-.accountAssistantActions { display: flex; flex-wrap: wrap; gap: .75rem; }
-.accountAssistantStatus { margin: .7rem 0 0; color: var(--muted); font: .75rem/1.4 var(--font-ui); }
-.accountSignOut { margin-top: 1.75rem; min-height: 2.75rem; padding: .7rem 1rem; border: 1px solid var(--line); border-radius: .3rem; background: transparent; color: var(--text); font: .62rem var(--font-mono); text-transform: uppercase; letter-spacing: .06em; cursor: pointer; }
-.accountSignOut:hover { background: #ffffff10; }
-
-@media (min-width: 64rem) {
-  .briefArticle, .accountStatsRow > div, .accountThemeOption, .accountAvatarButton, .accountSignOut, .accountAssistantBlock { border-radius: 1.25rem; }
-  .accountAvatarButton { border-radius: 50%; }
+/* Quiet reading and a single, simple account surface. */
+.briefView, .accountView { max-width: 42rem; }
+.briefView .workspaceHero, .accountView .workspaceHero { --text: #e5e5e5; --secondary: #b6b6b6; --muted: #a1a1a1; --line: #ffffff29; }
+.briefLead, .accountLead { margin: 0; color: var(--secondary); font: italic 1rem/1.6 var(--font-editorial); }
+.briefArticle, .accountPanel {
+  border: 1px solid var(--line);
+  border-radius: 1.75rem;
+  background: color-mix(in srgb, var(--surface-solid) 88%, transparent);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 16px 48px #0002, inset 0 1px 0 #ffffff06;
+  overflow: hidden;
 }
-@media (max-width: 63.999rem) {
-  .briefArticle { border-radius: 1.5rem; }
-  .accountAvatarButton { border-radius: 50%; }
-  .accountStatsRow > div, .accountThemeOption, .accountSignOut, .accountAssistantBlock { border-radius: 1.25rem; }
-  .accountSignOut { width: 100%; min-height: 3rem; }
+.briefArticle { position: relative; padding: 0 clamp(1.25rem, 4vw, 2.5rem); }
+.briefDateline { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1rem; padding: 1.25rem 0; border-bottom: 1px solid var(--line); color: var(--secondary); font: .68rem/1.6 var(--font-mono); }
+.briefDateline > span { color: var(--muted); font: .72rem var(--font-ui); white-space: nowrap; }
+.briefArticleHeading { padding-top: 2rem; }
+.briefEyebrow { display: block; color: var(--muted); font: .62rem/1.6 var(--font-mono); text-transform: uppercase; letter-spacing: .12em; }
+.briefTitle { max-width: 18ch; margin: .9rem 0 1.75rem; color: var(--text); font: 400 clamp(2rem, 4vw, 2.9rem)/1.15 var(--font-editorial); letter-spacing: -.035em; overflow-wrap: anywhere; text-wrap: balance; }
+.briefBody { color: var(--secondary); font: .98rem/1.85 var(--font-ui); overflow-wrap: anywhere; }
+.briefBody p { margin: 0 0 1.3rem; white-space: pre-wrap; }
+.briefBody p:first-child { color: var(--text); }
+.briefMeta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1rem; margin-top: 2rem; padding: 1.1rem 0 1.25rem; border-top: 1px solid var(--line); color: var(--muted); font: .65rem/1.6 var(--font-ui); }
+.briefEmpty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 23rem; padding: 3rem 0; text-align: center; }
+.briefSun { width: 7.5rem; height: 5.5rem; margin-bottom: 2rem; color: var(--secondary); }
+.briefEmpty h2 { max-width: 15ch; margin: .8rem 0 1rem; color: var(--text); font: 400 clamp(1.85rem, 4vw, 2.5rem)/1.2 var(--font-editorial); letter-spacing: -.03em; text-wrap: balance; }
+.briefEmpty p { margin: 0; color: var(--secondary); font: .9rem/1.7 var(--font-ui); }
+.briefLoading { min-height: 23rem; padding: 2.5rem 0; }
+.briefLoading > p { color: var(--secondary); font-size: .85rem; }
+.briefSkeleton { display: grid; gap: .9rem; margin: 1.75rem 0 2rem; }
+.briefSkeleton span { display: block; height: .75rem; background: var(--accent-soft); border-radius: 999px; }
+.briefSkeleton span:first-child { width: 76%; height: 2rem; margin-bottom: 1rem; }
+.briefSkeleton span:last-child { width: 62%; }
+
+.accountPanel { padding: 0 clamp(1.15rem, 3vw, 2rem); }
+.accountProfile { display: flex; align-items: center; gap: 1.15rem; padding: 2rem 0 1.5rem; }
+.accountAvatarButton { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 4.5rem; height: 4.5rem; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--accent-soft); color: var(--text); cursor: pointer; }
+.accountAvatarImage { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; display: block; }
+.accountAvatarInitial { font: 400 2rem var(--font-editorial); }
+.accountAvatarEdit { position: absolute; right: -.15rem; bottom: -.15rem; display: grid; place-items: center; width: 1.55rem; height: 1.55rem; border: 1px solid var(--line); border-radius: 50%; background: var(--surface-solid); color: var(--secondary); }
+.accountAvatarEdit svg { width: .8rem; height: .8rem; }
+.accountIdentity { min-width: 0; }
+.accountName { margin: 0; color: var(--text); font: 400 clamp(1.4rem, 3vw, 1.85rem)/1.2 var(--font-editorial); letter-spacing: -.025em; overflow-wrap: anywhere; }
+.accountEmail { margin: .35rem 0 0; color: var(--secondary); font: .8rem/1.5 var(--font-ui); overflow-wrap: anywhere; }
+.accountAvatarActions { display: flex; flex-wrap: wrap; gap: .25rem .85rem; margin-top: .3rem; }
+.accountTextButton { min-height: 2rem; padding: .3rem 0; border: 0; background: transparent; color: var(--secondary); font: .75rem var(--font-ui); cursor: pointer; }
+.accountTextButton:hover { color: var(--text); text-decoration: underline; text-underline-offset: .25rem; }
+.accountStatsRow { display: flex; flex-wrap: wrap; gap: .75rem 1.75rem; margin: 0; padding: 0 0 1.75rem; border-bottom: 1px solid var(--line); }
+.accountStatsRow > div { display: flex; flex-direction: row-reverse; align-items: baseline; gap: .5rem; }
+.accountStatsRow dt { color: var(--secondary); font: .75rem var(--font-ui); }
+.accountStatsRow dd { margin: 0; color: var(--text); font: 400 1.25rem/1 var(--font-editorial); font-variant-numeric: tabular-nums; }
+.accountThemeBlock { padding: 1.5rem 0; border-bottom: 1px solid var(--line); }
+.accountSectionHeading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .35rem 1rem; margin-bottom: 1rem; }
+.accountSectionLabel { margin: 0; color: var(--text); font: 500 .85rem/1.5 var(--font-ui); }
+.accountThemeGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+.accountThemeOption { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .5rem; min-height: 3rem; padding: .65rem .5rem; border: 1px solid var(--line); border-radius: .85rem; background: transparent; color: var(--secondary); font: .78rem var(--font-ui); cursor: pointer; transition: background-color 140ms ease, border-color 140ms ease; }
+.accountThemeOption:hover { background: var(--accent-soft); }
+.accountThemeOption.isActive { border-color: var(--secondary); color: var(--text); background: var(--accent-soft); }
+.accountThemeSwatch { flex-shrink: 0; width: .9rem; height: .9rem; border-radius: 50%; border: 1px solid #888; }
+.accountThemeCheck { width: .85rem; height: .85rem; display: none; }
+.accountThemeOption.isActive .accountThemeCheck { display: block; }
+.accountAssistantBlock { border-bottom: 1px solid var(--line); }
+.accountAssistantBlock summary { display: flex; align-items: center; gap: .8rem; min-height: 5.25rem; padding: 1.1rem 0; list-style: none; cursor: pointer; }
+.accountAssistantBlock summary::-webkit-details-marker { display: none; }
+.accountAssistantBlock summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: .5rem; }
+.accountAssistantIcon { display: grid; place-items: center; flex-shrink: 0; width: 2.4rem; height: 2.4rem; border: 1px solid var(--line); border-radius: .8rem; color: var(--secondary); }
+.accountAssistantIcon svg { width: 1.2rem; height: 1.2rem; }
+.accountAssistantLabel { flex: 1; color: var(--text); font: 500 .85rem/1.5 var(--font-ui); }
+.accountAssistantLabel > span { display: block; margin-top: .2rem; color: var(--secondary); font: 400 .75rem/1.5 var(--font-ui); }
+.accountDisclosureChevron { flex-shrink: 0; width: 1rem; height: 1rem; color: var(--muted); }
+.accountAssistantBlock[open] .accountDisclosureChevron { transform: rotate(90deg); }
+.accountAssistantContent { padding: .25rem 0 1.5rem; }
+.accountAssistantCopy { margin: 0 0 .75rem; color: var(--secondary); font: .85rem/1.6 var(--font-ui); }
+.accountAssistantSteps { margin: 0 0 1rem; padding-left: 1.2rem; color: var(--secondary); font: .8rem/1.7 var(--font-ui); }
+.accountAssistantSteps li + li { margin-top: .5rem; }
+.accountAssistantSteps code, .accountAssistantMeta code { color: var(--text); font: .7rem/1.6 var(--font-mono); overflow-wrap: anywhere; }
+.accountAssistantMeta { margin: 0 0 1rem; color: var(--secondary); font: .72rem/1.5 var(--font-ui); overflow-wrap: anywhere; }
+.accountCopyButton { min-height: 2.75rem; padding: .6rem 1rem; border: 1px solid var(--line); border-radius: .75rem; background: var(--accent-soft); color: var(--text); font: .8rem var(--font-ui); cursor: pointer; }
+.accountCopyButton:disabled { opacity: .5; cursor: default; }
+.accountAssistantStatus { margin: .75rem 0 0; color: var(--secondary); font: .75rem/1.6 var(--font-ui); }
+.accountAssistantStatus:empty { margin: 0; }
+.accountFooter { display: flex; justify-content: flex-end; padding: 1rem 0; }
+.accountSignOut { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; flex-shrink: 0; min-height: 2.75rem; padding: .5rem .6rem; border: 0; border-radius: .65rem; background: transparent; color: var(--secondary); font: .8rem var(--font-ui); cursor: pointer; }
+.accountSignOut svg { width: 1rem; height: 1rem; }
+.accountSignOut:hover { background: var(--accent-soft); color: var(--text); }
+.accountAvatarButton:active, .accountThemeOption:active, .accountCopyButton:active, .accountSignOut:active { transform: scale(.97); }
+
+@media (max-width: 24rem) {
+  .briefDateline { font-size: .6rem; }
+  .accountProfile { gap: .85rem; }
+  .accountAvatarButton { width: 3.5rem; height: 3.5rem; }
+  .accountThemeOption { gap: .35rem; font-size: .72rem; }
+  .accountThemeCheck { display: none !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .briefArticle, .accountPanel { background: var(--surface-solid); backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  .briefArticle, .accountPanel { background: var(--surface-solid); }
 }
 
 /* Account theme variants */
@@ -368,6 +421,8 @@ html[data-theme="dawn"] .liquidGlassDock { background: #f3eee6cc; }
 html[data-theme="dawn"] .dockItem.isActive { color: #f7f1e8; background: #241910; }
 html[data-theme="dawn"] .briefArticle,
 html[data-theme="dawn"] .questSection { background: rgba(255, 250, 243, .7); }
+html[data-theme="dawn"] .briefArticle,
+html[data-theme="dawn"] .accountPanel { --muted: #74604f; background: rgba(255, 250, 243, .96); }
 
 html[data-theme="slate"] {
   color-scheme: dark;
