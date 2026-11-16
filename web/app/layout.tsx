@@ -5,7 +5,7 @@ import "./ryoku-theme.css";
 
 export const metadata: Metadata = {
   title: "Profectus",
-  description: "Focus clearly. Progress quietly.",
+  description: "Quests, daily brief, and quiet progress.",
   applicationName: "Profectus",
   manifest: "/manifest.webmanifest",
   formatDetection: {

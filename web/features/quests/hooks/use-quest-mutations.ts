@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { Quest, QuestForm, Subtask } from "../types/quest";
 import {
-  completeQuestFocusSession,
   createQuestInFirestore,
   deleteQuestInFirestore,
   toggleQuestInFirestore,
@@ -288,25 +287,6 @@ export function useQuestMutations({
     }
   };
 
-  const finishFocusSession = async (questId: string, addedMinutes: number) => {
-    if (!userId) {
-      throw new Error("Could not save focus session. Please check your connection and retry.");
-    }
-
-    await completeQuestFocusSession(userId, questId, addedMinutes);
-    setQuests((current) =>
-      current.map((item) =>
-        item.id === questId
-          ? {
-              ...item,
-              completed: true,
-              focusMinutes: item.focusMinutes + addedMinutes,
-            }
-          : item,
-      ),
-    );
-  };
-
   return {
     savingQuestId,
     isCreating,
@@ -322,6 +302,5 @@ export function useQuestMutations({
     updateSubtask,
     deleteSubtask,
     reorderSubtasks,
-    finishFocusSession,
   };
 }

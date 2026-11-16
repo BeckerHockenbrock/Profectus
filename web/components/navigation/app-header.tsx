@@ -2,15 +2,17 @@ import { BrandMark } from "@/components/shared/brand-mark";
 
 type AppHeaderProps = {
   userInitial: string;
+  avatarDataUrl?: string | null;
   onOpenNewQuest: () => void;
-  onSignOut: () => void;
+  onOpenAccount: () => void;
   onNavigateTasks?: () => void;
 };
 
 export function AppHeader({
   userInitial,
+  avatarDataUrl,
   onOpenNewQuest,
-  onSignOut,
+  onOpenAccount,
   onNavigateTasks,
 }: AppHeaderProps) {
   return (
@@ -27,7 +29,10 @@ export function AppHeader({
         }}
       >
         <BrandMark />
-        <span className="railBrand"><span className="brandName">Profectus</span><span className="railBrandCaption">{"// Workspace"}</span></span>
+        <span className="railBrand">
+          <span className="brandName">Profectus</span>
+          <span className="railBrandCaption">{"// Workspace"}</span>
+        </span>
       </a>
       <div className="topBarActions">
         <button
@@ -53,8 +58,19 @@ export function AppHeader({
           </svg>
           <span>New quest</span>
         </button>
-        <button className="profileButton" type="button" onClick={onSignOut} title="Sign out" aria-label="Sign out">
-          {userInitial}
+        <button
+          className="profileButton"
+          type="button"
+          onClick={onOpenAccount}
+          title="Account"
+          aria-label="Open account"
+        >
+          {avatarDataUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarDataUrl} alt="" className="profileButtonImage" />
+          ) : (
+            userInitial
+          )}
         </button>
       </div>
     </header>

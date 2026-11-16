@@ -1,53 +1,27 @@
 "use client";
 
-export type AppTab = "tasks" | "school" | "focus";
+export type AppTab = "brief" | "tasks" | "account";
 
 type LiquidDockProps = {
   activeTab: AppTab;
+  onNavigateBrief: () => void;
   onNavigateTasks: () => void;
-  onNavigateSchool: () => void;
-  onNavigateFocus: () => void;
-  onOpenNewQuest: () => void;
+  onNavigateAccount: () => void;
 };
 
 export function LiquidDock({
   activeTab,
+  onNavigateBrief,
   onNavigateTasks,
-  onNavigateSchool,
-  onNavigateFocus,
-  onOpenNewQuest,
+  onNavigateAccount,
 }: LiquidDockProps) {
   return (
     <nav className="liquidGlassDock" aria-label="Main navigation">
-      {/* 1. Tasks */}
       <button
         type="button"
-        className={`dockItem ${activeTab === "tasks" ? "isActive" : ""}`}
-        aria-current={activeTab === "tasks" ? "page" : undefined}
-        onClick={onNavigateTasks}
-      >
-        <svg
-          className="dockIcon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M9 11l3 3L22 4" />
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-        </svg>
-        <span className="dockOrdinal" aria-hidden="true">01</span><span>Quests</span>
-      </button>
-
-      {/* 2. School */}
-      <button
-        type="button"
-        className={`dockItem ${activeTab === "school" ? "isActive" : ""}`}
-        aria-current={activeTab === "school" ? "page" : undefined}
-        onClick={onNavigateSchool}
+        className={`dockItem ${activeTab === "brief" ? "isActive" : ""}`}
+        aria-current={activeTab === "brief" ? "page" : undefined}
+        onClick={onNavigateBrief}
       >
         <svg
           className="dockIcon"
@@ -59,24 +33,27 @@ export function LiquidDock({
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
-          <path d="M22 10v6" />
-          <path d="M6 12.5V16c0 2.21 2.69 4 6 4s6-1.79 6-4v-3.5" />
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          <path d="M8 7h8" />
+          <path d="M8 11h6" />
         </svg>
-        <span className="dockOrdinal" aria-hidden="true">02</span><span>School</span>
+        <span className="dockOrdinal" aria-hidden="true">
+          01
+        </span>
+        <span>Brief</span>
       </button>
 
-      {/* 3. Lock In - Study timer */}
       <button
         type="button"
-        className={`dockItem dockLockInItem ${activeTab === "focus" ? "isActive" : ""}`}
-        aria-current={activeTab === "focus" ? "page" : undefined}
-        onClick={onNavigateFocus}
-        aria-label="Lock In study timer"
-        title="Lock In study timer"
+        className={`dockItem dockHomeItem ${activeTab === "tasks" ? "isActive" : ""}`}
+        aria-current={activeTab === "tasks" ? "page" : undefined}
+        onClick={onNavigateTasks}
+        aria-label="Quests home"
+        title="Quests"
       >
         <svg
-          className="dockIcon"
+          className="dockIcon dockHomeIcon"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -85,31 +62,39 @@ export function LiquidDock({
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+          <path d="M3 10.5 12 3l9 7.5" />
+          <path d="M5 9.5V21h14V9.5" />
+          <path d="M9 21v-7h6v7" />
         </svg>
-        <span className="dockOrdinal" aria-hidden="true">03</span><span>Focus</span>
+        <span className="dockOrdinal" aria-hidden="true">
+          02
+        </span>
+        <span>Quests</span>
       </button>
 
-      {/* 4. Add task button */}
       <button
         type="button"
-        className="dockItem dockCreateButton"
-        onClick={onOpenNewQuest}
-        aria-label="Add task"
+        className={`dockItem ${activeTab === "account" ? "isActive" : ""}`}
+        aria-current={activeTab === "account" ? "page" : undefined}
+        onClick={onNavigateAccount}
       >
         <svg
           className="dockIcon"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2.25"
+          strokeWidth="1.9"
           strokeLinecap="round"
+          strokeLinejoin="round"
           aria-hidden="true"
         >
-          <path d="M12 5v14" />
-          <path d="M5 12h14" />
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
         </svg>
-        <span>Add task</span>
+        <span className="dockOrdinal" aria-hidden="true">
+          03
+        </span>
+        <span>Account</span>
       </button>
     </nav>
   );

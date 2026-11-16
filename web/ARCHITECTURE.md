@@ -1,16 +1,21 @@
 # Profectus Web Architecture
 
-Profectus is a client-interactive Next.js 16 task application with optional focus sessions. `app/page.tsx` remains a Server Component; it supplies the current date to the client-owned `AppShell`.
+Profectus is a client-interactive Next.js 16 task application with a daily brief and a simple account surface. `app/page.tsx` remains a Server Component; it supplies the current date to the client-owned `AppShell`.
 
 ## Directory map
 
 ```text
 web/
 ├── app/
-│   ├── app-shell.tsx                 # Authenticated feature composition and modal ownership
-│   ├── use-app-navigation.ts         # Dock navigation, Tasks reset, and scroll behavior
-│   ├── globals.css                   # Base component layouts and behavior
-│   ├── ryoku-theme.css               # Shared visual identity, loaded after base styles
+│   ├── api/
+│   │   ├── bot/
+│   │   │   ├── brief/route.ts        # Bot read/write daily brief
+│   │   │   └── quests/route.ts       # Bot list/create quests
+│   │   └── journal/analyze/route.ts
+│   ├── app-shell.tsx                 # Authenticated feature composition
+│   ├── use-app-navigation.ts         # Dock navigation and scroll behavior
+│   ├── globals.css
+│   ├── ryoku-theme.css
 │   ├── layout.tsx
 │   ├── manifest.ts
 │   └── page.tsx
@@ -19,78 +24,21 @@ web/
 │   │   ├── app-header.tsx
 │   │   └── liquid-dock.tsx
 │   └── shared/
-│       ├── home-screen-hint.tsx
-│       └── use-sheet-swipe.ts
 ├── features/
+│   ├── account/                      # Simple profile, theme, light totals
 │   ├── auth/
-│   │   ├── components/auth-shell.tsx
-│   │   └── hooks/use-auth-user.ts
+│   ├── brief/                        # Daily brief UI + Firestore subscribe
 │   ├── construction/
-│   │   └── components/under-construction-view.tsx
-│   ├── focus/
-│   │   ├── components/break-screen.tsx
-│   │   ├── components/focus-screen.tsx
-│   │   ├── components/lock-in-view.tsx
-│   │   ├── components/sisyphus-frame-animation.tsx
-│   │   ├── data/focus-firestore.ts
-│   │   ├── data/focus-storage.ts
-│   │   ├── domain/timer-format.ts
-│   │   ├── hooks/use-focus-timer.ts
-│   │   ├── hooks/use-lock-in-stats.ts
-│   │   └── types/focus.ts
-│   ├── journal/
-│   │   ├── components/journal-entry-card.tsx
-│   │   ├── components/journal-key-modal.tsx
-│   │   ├── components/journal-view.tsx
-│   │   ├── data/journal-api.ts
-│   │   ├── data/journal-storage.ts
-│   │   ├── domain/journal-heuristics.ts
-│   │   ├── hooks/use-journal.ts
-│   │   └── types/journal.ts
+│   ├── journal/                      # Present but not in dock
 │   ├── quests/
-│   │   ├── components/category-list.tsx
-│   │   ├── components/date-list.tsx
-│   │   ├── components/quest-card.tsx
-│   │   ├── components/quest-form-modal.tsx
-│   │   ├── components/quest-list.tsx
-│   │   ├── components/task-detail-modal.tsx
-│   │   ├── components/tasks-view.tsx
-│   │   ├── data/quest-firestore.ts
-│   │   ├── data/quest-storage.ts
-│   │   ├── domain/date-utils.ts
-│   │   ├── hooks/use-category-reorder.ts
-│   │   ├── hooks/use-quest-mutations.ts
-│   │   ├── hooks/use-quest-reorder.ts
-│   │   ├── hooks/use-quest-subscription.ts
-│   │   ├── hooks/use-subtask-reorder.ts
-│   │   └── types/quest.ts
-│   ├── school/
-│   │   ├── components/period-card.tsx
-│   │   ├── components/period-detail-modal.tsx
-│   │   ├── components/period-form-modal.tsx
-│   │   ├── components/period-icon.tsx
-│   │   ├── components/school-view.tsx
-│   │   ├── data/school-firestore.ts
-│   │   ├── data/school-storage.ts
-│   │   ├── domain/period-clock.ts
-│   │   ├── hooks/use-period-clock.ts
-│   │   ├── hooks/use-period-form.ts
-│   │   ├── hooks/use-periods-data.ts
-│   │   └── types/school.ts
-│   └── stats/
-│       ├── components/attribute-card.tsx
-│       ├── components/attribute-detail-sheet.tsx
-│       ├── components/competitive-rank-card.tsx
-│       ├── components/history-modal.tsx
-│       ├── components/radar-chart.tsx
-│       ├── components/rank-badge.tsx
-│       ├── components/stats-view.tsx
-│       ├── data/stats-storage.ts
-│       ├── domain/rank-math.ts
-│       ├── domain/stats-chart-math.ts
-│       ├── hooks/use-user-stats.ts
-│       └── types/stats.ts
-└── lib/firebase.ts
+│   └── stats/                        # Present but not in dock
+└── lib/
+    ├── firebase.ts
+    ├── firebase-admin.ts
+    └── bot-http.ts
+
+mcp/                                  # Thin MCP server for Grok bot R/W
+└── src/index.js
 ```
 
 ## Ownership and dependency rules
@@ -100,9 +48,8 @@ web/
 `AppShell` owns only state that crosses feature boundaries:
 
 - authenticated user composition;
-- the active application tab (`tasks`, `school`, `focus`);
-- the active quest detail, quest form, and focus-session entry points;
-- focus completion coordination after the quest mutation layer commits successfully.
+- the active application tab (`brief`, `tasks`, `account`);
+- quest detail and quest form entry points.
 
 `use-app-navigation.ts` preserves dock scrolling, sheet-closing, and reduced-motion behavior across primary tabs.
 
@@ -110,36 +57,19 @@ web/
 
 Files under `features/*/components` render UI and invoke callbacks. They do not import Firebase SDK operations or Firebase singletons.
 
-Persistence is reached through feature hooks and data modules:
-
-```text
-FocusScreen
-  -> injected onFinish callback
-  -> AppShell
-  -> useQuestMutations.finishFocusSession
-  -> quest-firestore.completeQuestFocusSession
-  -> Firestore transaction
-```
-
-The transaction reads and updates `users/{uid}/quests/{questId}`, sets `completed: true`, and adds only `Math.floor(elapsedSeconds / 60)` full minutes. A failed transaction rejects back to `FocusScreen`, which keeps the frozen session open and exposes Retry. Quit never invokes persistence.
-
-### Quest boundaries
-
-- `use-quest-subscription.ts` owns listener lifecycle and returns the unsubscribe cleanup.
-- `use-quest-mutations.ts` owns optimistic completion, rollback errors, creation, subtask mutations, and focus completion.
-- `use-quest-reorder.ts` owns the original 200 ms hold threshold, 16 px cancellation threshold, haptics, auto-scroll, transforms, and 180 ms click suppression.
-- `use-category-reorder.ts` owns category drag thresholds, variable-height measurements, transforms, and keyboard reordering.
-- `quest-firestore.ts` owns Firestore reads and writes.
-- `quest-storage.ts` exclusively owns the `todo-quest-order-<uid>` and `todo-quest-category-order-<uid>` localStorage keys and ordering fallbacks.
-- `date-utils.ts` is the shared pure date-formatting source for quest cards and details.
+Persistence is reached through feature hooks and data modules.
 
 ### Authentication
 
 `use-auth-user.ts` is the only Firebase Authentication consumer. It owns the auth-state unsubscribe cleanup and sign-in/sign-out error strings. `AuthShell` renders signed-out and loading states; `AppShell` renders authentication failures that occur while the user remains signed in.
 
+### Bot / MCP path
+
+Grok (or any MCP client) talks to `mcp/` tools only. Those tools call `/api/bot/*` with `PROFECTUS_BOT_API_KEY`. The API routes use the Admin SDK (`FIREBASE_SERVICE_ACCOUNT_JSON`) to read/write the owner account identified by `PROFECTUS_OWNER_UID`. No prompts live in the MCP or API — callers supply content.
+
 ## Styling invariant
 
-`app/globals.css` supplies base component layouts and neutral colors for component states. `app/ryoku-theme.css` loads after it and implements the image-led Ryoku settings reference: a narrow desktop navigation rail, self-hosted Fraunces headings, Space Grotesk body text, Space Mono labels, and translucent task surfaces with backdrop blur. Root-level `WorkspaceScene` places the generated halftone marble portrait behind sign-in, quests, school, and focus; `WorkspaceHero` supplies compact section headings without a separate illustration block. Artwork and its generation prompt live in `public/art/`; fonts and licenses live in `public/fonts/`. Navigation moves to the bottom on mobile, with a different portrait crop and darker panels for readability. Visual changes should be checked at desktop and mobile widths, including editing sheets and the focus timer.
+`app/globals.css` supplies base component layouts and neutral colors for component states. `app/ryoku-theme.css` loads after it and implements the image-led Ryoku settings reference: a narrow desktop navigation rail, self-hosted Fraunces headings, Space Grotesk body text, Space Mono labels, and translucent task surfaces with backdrop blur. Account themes (`dawn`, `slate`) override CSS variables via `html[data-theme]`. Root-level `WorkspaceScene` places the generated halftone marble portrait behind sign-in and workspace tabs. Navigation moves to the bottom on mobile.
 
 ## Where to make common changes
 
@@ -147,16 +77,11 @@ The transaction reads and updates `users/{uid}/quests/{questId}`, sets `complete
 | --- | --- |
 | Dock view selection | `app/use-app-navigation.ts` |
 | Auth lifecycle or error text | `features/auth/hooks/use-auth-user.ts` |
-| Signed-out/loading auth DOM | `features/auth/components/auth-shell.tsx` |
-| Quest card DOM | `features/quests/components/quest-card.tsx` |
-| All/Completed list composition | `features/quests/components/quest-list.tsx` |
-| Category grouping UI | `features/quests/components/category-list.tsx` |
-| Category reordering | `features/quests/hooks/use-category-reorder.ts` |
-| Date grouping UI | `features/quests/components/date-list.tsx` |
-| Quest & category order localStorage | `features/quests/data/quest-storage.ts` |
+| Daily brief UI / subscribe | `features/brief/` |
+| Account prefs / theme / avatar | `features/account/` |
 | Quest Firestore paths and writes | `features/quests/data/quest-firestore.ts` |
-| Focus timer behavior | `features/focus/hooks/use-focus-timer.ts` |
-| Focus completion orchestration | `features/quests/hooks/use-quest-mutations.ts` and `app/app-shell.tsx` |
+| Bot brief/quest HTTP API | `app/api/bot/` |
+| MCP tools | `mcp/src/index.js` |
 
 ## Verification gates
 
@@ -168,5 +93,3 @@ npx.cmd tsc --noEmit
 npm.cmd run build
 git diff --check
 ```
-
-Behavior-preserving refactors also require deterministic visual screenshots, DOM-structure comparisons, console-error checks, listener cleanup inspection, exact storage-key inspection, and import-boundary searches before completion.

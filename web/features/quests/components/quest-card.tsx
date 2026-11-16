@@ -128,9 +128,6 @@ export function QuestCard({
               />
             ) : null}
             <span className="categoryPill">{quest.category}</span>
-            {quest.focusMinutes > 0 ? (
-              <span className="questXPBadge">{quest.focusMinutes}m</span>
-            ) : null}
           </div>
         </div>
 

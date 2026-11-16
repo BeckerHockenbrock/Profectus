@@ -21,7 +21,6 @@ type TaskDetailModalProps = {
   onAddSubtask: (title: string, dueDate?: string) => void | Promise<boolean>;
   onDeleteSubtask: (subtaskId: string) => void | Promise<boolean>;
   onReorderSubtasks?: (newSubtasks: Subtask[]) => void | Promise<boolean>;
-  onStartFocus: (quest: Quest) => void;
   onUpdateDueDate?: (dueDate: string) => void | Promise<boolean>;
   isUpdating: boolean;
 };
@@ -38,7 +37,6 @@ export function TaskDetailModal({
   onAddSubtask,
   onDeleteSubtask,
   onReorderSubtasks,
-  onStartFocus,
   onUpdateDueDate,
   isUpdating,
 }: TaskDetailModalProps) {
@@ -562,44 +560,6 @@ export function TaskDetailModal({
             </form>
           </div>
 
-          <div className="detailFocusCard">
-            <div className="detailFocusInfo">
-              <span className="detailFocusLabel">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-                <span>Focus Progress</span>
-              </span>
-              <div className="detailFocusStatsRow">
-                <span className="detailFocusMinutes">
-                  <strong>{quest.focusMinutes}</strong> min focused
-                </span>
-                <span className="detailFocusDivider">·</span>
-                <span className="detailFocusXp">
-                  <svg className="detailFocusXpIcon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                  <strong>{quest.focusMinutes}</strong> XP
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="detailStartFocusButton"
-              onClick={() => {
-                onClose();
-                onStartFocus(quest);
-              }}
-              aria-label={`Start focus mode on ${quest.title}`}
-            >
-              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="6 3 20 12 6 21 6 3" />
-              </svg>
-              <span>Start Focus Mode</span>
-            </button>
-          </div>
         </div>
 
         <footer className="detailModalFooter">

@@ -6,7 +6,6 @@ import {
   orderBy,
   query,
   onSnapshot,
-  runTransaction,
   updateDoc,
   writeBatch,
 } from "firebase/firestore";
@@ -159,28 +158,4 @@ export async function saveQuestOrderToFirestore(
   } catch (err) {
     console.warn("Could not persist quest order to Firestore", err);
   }
-}
-
-export async function completeQuestFocusSession(
-  userId: string,
-  questId: string,
-  addedMinutes: number,
-): Promise<void> {
-  const database = getFirebaseDb();
-  const questRef = doc(database, "users", userId, "quests", questId);
-
-  await runTransaction(database, async (transaction) => {
-    const questDoc = await transaction.get(questRef);
-    if (!questDoc.exists()) {
-      throw new Error("Quest no longer exists.");
-    }
-    const data = questDoc.data();
-    const currentFocus = typeof data.focusMinutes === "number" ? Math.floor(data.focusMinutes) : 0;
-    const newFocusMinutes = currentFocus + addedMinutes;
-
-    transaction.update(questRef, {
-      completed: true,
-      focusMinutes: newFocusMinutes,
-    });
-  });
 }
