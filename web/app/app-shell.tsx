@@ -5,18 +5,15 @@ import type { FormEvent } from "react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { type AppTab, LiquidDock } from "@/components/navigation/liquid-dock";
 import { HomeScreenHint } from "@/components/shared/home-screen-hint";
+import { AccountView } from "@/features/account/components/account-view";
+import { useAccountPreferences } from "@/features/account/hooks/use-account-preferences";
 import { AuthShell } from "@/features/auth/components/auth-shell";
 import { useAuthUser } from "@/features/auth/hooks/use-auth-user";
-import { FocusScreen } from "@/features/focus/components/focus-screen";
-import { BreakScreen } from "@/features/focus/components/break-screen";
-import { LockInView } from "@/features/focus/components/lock-in-view";
-import { useLockInStats } from "@/features/focus/hooks/use-lock-in-stats";
-import type { BreakAction } from "@/features/focus/types/focus";
+import { BriefView } from "@/features/brief/components/brief-view";
 import { QuestFormModal } from "@/features/quests/components/quest-form-modal";
 import { TaskDetailModal } from "@/features/quests/components/task-detail-modal";
 import { TasksView } from "@/features/quests/components/tasks-view";
 import { IosDatePickerPopover } from "@/features/quests/components/ios-date-picker";
-import { SchoolView } from "@/features/school/components/school-view";
 import { useQuestMutations } from "@/features/quests/hooks/use-quest-mutations";
 import { useQuestReorder } from "@/features/quests/hooks/use-quest-reorder";
 import { useQuestSubscription } from "@/features/quests/hooks/use-quest-subscription";
@@ -62,17 +59,12 @@ export function AppShell({ today: initialToday }: AppShellProps) {
   }, []);
 
   const { user, authError, signIn, signOut } = useAuthUser();
+  const { prefs: accountPrefs } = useAccountPreferences(user?.uid);
   const [activeTab, setActiveTab] = useState<AppTab>("tasks");
   const [questView, setQuestView] = useState<QuestView>("dates");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingQuestId, setEditingQuestId] = useState<string | null>(null);
   const [form, setForm] = useState<QuestForm>(emptyForm);
-  const [focusConfig, setFocusConfig] = useState<{
-    quest: Quest | null;
-    targetMinutes: number | null;
-    initialBlocks?: number;
-  } | null>(null);
-  const [activeBreakMinutes, setActiveBreakMinutes] = useState<number | null>(null);
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
   const [showHomeScreenHint, setShowHomeScreenHint] = useState(false);
 
@@ -92,14 +84,11 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     updateSubtask,
     deleteSubtask,
     reorderSubtasks,
-    finishFocusSession,
   } = useQuestMutations({
     userId: user?.uid,
     quests,
     setQuests,
   });
-
-  const { logSession, addBreak, consumeBreak } = useLockInStats(user?.uid, today);
 
   const [listDatePickerTarget, setListDatePickerTarget] = useState<{
     questId: string;
@@ -192,9 +181,9 @@ export function AppShell({ today: initialToday }: AppShellProps) {
   });
 
   const {
+    handleBriefNavigation,
     handleTasksNavigation,
-    handleSchoolNavigation,
-    handleFocusNavigation,
+    handleAccountNavigation,
   } = useAppNavigation({
     sheetOpen,
     setSheetOpen,
@@ -202,12 +191,19 @@ export function AppShell({ today: initialToday }: AppShellProps) {
   });
 
   useEffect(() => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigatorWithStandalone.standalone === true;
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      navigatorWithStandalone.standalone === true;
 
-    if (isIOS && !isStandalone && localStorage.getItem("todo-quest-home-screen-hint-dismissed") !== "true") {
+    if (
+      isIOS &&
+      !isStandalone &&
+      localStorage.getItem("todo-quest-home-screen-hint-dismissed") !== "true"
+    ) {
       const animationFrame = requestAnimationFrame(() => setShowHomeScreenHint(true));
       return () => cancelAnimationFrame(animationFrame);
     }
@@ -217,47 +213,6 @@ export function AppShell({ today: initialToday }: AppShellProps) {
     localStorage.setItem("todo-quest-home-screen-hint-dismissed", "true");
     setShowHomeScreenHint(false);
   }
-
-  const handleFocusFinished = async (
-    addedMinutes: number,
-    blocksCompleted: number,
-    questId?: string,
-    breakAction?: BreakAction,
-  ) => {
-    if (questId && addedMinutes > 0) {
-      await finishFocusSession(questId, addedMinutes);
-    }
-    const targetQuest = questId ? quests.find((q) => q.id === questId) : null;
-    await logSession(
-      addedMinutes,
-      blocksCompleted,
-      focusConfig?.targetMinutes ?? null,
-      questId,
-      targetQuest?.title,
-    );
-    setFocusConfig(null);
-    setSelectedQuestId(null);
-
-    // Handle post-session break action (take now vs delay)
-    if (breakAction) {
-      if (breakAction.type === "take_now") {
-        setActiveBreakMinutes(breakAction.breakMinutes);
-      } else if (breakAction.type === "delay") {
-        addBreak(breakAction.breakMinutes);
-      }
-    }
-  };
-
-  const handleStartGeneralFocus = (options: {
-    targetMinutes: number | null;
-    initialBlocks?: number;
-  }) => {
-    setFocusConfig({
-      quest: null,
-      targetMinutes: options.targetMinutes,
-      initialBlocks: options.initialBlocks,
-    });
-  };
 
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -318,155 +273,142 @@ export function AppShell({ today: initialToday }: AppShellProps) {
   }
 
   const selectedQuest = selectedQuestId
-    ? quests.find((quest) => quest.id === selectedQuestId) ?? null
-    : null;
-  const activeFocusQuest = focusConfig?.quest
-    ? quests.find((quest) => quest.id === focusConfig.quest?.id) ?? focusConfig.quest
+    ? (quests.find((quest) => quest.id === selectedQuestId) ?? null)
     : null;
   const displayError = mutationError || loadError;
   const userInitial = (user.displayName ?? user.email ?? "U").slice(0, 1).toUpperCase();
+  const displayName = user.displayName?.trim() || user.email || "Account";
 
   return (
     <>
-      <svg aria-hidden="true" style={{ position: "absolute", width: 0, height: 0, pointerEvents: "none" }}>
+      <svg
+        aria-hidden="true"
+        style={{ position: "absolute", width: 0, height: 0, pointerEvents: "none" }}
+      >
         <defs>
           <filter id="pencil-stroke">
             <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.4" xChannelSelector="R" yChannelSelector="G" />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="1.4"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
           </filter>
         </defs>
       </svg>
 
-      {activeBreakMinutes ? (
-        <BreakScreen
-          durationMinutes={activeBreakMinutes}
-          onFinish={() => {
-            setActiveBreakMinutes(null);
-            setActiveTab("focus");
-          }}
-          onSkip={() => setActiveBreakMinutes(null)}
+      <main className="appShell">
+        <AppHeader
+          userInitial={userInitial}
+          avatarDataUrl={accountPrefs.avatarDataUrl}
+          onOpenNewQuest={openNewQuest}
+          onOpenAccount={handleAccountNavigation}
+          onNavigateTasks={handleTasksNavigation}
         />
-      ) : focusConfig ? (
-        <FocusScreen
-          quest={activeFocusQuest}
-          targetMinutes={focusConfig.targetMinutes}
-          initialBlocks={focusConfig.initialBlocks}
-          onQuit={() => setFocusConfig(null)}
-          onFinish={handleFocusFinished}
+
+        {authError ? (
+          <p className="formError" role="alert">
+            {authError}
+          </p>
+        ) : null}
+
+        {activeTab === "brief" ? (
+          <div className="content" id="top">
+            <BriefView userId={user.uid} today={today} />
+          </div>
+        ) : activeTab === "account" ? (
+          <div className="content" id="top">
+            <AccountView
+              userId={user.uid}
+              displayName={displayName}
+              email={user.email}
+              userInitial={userInitial}
+              openQuestCount={openQuests.length}
+              completedQuestCount={completedQuests.length}
+              onSignOut={signOut}
+            />
+          </div>
+        ) : (
+          <div className="content" id="top">
+            {showHomeScreenHint ? <HomeScreenHint onDismiss={dismissHomeScreenHint} /> : null}
+            <TasksView
+              today={today}
+              view={questView}
+              onViewChange={setQuestView}
+              quests={quests}
+              openQuests={openQuests}
+              completedQuests={completedQuests}
+              savingQuestId={savingQuestId}
+              saveError={displayError}
+              draggedId={draggedId}
+              getCardTransformY={getCardTransformY}
+              handleCardPointerDown={handleCardPointerDown}
+              suppressClickRef={suppressClickRef}
+              onToggleQuest={toggleQuest}
+              onSelectQuest={(targetQuest) => setSelectedQuestId(targetQuest.id)}
+              onToggleSubtask={toggleSubtask}
+              onOpenDatePicker={handleOpenListDatePicker}
+              onOpenSubtaskDatePicker={handleOpenListSubtaskDatePicker}
+              onReorderSubtasks={reorderSubtasks}
+              categoryOrder={categoryOrder}
+              onReorderCategories={handleReorderCategories}
+            />
+          </div>
+        )}
+
+        <QuestFormModal
+          sheetOpen={sheetOpen}
+          editingQuestId={editingQuestId}
+          form={form}
+          setForm={setForm}
+          categories={categories}
+          isSaving={isCreating || savingQuestId !== null}
+          formError={mutationError}
+          onClose={closeQuestForm}
+          onSubmit={handleFormSubmit}
         />
-      ) : (
-        <main className="appShell">
-          <AppHeader
-            userInitial={userInitial}
-            onOpenNewQuest={openNewQuest}
-            onSignOut={signOut}
-            onNavigateTasks={handleTasksNavigation}
+
+        {selectedQuest ? (
+          <TaskDetailModal
+            quest={selectedQuest}
+            today={today}
+            onClose={() => setSelectedQuestId(null)}
+            onEdit={() => openQuestEditor(selectedQuest)}
+            onDelete={() => handleDeleteQuest(selectedQuest.id)}
+            onToggleComplete={toggleQuest}
+            onToggleSubtask={(subtaskId) => toggleSubtask(selectedQuest.id, subtaskId)}
+            onUpdateSubtask={(subtaskId, updates) =>
+              updateSubtask(selectedQuest.id, subtaskId, updates)
+            }
+            onAddSubtask={(title, dueDate) => addSubtask(selectedQuest.id, title, dueDate)}
+            onDeleteSubtask={(subtaskId) => deleteSubtask(selectedQuest.id, subtaskId)}
+            onReorderSubtasks={(newSubtasks) => reorderSubtasks(selectedQuest.id, newSubtasks)}
+            onUpdateDueDate={(newDate) => updateQuestDueDate(selectedQuest.id, newDate)}
+            isUpdating={savingQuestId === selectedQuest.id}
           />
+        ) : null}
 
-          {authError ? <p className="formError" role="alert">{authError}</p> : null}
-
-          {activeTab === "school" ? (
-            <div className="content" id="top">
-              <SchoolView userId={user.uid} />
-            </div>
-          ) : activeTab === "focus" ? (
-            <div className="content" id="top">
-              <LockInView
-                userId={user.uid}
-                today={today}
-                onStartFocus={handleStartGeneralFocus}
-                onStartBreak={(durationMinutes) => {
-                  consumeBreak(durationMinutes);
-                  setActiveBreakMinutes(durationMinutes);
-                }}
-              />
-            </div>
-          ) : (
-            <div className="content" id="top">
-              {showHomeScreenHint ? <HomeScreenHint onDismiss={dismissHomeScreenHint} /> : null}
-              <TasksView
-                today={today}
-                view={questView}
-                onViewChange={setQuestView}
-                quests={quests}
-                openQuests={openQuests}
-                completedQuests={completedQuests}
-                savingQuestId={savingQuestId}
-                saveError={displayError}
-                draggedId={draggedId}
-                getCardTransformY={getCardTransformY}
-                handleCardPointerDown={handleCardPointerDown}
-                suppressClickRef={suppressClickRef}
-                onToggleQuest={toggleQuest}
-                onSelectQuest={(targetQuest) => setSelectedQuestId(targetQuest.id)}
-                onToggleSubtask={toggleSubtask}
-                onOpenDatePicker={handleOpenListDatePicker}
-                onOpenSubtaskDatePicker={handleOpenListSubtaskDatePicker}
-                onReorderSubtasks={reorderSubtasks}
-                categoryOrder={categoryOrder}
-                onReorderCategories={handleReorderCategories}
-              />
-            </div>
-          )}
-
-          <QuestFormModal
-            sheetOpen={sheetOpen}
-            editingQuestId={editingQuestId}
-            form={form}
-            setForm={setForm}
-            categories={categories}
-            isSaving={isCreating || savingQuestId !== null}
-            formError={mutationError}
-            onClose={closeQuestForm}
-            onSubmit={handleFormSubmit}
+        {listDatePickerTarget ? (
+          <IosDatePickerPopover
+            isOpen={Boolean(listDatePickerTarget)}
+            currentDate={listDatePickerTarget.currentDueDate}
+            today={today}
+            anchorRect={listDatePickerTarget.anchorRect}
+            onSelectDate={handleSelectListDate}
+            onClose={() => setListDatePickerTarget(null)}
+            title={listDatePickerTarget.subtaskId ? "Subtask Due Date" : "Quest Due Date"}
           />
+        ) : null}
 
-          {selectedQuest ? (
-            <TaskDetailModal
-              quest={selectedQuest}
-              today={today}
-              onClose={() => setSelectedQuestId(null)}
-              onEdit={() => openQuestEditor(selectedQuest)}
-              onDelete={() => handleDeleteQuest(selectedQuest.id)}
-              onToggleComplete={toggleQuest}
-              onToggleSubtask={(subtaskId) => toggleSubtask(selectedQuest.id, subtaskId)}
-              onUpdateSubtask={(subtaskId, updates) => updateSubtask(selectedQuest.id, subtaskId, updates)}
-              onAddSubtask={(title, dueDate) => addSubtask(selectedQuest.id, title, dueDate)}
-              onDeleteSubtask={(subtaskId) => deleteSubtask(selectedQuest.id, subtaskId)}
-              onReorderSubtasks={(newSubtasks) => reorderSubtasks(selectedQuest.id, newSubtasks)}
-              onStartFocus={(targetQuest) => {
-                setSelectedQuestId(null);
-                setFocusConfig({
-                  quest: targetQuest,
-                  targetMinutes: null,
-                });
-              }}
-              onUpdateDueDate={(newDate) => updateQuestDueDate(selectedQuest.id, newDate)}
-              isUpdating={savingQuestId === selectedQuest.id}
-            />
-          ) : null}
-
-          {listDatePickerTarget ? (
-            <IosDatePickerPopover
-              isOpen={Boolean(listDatePickerTarget)}
-              currentDate={listDatePickerTarget.currentDueDate}
-              today={today}
-              anchorRect={listDatePickerTarget.anchorRect}
-              onSelectDate={handleSelectListDate}
-              onClose={() => setListDatePickerTarget(null)}
-              title={listDatePickerTarget.subtaskId ? "Subtask Due Date" : "Quest Due Date"}
-            />
-          ) : null}
-
-          <LiquidDock
-            activeTab={activeTab}
-            onNavigateTasks={handleTasksNavigation}
-            onNavigateSchool={handleSchoolNavigation}
-            onNavigateFocus={handleFocusNavigation}
-            onOpenNewQuest={openNewQuest}
-          />
-        </main>
-      )}
+        <LiquidDock
+          activeTab={activeTab}
+          onNavigateBrief={handleBriefNavigation}
+          onNavigateTasks={handleTasksNavigation}
+          onNavigateAccount={handleAccountNavigation}
+        />
+      </main>
     </>
   );
 }

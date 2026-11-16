@@ -281,3 +281,106 @@ input:focus, textarea:focus, select:focus { border-color: #aaa; background-color
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } .liquidGlassDock { transform: none !important; } }
 @media (prefers-contrast: more) { :root { --line: #999; --secondary: #ddd; --muted: #bbb; } .questSection, .schoolPeriodSection, .lockInMainCard { background: #000e; } }
 @media (prefers-reduced-transparency: reduce) { body::before { display: none; } .questSection, .schoolPeriodSection, .lockInMainCard, .authCard, .sheet, .detailModalSheet, .liquidGlassDock { background: #080808; backdrop-filter: none; } }
+
+/* Quests is the centered home control in the dock. */
+.dockHomeItem { font-weight: 600; }
+.dockHomeItem .dockHomeIcon { width: 1.2rem; height: 1.2rem; }
+.dockHomeItem.isActive { box-shadow: inset 0 0 0 1px #fff3; }
+@media (min-width: 64rem) {
+  .dockHomeItem { min-height: 3rem; padding: .75rem .85rem; font-size: .95rem; }
+  .dockHomeItem .dockOrdinal { opacity: .8; }
+}
+@media (max-width: 63.999rem) {
+  .dockHomeItem { min-height: 3.25rem; font-size: .8rem; }
+  .dockHomeItem .dockHomeIcon { width: 1.2rem; height: 1.2rem; }
+}
+
+.profileButton { overflow: hidden; padding: 0; }
+.profileButtonImage { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.briefView, .accountView { max-width: 39rem; }
+.briefDateLine, .accountLead { margin: 0; color: var(--secondary); font: .95rem/1.5 var(--font-editorial); font-style: italic; }
+.briefArticle { margin-top: .5rem; padding: 1.35rem 1.4rem; border: 1px solid var(--line); border-radius: .55rem; background: rgba(4, 4, 4, .42); backdrop-filter: blur(18px); }
+.briefTitle { margin: 0 0 .85rem; color: var(--text); font: 400 1.7rem/1.15 var(--font-editorial); letter-spacing: -.02em; }
+.briefBody { white-space: pre-wrap; color: var(--secondary); font: .95rem/1.65 var(--font-ui); }
+.briefMeta { margin: 1.1rem 0 0; color: var(--muted); font: .55rem var(--font-mono); text-transform: uppercase; letter-spacing: .08em; }
+.briefEmpty { margin: 1rem 0 0; color: var(--muted); font: .9rem/1.5 var(--font-ui); }
+
+.accountProfile { display: flex; align-items: center; gap: 1rem; margin: .35rem 0 1.4rem; }
+.accountAvatarButton { width: 4.5rem; height: 4.5rem; border: 1px solid var(--line); border-radius: .35rem; background: #ffffff08; color: var(--text); overflow: hidden; padding: 0; cursor: pointer; }
+.accountAvatarImage { width: 100%; height: 100%; object-fit: cover; display: block; }
+.accountAvatarInitial { font: .95rem var(--font-mono); letter-spacing: .08em; }
+.accountIdentity { min-width: 0; }
+.accountName { margin: 0; color: var(--text); font: 400 1.55rem/1.15 var(--font-editorial); }
+.accountEmail { margin: .35rem 0 0; color: var(--muted); font: .8rem/1.4 var(--font-ui); overflow-wrap: anywhere; }
+.accountAvatarActions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .55rem; }
+.accountTextButton { border: 0; background: transparent; color: var(--secondary); padding: 0; font: .55rem var(--font-mono); text-transform: uppercase; letter-spacing: .08em; cursor: pointer; }
+.accountTextButton:hover { color: var(--text); }
+.accountStatsRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 0 0 1.5rem; max-width: 18rem; }
+.accountStatsRow > div { display: flex; flex-direction: column-reverse; gap: .35rem; padding: .85rem .9rem; border: 1px solid var(--line); border-radius: .45rem; background: #ffffff05; }
+.accountStatsRow dt { margin: 0; color: var(--muted); font: .52rem var(--font-mono); text-transform: uppercase; letter-spacing: .12em; }
+.accountStatsRow dd { margin: 0; color: var(--text); font: 400 1.7rem/1 var(--font-editorial); font-variant-numeric: tabular-nums; }
+.accountSectionLabel { margin: 0 0 .75rem; color: var(--muted); font: .55rem var(--font-mono); text-transform: uppercase; letter-spacing: .12em; }
+.accountThemeGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; }
+.accountThemeOption { display: flex; flex-direction: column; align-items: flex-start; gap: .55rem; min-height: 4.5rem; padding: .7rem; border: 1px solid var(--line); border-radius: .4rem; background: #0004; color: var(--secondary); font: .72rem var(--font-ui); cursor: pointer; }
+.accountThemeOption.isActive { border-color: #bbb; color: var(--text); background: #ffffff0c; }
+.accountThemeSwatch { width: 100%; height: 1.35rem; border-radius: .2rem; border: 1px solid #ffffff22; }
+.accountSignOut { margin-top: 1.75rem; min-height: 2.75rem; padding: .7rem 1rem; border: 1px solid var(--line); border-radius: .3rem; background: transparent; color: var(--text); font: .62rem var(--font-mono); text-transform: uppercase; letter-spacing: .06em; cursor: pointer; }
+.accountSignOut:hover { background: #ffffff10; }
+
+@media (min-width: 64rem) {
+  .briefArticle, .accountStatsRow > div, .accountThemeOption, .accountAvatarButton, .accountSignOut { border-radius: 1.25rem; }
+  .accountAvatarButton { border-radius: 50%; }
+}
+@media (max-width: 63.999rem) {
+  .briefArticle { border-radius: 1.5rem; }
+  .accountAvatarButton { border-radius: 50%; }
+  .accountStatsRow > div, .accountThemeOption, .accountSignOut { border-radius: 1.25rem; }
+  .accountSignOut { width: 100%; min-height: 3rem; }
+}
+
+/* Account theme variants */
+html[data-theme="dawn"] {
+  color-scheme: light;
+  --background: #f3eee6;
+  --surface: rgba(255, 250, 243, .72);
+  --surface-solid: #f7f1e8;
+  --surface-soft: rgba(40, 28, 18, .05);
+  --text: #241910;
+  --secondary: #5c4b3c;
+  --muted: #8a7462;
+  --accent: #241910;
+  --accent-strong: #120d09;
+  --accent-soft: rgba(36, 25, 16, .08);
+  --line: rgba(36, 25, 16, .16);
+  --shadow: 0 24px 80px #24191022;
+}
+html[data-theme="dawn"] body { background: #e8dfd2; }
+html[data-theme="dawn"] .workspaceScene { background: #d9cdb8; }
+html[data-theme="dawn"] .topBar,
+html[data-theme="dawn"] .liquidGlassDock { background: #f3eee6cc; }
+html[data-theme="dawn"] .dockItem.isActive { color: #f7f1e8; background: #241910; }
+html[data-theme="dawn"] .briefArticle,
+html[data-theme="dawn"] .questSection { background: rgba(255, 250, 243, .7); }
+
+html[data-theme="slate"] {
+  color-scheme: dark;
+  --background: #121820;
+  --surface: rgba(18, 24, 32, .55);
+  --surface-solid: #161d27;
+  --surface-soft: rgba(180, 205, 230, .05);
+  --text: #e7eef6;
+  --secondary: #a9b7c7;
+  --muted: #7f8fa3;
+  --accent: #d7e4f2;
+  --accent-strong: #f2f7fc;
+  --accent-soft: rgba(215, 228, 242, .08);
+  --line: rgba(180, 205, 230, .18);
+  --shadow: 0 24px 80px #000a;
+}
+html[data-theme="slate"] body { background: #0d1218; }
+html[data-theme="slate"] .workspaceScene { background: #0d1218; }
+html[data-theme="slate"] .topBar,
+html[data-theme="slate"] .liquidGlassDock { background: #121820cc; }
+html[data-theme="slate"] .dockItem.isActive { color: #0d1218; background: #d7e4f2; }
+

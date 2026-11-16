@@ -19,33 +19,36 @@ export function useAppNavigation({
   setSheetOpen,
   setActiveTab,
 }: UseAppNavigationOptions) {
-  const navigateToTab = useCallback((tab: AppTab) => {
-    if (sheetOpen) {
-      setSheetOpen(false);
-    }
-    setActiveTab(tab);
+  const navigateToTab = useCallback(
+    (tab: AppTab) => {
+      if (sheetOpen) {
+        setSheetOpen(false);
+      }
+      setActiveTab(tab);
 
-    const targetHeading =
-      tab === "tasks"
-        ? (document.getElementById("quest-heading") ?? document.getElementById("top"))
-        : document.getElementById("top");
+      const targetHeading =
+        tab === "tasks"
+          ? (document.getElementById("quest-heading") ?? document.getElementById("top"))
+          : document.getElementById("top");
 
-    if (targetHeading) {
-      targetHeading.scrollIntoView({
-        behavior: prefersReducedMotion() ? "auto" : "smooth",
-        block: "start",
-      });
-    } else {
-      window.scrollTo({
-        top: 0,
-        behavior: prefersReducedMotion() ? "auto" : "smooth",
-      });
-    }
-  }, [setActiveTab, setSheetOpen, sheetOpen]);
+      if (targetHeading) {
+        targetHeading.scrollIntoView({
+          behavior: prefersReducedMotion() ? "auto" : "smooth",
+          block: "start",
+        });
+      } else {
+        window.scrollTo({
+          top: 0,
+          behavior: prefersReducedMotion() ? "auto" : "smooth",
+        });
+      }
+    },
+    [setActiveTab, setSheetOpen, sheetOpen],
+  );
 
   return {
+    handleBriefNavigation: () => navigateToTab("brief"),
     handleTasksNavigation: () => navigateToTab("tasks"),
-    handleSchoolNavigation: () => navigateToTab("school"),
-    handleFocusNavigation: () => navigateToTab("focus"),
+    handleAccountNavigation: () => navigateToTab("account"),
   };
 }
