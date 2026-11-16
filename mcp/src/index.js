@@ -5,46 +5,20 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-
-const APP_URL = (process.env.PROFECTUS_APP_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
-const BOT_API_KEY = process.env.PROFECTUS_BOT_API_KEY || "";
-
-function requireKey() {
-  if (!BOT_API_KEY) {
-    throw new Error("PROFECTUS_BOT_API_KEY is required for Profectus MCP.");
-  }
-}
-
-async function api(path, options = {}) {
-  requireKey();
-  const response = await fetch(`${APP_URL}${path}`, {
-    ...options,
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${BOT_API_KEY}`,
-      ...(options.headers || {}),
-    },
-  });
-
-  const text = await response.text();
-  let data;
-  try {
-    data = text ? JSON.parse(text) : {};
-  } catch {
-    throw new Error(`Profectus API returned non-JSON (${response.status}): ${text.slice(0, 200)}`);
-  }
-
-  if (!response.ok || data.ok === false) {
-    throw new Error(data.error || `Profectus API error (${response.status})`);
-  }
-
-  return data;
-}
+import {
+  createQuest,
+  getBrief,
+  isValidDateId,
+  listQuests,
+  setBrief,
+  todayUtcDateId,
+} from "./firebase.js";
 
 const tools = [
   {
     name: "get_brief",
-    description: "Read the Profectus daily brief for a date (defaults to today UTC).",
+    description:
+      "Read the signed-in user's Profectus daily brief for a date (defaults to today UTC).",
     inputSchema: {
       type: "object",
       properties: {
@@ -57,7 +31,8 @@ const tools = [
   },
   {
     name: "set_brief",
-    description: "Write/update the Profectus daily brief. Content is provided by the caller; no prompting happens here.",
+    description:
+      "Write/update the signed-in user's Profectus daily brief. Content is provided by the caller; no prompting happens here.",
     inputSchema: {
       type: "object",
       properties: {
@@ -79,7 +54,7 @@ const tools = [
   },
   {
     name: "list_quests",
-    description: "List Profectus quests.",
+    description: "List the signed-in user's Profectus quests.",
     inputSchema: {
       type: "object",
       properties: {
@@ -96,7 +71,7 @@ const tools = [
   },
   {
     name: "create_quest",
-    description: "Create a Profectus quest.",
+    description: "Create a quest for the signed-in Profectus user.",
     inputSchema: {
       type: "object",
       properties: {
@@ -111,7 +86,7 @@ const tools = [
 ];
 
 const server = new Server(
-  { name: "profectus-mcp", version: "0.1.0" },
+  { name: "profectus-mcp", version: "0.2.0" },
   { capabilities: { tools: {} } },
 );
 
@@ -124,33 +99,29 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     let result;
     if (name === "get_brief") {
-      const date = typeof args.date === "string" ? args.date : undefined;
-      const query = date ? `?date=${encodeURIComponent(date)}` : "";
-      result = await api(`/api/bot/brief${query}`);
+      const date = typeof args.date === "string" && args.date.trim() ? args.date.trim() : todayUtcDateId();
+      if (!isValidDateId(date)) throw new Error("date must be YYYY-MM-DD");
+      result = await getBrief(date);
     } else if (name === "set_brief") {
-      result = await api("/api/bot/brief", {
-        method: "PUT",
-        body: JSON.stringify({
-          body: args.body,
-          title: args.title,
-          date: args.date,
-        }),
+      const date = typeof args.date === "string" && args.date.trim() ? args.date.trim() : todayUtcDateId();
+      if (!isValidDateId(date)) throw new Error("date must be YYYY-MM-DD");
+      if (typeof args.body !== "string") throw new Error("body is required");
+      result = await setBrief({
+        date,
+        title: typeof args.title === "string" ? args.title : "",
+        body: args.body,
       });
     } else if (name === "list_quests") {
-      const params = new URLSearchParams();
-      if (typeof args.completed === "boolean") params.set("completed", String(args.completed));
-      if (typeof args.limit === "number") params.set("limit", String(args.limit));
-      const query = params.toString() ? `?${params}` : "";
-      result = await api(`/api/bot/quests${query}`);
+      result = await listQuests({
+        completed: typeof args.completed === "boolean" ? args.completed : undefined,
+        limit: typeof args.limit === "number" ? args.limit : 50,
+      });
     } else if (name === "create_quest") {
-      result = await api("/api/bot/quests", {
-        method: "POST",
-        body: JSON.stringify({
-          title: args.title,
-          description: args.description,
-          category: args.category,
-          dueDate: args.dueDate,
-        }),
+      result = await createQuest({
+        title: args.title,
+        description: args.description,
+        category: args.category,
+        dueDate: args.dueDate,
       });
     } else {
       throw new Error(`Unknown tool: ${name}`);

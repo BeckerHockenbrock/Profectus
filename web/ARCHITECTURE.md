@@ -8,9 +8,6 @@ Profectus is a client-interactive Next.js 16 task application with a daily brief
 web/
 ├── app/
 │   ├── api/
-│   │   ├── bot/
-│   │   │   ├── brief/route.ts        # Bot read/write daily brief
-│   │   │   └── quests/route.ts       # Bot list/create quests
 │   │   └── journal/analyze/route.ts
 │   ├── app-shell.tsx                 # Authenticated feature composition
 │   ├── use-app-navigation.ts         # Dock navigation and scroll behavior
@@ -25,7 +22,7 @@ web/
 │   │   └── liquid-dock.tsx
 │   └── shared/
 ├── features/
-│   ├── account/                      # Simple profile, theme, light totals
+│   ├── account/                      # Profile, theme, assistant token copy
 │   ├── auth/
 │   ├── brief/                        # Daily brief UI + Firestore subscribe
 │   ├── construction/
@@ -33,12 +30,12 @@ web/
 │   ├── quests/
 │   └── stats/                        # Present but not in dock
 └── lib/
-    ├── firebase.ts
-    ├── firebase-admin.ts
-    └── bot-http.ts
+    └── firebase.ts
 
-mcp/                                  # Thin MCP server for Grok bot R/W
-└── src/index.js
+mcp/                                  # Per-user MCP (Firebase user credentials)
+├── src/index.js
+├── src/firebase.js
+└── src/login.js
 ```
 
 ## Ownership and dependency rules
@@ -65,7 +62,7 @@ Persistence is reached through feature hooks and data modules.
 
 ### Bot / MCP path
 
-Grok (or any MCP client) talks to `mcp/` tools only. Those tools call `/api/bot/*` with `PROFECTUS_BOT_API_KEY`. The API routes use the Admin SDK (`FIREBASE_SERVICE_ACCOUNT_JSON`) to read/write the owner account identified by `PROFECTUS_OWNER_UID`. No prompts live in the MCP or API — callers supply content.
+Grok talks to `mcp/` tools. The MCP signs in as a real Profectus Firebase user (refresh token from Account → Assistant access) and writes through Firestore REST using that user's ID token. Owner rules on `users/{uid}/briefs` and `users/{uid}/quests` are the permission boundary — every user connects their own bot to their own data. No shared bot API key and no single-owner admin writer.
 
 ## Styling invariant
 
@@ -80,8 +77,7 @@ Grok (or any MCP client) talks to `mcp/` tools only. Those tools call `/api/bot/
 | Daily brief UI / subscribe | `features/brief/` |
 | Account prefs / theme / avatar | `features/account/` |
 | Quest Firestore paths and writes | `features/quests/data/quest-firestore.ts` |
-| Bot brief/quest HTTP API | `app/api/bot/` |
-| MCP tools | `mcp/src/index.js` |
+| MCP tools / user auth | `mcp/src/` |
 
 ## Verification gates
 

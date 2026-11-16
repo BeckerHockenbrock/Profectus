@@ -325,17 +325,23 @@ input:focus, textarea:focus, select:focus { border-color: #aaa; background-color
 .accountThemeOption { display: flex; flex-direction: column; align-items: flex-start; gap: .55rem; min-height: 4.5rem; padding: .7rem; border: 1px solid var(--line); border-radius: .4rem; background: #0004; color: var(--secondary); font: .72rem var(--font-ui); cursor: pointer; }
 .accountThemeOption.isActive { border-color: #bbb; color: var(--text); background: #ffffff0c; }
 .accountThemeSwatch { width: 100%; height: 1.35rem; border-radius: .2rem; border: 1px solid #ffffff22; }
+.accountAssistantBlock { margin: 1.75rem 0 0; padding: 1.1rem 1.15rem; border: 1px solid var(--line); border-radius: .45rem; background: #ffffff05; }
+.accountAssistantCopy { margin: 0 0 .7rem; color: var(--secondary); font: .86rem/1.5 var(--font-ui); }
+.accountAssistantCopy code, .accountAssistantMeta code { font: .72rem/1.4 var(--font-mono); color: var(--text); }
+.accountAssistantMeta { margin: 0 0 .7rem; color: var(--muted); font: .72rem/1.4 var(--font-ui); overflow-wrap: anywhere; }
+.accountAssistantActions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.accountAssistantStatus { margin: .7rem 0 0; color: var(--muted); font: .75rem/1.4 var(--font-ui); }
 .accountSignOut { margin-top: 1.75rem; min-height: 2.75rem; padding: .7rem 1rem; border: 1px solid var(--line); border-radius: .3rem; background: transparent; color: var(--text); font: .62rem var(--font-mono); text-transform: uppercase; letter-spacing: .06em; cursor: pointer; }
 .accountSignOut:hover { background: #ffffff10; }
 
 @media (min-width: 64rem) {
-  .briefArticle, .accountStatsRow > div, .accountThemeOption, .accountAvatarButton, .accountSignOut { border-radius: 1.25rem; }
+  .briefArticle, .accountStatsRow > div, .accountThemeOption, .accountAvatarButton, .accountSignOut, .accountAssistantBlock { border-radius: 1.25rem; }
   .accountAvatarButton { border-radius: 50%; }
 }
 @media (max-width: 63.999rem) {
   .briefArticle { border-radius: 1.5rem; }
   .accountAvatarButton { border-radius: 50%; }
-  .accountStatsRow > div, .accountThemeOption, .accountSignOut { border-radius: 1.25rem; }
+  .accountStatsRow > div, .accountThemeOption, .accountSignOut, .accountAssistantBlock { border-radius: 1.25rem; }
   .accountSignOut { width: 100%; min-height: 3rem; }
 }
 

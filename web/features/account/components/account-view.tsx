@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import { useAccountPreferences } from "../hooks/use-account-preferences";
 import { THEME_OPTIONS } from "../types/account";
@@ -10,6 +10,7 @@ type AccountViewProps = {
   displayName: string;
   email: string | null;
   userInitial: string;
+  refreshToken: string | null;
   openQuestCount: number;
   completedQuestCount: number;
   onSignOut: () => void;
@@ -20,13 +21,28 @@ export function AccountView({
   displayName,
   email,
   userInitial,
+  refreshToken,
   openQuestCount,
   completedQuestCount,
   onSignOut,
 }: AccountViewProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [copyStatus, setCopyStatus] = useState("");
   const { prefs, error, setTheme, setAvatarFromFile, clearAvatar } =
     useAccountPreferences(userId);
+
+  const copyRefreshToken = async () => {
+    if (!refreshToken) {
+      setCopyStatus("Sign in again to refresh assistant access.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(refreshToken);
+      setCopyStatus("Refresh token copied. Use it only on your own machine.");
+    } catch {
+      setCopyStatus("Could not copy. Select and copy the token manually.");
+    }
+  };
 
   return (
     <section className="accountView" aria-labelledby="workspace-03">
@@ -108,6 +124,22 @@ export function AccountView({
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="accountAssistantBlock">
+        <h3 className="accountSectionLabel">Assistant access</h3>
+        <p className="accountAssistantCopy">
+          Grok connects as you — no shared API key. Copy your refresh token, then run{" "}
+          <code>node mcp/src/login.js &lt;token&gt;</code> so the MCP can write only to your brief and
+          quests.
+        </p>
+        <p className="accountAssistantMeta">Signed in as <code>{userId}</code></p>
+        <div className="accountAssistantActions">
+          <button type="button" className="accountTextButton" onClick={() => void copyRefreshToken()}>
+            Copy refresh token
+          </button>
+        </div>
+        {copyStatus ? <p className="accountAssistantStatus">{copyStatus}</p> : null}
       </div>
 
       <button type="button" className="accountSignOut" onClick={onSignOut}>
